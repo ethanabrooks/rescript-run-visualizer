@@ -4,7 +4,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "clean": "bsb -clean-world",
-    "format": "prettier -w **/*.css **/*.html **/*.json **/*.scss",
+    "format": "prettier -w **/*.css **/*.html **/*.json **/*.scss src/**/*.js *.js",
     "dev": "concurrently 'node server.js dev' 'yarn dev:build' 'yarn dev:bundle'",
     "dev:build": "bsb -make-world -w -ws _",
     "dev:bundle": "esbuild --serve=localhost:8001 --bundle src/Index.bs.js --external:react --external:react-dom"
