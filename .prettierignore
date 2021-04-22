@@ -1,0 +1,10 @@
+/dev/cancer-types.json
+/dev/main.css
+/dev/testicular.json
+/dist/cancer-types.json
+/dist/main.css
+/dist/main.js
+/dist/testicular.json
+/lib/
+/node_modules/
+/src/**/*.bs.js

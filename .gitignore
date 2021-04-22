@@ -1,0 +1,12 @@
+.DS_Store
+/.bsb.lock
+/.merlin
+/dev/*.json
+/dev/main.css
+/dist/*.json
+/dist/main.css
+/dist/main.js
+/lib/
+/node_modules/
+/release.tzst
+/src/**/*.bs.js
