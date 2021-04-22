@@ -1,7 +1,7 @@
 import React from "react";
 
-export function make(msg) {
+export function make({ message }) {
     return (
-        <div>{msg}</div>
+        <div>{message}</div>
     );
 }
