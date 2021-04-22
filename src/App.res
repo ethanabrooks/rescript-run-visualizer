@@ -1,11 +1,3 @@
-let query = gql`
-  query UserQuery {
-    user {
-      id
-      name
-    }
-  }
-`
 
 @react.component
 let make = (): React.element => {
@@ -44,6 +36,9 @@ let make = (): React.element => {
     )
   }
   <ApolloClient.React.ApolloProvider client>
-    <div> <h2> {"My first Apollo app 🚀"->React.string} </h2> </div> <Chart message={"hello"} />
+    <div> 
+    <h2> {"My first Apollo app 🚀"->React.string} </h2>
+     </div> 
+     <Query />
   </ApolloClient.React.ApolloProvider>
 }
