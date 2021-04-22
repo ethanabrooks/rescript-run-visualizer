@@ -68,10 +68,10 @@
     "@nodelib/fs.scandir" "2.1.4"
     fastq "^1.6.0"
 
-"@reasonml-community/graphql-ppx@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@reasonml-community/graphql-ppx/-/graphql-ppx-1.2.0.tgz#5a51021dd43c3a090da34d2dfa22b2257fdb9049"
-  integrity sha512-CKTzl/DZNT0QgpKjpi0Fij2R4r9c/oT+M8mEWYnNidaLDcFX7ZfcvmJA4ZhPYXRD6AGUO3cS1zQOJZSuJHKogQ==
+"@reasonml-community/graphql-ppx@^1.0.0-beta.22":
+  version "1.0.0-beta.22"
+  resolved "https://registry.yarnpkg.com/@reasonml-community/graphql-ppx/-/graphql-ppx-1.0.0-beta.22.tgz#2857c855841121059208154c22a890a4e08117f5"
+  integrity sha512-GZDWjwxDQZhnycSC6Oo+H7M5FQki4MeDXawNk2aAc05uERvmYQ+M7C1ERa/Ag7RkWAM333fA9wknfvU0C8MnjQ==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"

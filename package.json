@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.3.15",
-    "@reasonml-community/graphql-ppx": "^1.2.0",
+    "@reasonml-community/graphql-ppx": "^1.0.0-beta.22",
     "bs-fetch": "^0.6.2",
     "bs-platform": "^9.0.1",
     "bulma": "^0.9.2",
