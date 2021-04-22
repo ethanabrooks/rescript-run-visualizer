@@ -1,4 +1,3 @@
-
 @react.component
 let make = (): React.element => {
   let graphqlEndpoint = "rldl12.eecs.umich.edu:8080/v1/graphql"
@@ -36,9 +35,6 @@ let make = (): React.element => {
     )
   }
   <ApolloClient.React.ApolloProvider client>
-    <div> 
-    <h2> {"My first Apollo app 🚀"->React.string} </h2>
-     </div> 
-     <Query />
+    <div> <h2> {"My first Apollo app 🚀"->React.string} </h2> </div> <Query />
   </ApolloClient.React.ApolloProvider>
 }
