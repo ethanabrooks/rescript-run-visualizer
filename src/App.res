@@ -35,6 +35,8 @@ let make = (): React.element => {
     )
   }
   <ApolloClient.React.ApolloProvider client>
-    <div> <h2> {"My first Apollo app 🚀"->React.string} </h2> </div> <Query />
+    <div> <h2> {"My first Apollo app 🚀"->React.string} </h2> </div>
+    <GetChartData />
+    // <Chart data={list{}} spec={Js.Json.null} />
   </ApolloClient.React.ApolloProvider>
 }
