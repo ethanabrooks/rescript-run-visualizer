@@ -25,7 +25,7 @@ type logId = int
 
 @react.component
 let make = () => {
-  switch LogQuery.use({sweepId: 5}) {
+  switch LogQuery.use({sweepId: 9}) {
   | {loading: true} => "Loading..."->React.string
   | {error: Some(_error)} => "Error loading data"->React.string
   | {data: Some({sweep})} => {
@@ -66,7 +66,6 @@ let make = () => {
           ->List.sort(((logId1, _), (logId2, _)) => logId1 - logId2)
           ->List.map(((_, log)) => log)
         )
-      Js.log(data)
       switch data {
       | Result.Error(e) => <> <p> {e.message->React.string} </p> </>
       | Result.Ok(data) => <>

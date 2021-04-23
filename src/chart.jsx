@@ -2,10 +2,10 @@ import React from "react";
 import { Vega } from "react-vega";
 
 
-export function make({ data, spec }) {
+export function make(data, spec, test) {
     const [view, setView] = React.useState(null);
     const [initialData, setInitialData] = React.useState(null);
-    console.log(data)
+    console.log('spec', spec)
     React.useEffect(
         () => {
             if (initialData === null) {
