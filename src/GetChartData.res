@@ -24,8 +24,8 @@ type runId = int
 type logId = int
 
 @react.component
-let make = () => {
-  switch LogQuery.use({sweepId: 9}) {
+let make = (~sweepId: int) => {
+  switch LogQuery.use({sweepId: sweepId}) {
   | {loading: true} => "Loading..."->React.string
   | {error: Some(_error)} => "Error loading data"->React.string
   | {data: Some({sweep})} => {
