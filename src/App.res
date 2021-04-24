@@ -19,7 +19,7 @@ let make = (): React.element => {
     )
   }
 
-  let client = {
+  let client: ApolloClient__Core_ApolloClient.t = {
     open ApolloClient
     make(
       ~cache=Cache.InMemoryCache.make(),
@@ -34,5 +34,5 @@ let make = (): React.element => {
       (),
     )
   }
-  <ApolloClient.React.ApolloProvider client> <Router /> </ApolloClient.React.ApolloProvider>
+  <ApolloClient.React.ApolloProvider client> <Router client /> </ApolloClient.React.ApolloProvider>
 }

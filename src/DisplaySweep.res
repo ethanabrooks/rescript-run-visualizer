@@ -37,12 +37,13 @@ subscription logs($sweepId: Int!, $minLogId: Int!) {
 `)
 
 @react.component
-let make = (~sweepId: int) => {
+let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   module DataSource = {
-    type data = {specs: list<Js.Json.t>, logs: list<logEntry>}
-    type subscriptionData = {logs: list<logEntry>}
-    let initial = () => {
-      switch SweepQuery.use({sweepId: sweepId}) {
+    type subscriptionData = list<logEntry>
+    type data = {specs: list<Js.Json.t>, logs: subscriptionData}
+    let initial = (): Data.state<data> => {
+      let queryResult = SweepQuery.use({sweepId: sweepId})
+      switch queryResult {
       | {loading: true} => Data.Loading
       | {error: Some(e)} => Error(e.message)
       | {data: None, error: None, loading: false} => Error("Log query is in a hung state.")
@@ -98,35 +99,36 @@ let make = (~sweepId: int) => {
         }
       }
 
-    let subscription = (data: option<data>): Data.state<subscriptionData> => {
-      let minLogId = data->Option.mapWithDefault(0, ({logs}) => {
-        let (id, _) = logs->List.headExn
-        id
-      })
-      switch LogSubscription.use({sweepId: sweepId, minLogId: minLogId}) {
-      | {loading: true} => Loading
-      | {error: Some(e)} => Error(e.message)
-      | {data: None, error: None, loading: false} => Error("Subscription is in a hung state.")
-      | {data: Some({run_log})} =>
-        let data =
-          run_log
-          ->List.fromArray
-          ->List.map(({id: logId, log, run_id: runId}) => log->encodeLog(~runId, ~logId))
-          ->List.reduce(Result.Ok(list{}), (list, result) =>
-            list->Result.flatMap(list =>
-              result->Result.map((r: (int, Js.Json.t)) => list->List.add(r))
+    let subscribe = (
+      ~currentData: data,
+      ~addData: subscriptionData => unit,
+      ~setError: string => unit,
+    ) => {
+      let (minLogId, _) = currentData.logs->List.headExn
+      client.subscribe(
+        ~subscription=module(LogSubscription),
+        {sweepId: sweepId, minLogId: minLogId},
+      ).subscribe(
+        ~onNext=({data: {run_log}}) => {
+          let data =
+            run_log
+            ->List.fromArray
+            ->List.map(({id: logId, log, run_id: runId}) => log->encodeLog(~runId, ~logId))
+            ->List.reduce(Result.Ok(list{}), (list, result) =>
+              list->Result.flatMap(list =>
+                result->Result.map((r: (int, Js.Json.t)) => list->List.add(r))
+              )
             )
-          )
-        switch data {
-        | Result.Error(e) => Error(e.message)
-        | Result.Ok(list) => {
-            let logs = list->List.sort(((id1, _), (id2, _)) => id1 - id2)
-            Data({logs: logs})
+          switch data {
+          | Result.Error(e) => setError(e.message)
+          | Result.Ok(list) => list->List.sort(((id1, _), (id2, _)) => id1 - id2)->addData
           }
-        }
-      }
+        },
+        ~onError=error => setError(error.message),
+        (),
+      )
     }
-    let update = ({specs, logs: currentLogs}, {logs: newLogs}) => {
+    let update = ({specs, logs: currentLogs}, newLogs) => {
       {specs: specs, logs: List.concat(newLogs, currentLogs)}
     }
   }

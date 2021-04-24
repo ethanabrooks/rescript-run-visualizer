@@ -10,11 +10,17 @@ let urlToPath = (url: ReasonReactRouter.url) =>
     | None => NotFound
     | Some(sweepId) => Sweep(sweepId)
     }
+  | ["runs"] => Runs
+  | ["run", runIdString] =>
+    switch runIdString->Int.fromString {
+    | None => NotFound
+    | Some(runId) => Run(runId)
+    }
   | _ => NotFound
   }
 
 @react.component
-let make = () => {
+let make = (~client) => {
   let path = ReasonReactRouter.useUrl()->urlToPath
   <>
     <div className="tabs">
@@ -40,9 +46,10 @@ let make = () => {
     {switch path {
     | Loading => <p> {"Loading"->React.string} </p>
     | Sweeps => <ListSweeps />
-    | Sweep(sweepId) => <DisplayCharts sweepId />
+    | Sweep(sweepId) => <DisplaySweep sweepId client />
+    | Runs => <ListRuns />
+    | Run(runId) => <DisplayRun runId client />
     | NotFound => <p> {React.string("Not found")} </p>
-    | _ => <p> {React.string("To do")} </p>
     }}
   </>
 }
