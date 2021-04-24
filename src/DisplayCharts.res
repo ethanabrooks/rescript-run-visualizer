@@ -1,4 +1,5 @@
 open Belt
+open Query
 module SweepQuery = %graphql(`
 query logs($sweepId: Int!) {
   sweep(where: {id: {_eq: $sweepId}}) {
@@ -54,10 +55,11 @@ let encodeLog = (log: Js.Json.t, ~runId: int, ~logId: int) =>
 
 let useData = (~sweepId: int) => {
   let (state: queryResult<queryData>, setState) = React.useState(_ => Loading)
+
   React.useEffect(() => {
     switch state {
     | Loading =>
-      setState(_ =>
+      setState(_ => {
         switch SweepQuery.use({sweepId: sweepId}) {
         | {loading: true} => Loading
         | {error: Some(e)} => Error(e.message)
@@ -101,7 +103,7 @@ let useData = (~sweepId: int) => {
           | Result.Ok(logs) => Data({specs: specs, logs: logs})
           }
         }
-      )
+      })
     | Data({specs, logs}) =>
       setState(_ => {
         let (minLogId, _) = logs->List.headExn
