@@ -1,37 +1,45 @@
 type state<'a> =
   | Loading
   | Error(string)
-  | Hanging
   | Data('a)
 
 module type Source = {
   type data
   type subscriptionData
   let initial: unit => state<data>
-  let subscription: data => state<subscriptionData>
+  let subscription: option<data> => state<subscriptionData>
   let update: (data, subscriptionData) => data
 }
 
 module Stream = (Source: Source) => {
-  let getData = (queryResult: state<Source.data>): state<Source.data> => {
-    switch queryResult {
-    | Loading => Source.initial()
-    | Data(data) =>
-      switch Source.subscription(data) {
-      | Data(subscriptionData) => data->Source.update(subscriptionData)->Data
-      | Loading => Loading
-      | Hanging => Hanging
-      | Error(e) => Error(e)
-      }
-    | state => state
-    }
-  }
   let useData = () => {
     let (state, setState) = React.useState(() => Loading)
-    React.useEffect1(() => {
-      setState(_ => getData(state))
+    let initialState = Source.initial()
+
+    let subscriptionState = Source.subscription(
+      switch initialState {
+      | Data(data) => Some(data)
+      | _ => None
+      },
+    )
+
+    React.useEffect2(() => {
+      setState(_ =>
+        switch (state, initialState, subscriptionState) {
+        | (Loading, Loading, _) => Loading // waiting on initial data
+        | (Loading, Data(data), _) // received initial data
+        | (Data(data), _, Loading) =>
+          // waiting on subscriptiion data
+          data->Data
+        | (Data(data), _, Data(newData)) => data->Source.update(newData)->Data // received subscription data
+        | (Error(e), _, _)
+        | (_, Error(e), _)
+        | (_, _, Error(e)) =>
+          Error(e)
+        }
+      )
       None
-    }, [state])
+    }, (initialState, subscriptionState))
     state
   }
 }

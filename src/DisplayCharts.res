@@ -45,7 +45,7 @@ let make = (~sweepId: int) => {
       switch SweepQuery.use({sweepId: sweepId}) {
       | {loading: true} => Data.Loading
       | {error: Some(e)} => Error(e.message)
-      | {data: None, error: None, loading: false} => Hanging
+      | {data: None, error: None, loading: false} => Error("Log query is in a hung state.")
       | {data: Some({sweep})} => {
           let specs: list<Js.Json.t> =
             sweep
@@ -98,12 +98,15 @@ let make = (~sweepId: int) => {
         }
       }
 
-    let subscription = ({logs}: data): Data.state<subscriptionData> => {
-      let (minLogId, _) = logs->List.headExn
+    let subscription = (data: option<data>): Data.state<subscriptionData> => {
+      let minLogId = data->Option.mapWithDefault(0, ({logs}) => {
+        let (id, _) = logs->List.headExn
+        id
+      })
       switch LogSubscription.use({sweepId: sweepId, minLogId: minLogId}) {
       | {loading: true} => Loading
       | {error: Some(e)} => Error(e.message)
-      | {data: None, error: None, loading: false} => Hanging
+      | {data: None, error: None, loading: false} => Error("Subscription is in a hung state.")
       | {data: Some({run_log})} =>
         let data =
           run_log
@@ -132,7 +135,6 @@ let make = (~sweepId: int) => {
   switch DisplayCharts.useData() {
   | Loading => <p> {"Loading..."->React.string} </p>
   | Error(e) => <p> {e->React.string} </p>
-  | Hanging => <p> {"Hanging..."->React.string} </p>
   | Data({specs, logs}) => <>
       {specs
       ->List.mapWithIndex((i, spec) =>
