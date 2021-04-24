@@ -34,7 +34,5 @@ let make = (): React.element => {
       (),
     )
   }
-  <ApolloClient.React.ApolloProvider client>
-    <div> <h2> {"My first Apollo app 🚀"->React.string} </h2> <Router /> </div>
-  </ApolloClient.React.ApolloProvider>
+  <ApolloClient.React.ApolloProvider client> <Router /> </ApolloClient.React.ApolloProvider>
 }
