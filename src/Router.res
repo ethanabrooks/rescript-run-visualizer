@@ -1,16 +1,25 @@
 open Belt
 
+type path = Sweeps | Sweep(int) | NotFound
+
+let urlToPath = (url: ReasonReactRouter.url) =>
+  switch url.hash {
+  | "" => Sweeps
+  | sweepIdString =>
+    switch sweepIdString->Int.fromString {
+    | None => NotFound
+    | Some(sweepId) => Sweep(sweepId)
+    }
+  }
+
 @react.component
 let make = () => {
-  let url = ReasonReactRouter.useUrl()
-  let notFound = <p> {React.string("Not found")} </p>
+  let (path, setPath) = React.useState(() => ReasonReactRouter.useUrl()->urlToPath)
+  let _ = ReasonReactRouter.watchUrl(url => setPath(_ => url->urlToPath))
 
-  switch url.hash->Js.String2.split("/") {
-  | [sweepIdString] =>
-    switch sweepIdString->Int.fromString {
-    | None => notFound
-    | Some(sweepId) => <GetChartData sweepId />
-    }
-  | _ => notFound
+  switch path {
+  | Sweeps => <GetSweeps />
+  | Sweep(sweepId) => <GetChartData sweepId />
+  | NotFound => <p> {React.string("Not found")} </p>
   }
 }
