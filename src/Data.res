@@ -18,23 +18,26 @@ module type Source = {
 
 module Stream = (Source: Source) => {
   let useData = () => {
-    let (state: state<Source.data>, setState) = React.useState(() => Loading)
+    let (state, setState) = React.useState(() => Loading)
     let initialState = Source.initial()
 
+    let setError = (message: string) => setState(_ => message->Error)
     let addData = (newData: Source.subscriptionData) => {
       switch state {
       | Data(data) => setState(_ => data->Source.update(newData)->Data)
       | _ => ()
       }
     }
-    let setError = (message: string) => setState(_ => message->Error)
 
-    React.useEffect2(() => {
-      switch initialState {
-      | Data(data) => Source.subscribe(~currentData=data, ~addData, ~setError)->Some
+    React.useEffect3(() => {
+      switch (state, initialState) {
+      | (Loading, Data(data)) => {
+          setState(_ => Data(data))
+          Source.subscribe(~currentData=data, ~addData, ~setError)->Some
+        }
       | _ => None
       }->Option.map((subscription, ()) => subscription.unsubscribe())
-    }, (setState, initialState))
+    }, (setState, state, initialState))
     state
   }
 }
