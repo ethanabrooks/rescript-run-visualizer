@@ -13,7 +13,8 @@ module type Source = {
 
 module Stream = (Source: Source) => {
   let useData = () => {
-    let (state, setState) = React.useState(() => Loading)
+    let (state: state<Source.data>, setState) = React.useState(() => Loading)
+    let (count, setCount) = React.useState(() => 0)
     let initialState = Source.initial()
 
     let subscriptionState = Source.subscription(
@@ -24,20 +25,18 @@ module Stream = (Source: Source) => {
     )
 
     React.useEffect2(() => {
-      setState(_ =>
-        switch (state, initialState, subscriptionState) {
-        | (Loading, Loading, _) => Loading // waiting on initial data
-        | (Loading, Data(data), _) // received initial data
-        | (Data(data), _, Loading) =>
-          // waiting on subscriptiion data
-          data->Data
-        | (Data(data), _, Data(newData)) => data->Source.update(newData)->Data // received subscription data
-        | (Error(e), _, _)
-        | (_, Error(e), _)
-        | (_, _, Error(e)) =>
-          Error(e)
-        }
-      )
+      Js.log2("count", count->Belt.Int.toString)
+      setCount(_ => count + 1)
+      switch (state, initialState, subscriptionState) {
+      | (_, Error(e), _)
+      | (_, _, Error(e)) =>
+        setState(_ => Error(e))
+      | (Error(_), _, _)
+      | (Loading, Loading, _)
+      | (Data(_), _, Loading) => () // waiting on subscriptiion data
+      | (Loading, Data(data), _) => setState(_ => data->Data) // received initial data
+      | (Data(data), _, Data(newData)) => setState(_ => data->Source.update(newData)->Data) // received subscription data
+      }
       None
     }, (initialState, subscriptionState))
     state
