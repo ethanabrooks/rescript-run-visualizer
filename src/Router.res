@@ -15,12 +15,7 @@ let urlToPath = (url: ReasonReactRouter.url) =>
 
 @react.component
 let make = () => {
-  let (path, setPath) = React.useState(() => Sweeps)
-  React.useEffect1(() => {
-    let _ = ReasonReactRouter.watchUrl(url => setPath(_ => url->urlToPath))
-    None
-  }, [path])
-
+  let path = ReasonReactRouter.useUrl()->urlToPath
   <>
     <div className="tabs">
       <ul>

@@ -22,10 +22,12 @@ let make = () => {
       ->List.map(({id, metadata}) => {
         let id = id->Int.toString
         <li key={id} onClick={_ => ReasonReactRouter.push(`#sweep/${id}`)}>
-          {id->React.string}
-          {metadata->Option.mapWithDefault(<> </>, metadata =>
-            <pre> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
-          )}
+          <a>
+            {id->React.string}
+            {metadata->Option.mapWithDefault(<> </>, metadata =>
+              <pre> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
+            )}
+          </a>
         </li>
       })
       ->List.toArray
