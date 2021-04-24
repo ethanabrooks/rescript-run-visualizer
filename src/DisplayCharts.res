@@ -1,5 +1,4 @@
 open Belt
-open Query
 module SweepQuery = %graphql(`
 query logs($sweepId: Int!) {
   sweep(where: {id: {_eq: $sweepId}}) {

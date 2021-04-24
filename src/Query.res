@@ -6,7 +6,7 @@ type queryState<'a> =
   | Hanging
   | Data('a)
 
-module type Queries = {
+module type DataSource = {
   type data
   type subscriptionData
   let initial: unit => queryState<data>
@@ -14,19 +14,27 @@ module type Queries = {
   let update: (data, subscriptionData) => data
 }
 
-module UpdatingQuery = (Queries: Queries) => {
-  let getData = (queryResult: queryState<Queries.data>): queryState<Queries.data> => {
+module DataStream = (DataSource: DataSource) => {
+  let getData = (queryResult: queryState<DataSource.data>): queryState<DataSource.data> => {
     switch queryResult {
-    | Loading => Queries.initial()
+    | Loading => DataSource.initial()
     | Data(data) =>
-      switch Queries.subscription(data) {
-      | Data(subscriptionData) => data->Queries.update(subscriptionData)->Data
+      switch DataSource.subscription(data) {
+      | Data(subscriptionData) => data->DataSource.update(subscriptionData)->Data
       | Loading => Loading
       | Hanging => Hanging
       | Error(e) => Error(e)
       }
     | state => state
     }
+  }
+  let useData = () => {
+    let (state, setState) = React.useState(() => Loading)
+    React.useEffect1(() => {
+      setState(_ => getData(state))
+      None
+    }, [state])
+    state
   }
 }
 
@@ -68,7 +76,7 @@ subscription logs($sweepId: Int!, $minLogId: Int!) {
 
 @react.component
 let make = (~sweepId: int) => {
-  module ChartsQueries = {
+  module DataSource = {
     type data = {specs: list<Js.Json.t>, logs: list<logEntry>}
     type subscriptionData = {logs: list<logEntry>}
     let initial = () => {
@@ -157,23 +165,19 @@ let make = (~sweepId: int) => {
       {specs: specs, logs: List.concat(newLogs, currentLogs)}
     }
   }
-  module Sweep = {
+  module DisplayCharts = DataStream(DataSource)
 
-  }
-  module DisplayCharts = UpdatingQuery(ChartsQueries)
-  let (state, setState) = React.useState(() => Loading)
-  React.useEffect(() => {
-    setState(_ => {
-      Loading
-      //   DisplayCharts.getData(sweepId, state)
-    })
-
-    None
-  })
-  switch state {
+  switch DisplayCharts.useData() {
   | Loading => <p> {"Loading..."->React.string} </p>
   | Error(e) => <p> {e->React.string} </p>
   | Hanging => <p> {"Hanging..."->React.string} </p>
-  | Data(data) => <> </>
+  | Data({specs, logs}) => <>
+      {specs
+      ->List.mapWithIndex((i, spec) =>
+        <Chart key={i->Int.toString} data={logs->List.map(((_, log)) => log)} spec />
+      )
+      ->List.toArray
+      ->React.array}
+    </>
   }
 }
