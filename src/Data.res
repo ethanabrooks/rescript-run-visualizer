@@ -41,3 +41,24 @@ module Stream = (Source: Source) => {
     state
   }
 }
+
+@decco
+type runId = int
+
+@decco
+type logId = int
+
+type logEntry = (int, Js.Json.t)
+
+type subscriptionData = list<logEntry>
+type data = {specs: list<Js.Json.t>, logs: subscriptionData}
+
+let encodeLog = (log: Js.Json.t, ~runId: int, ~logId: int) =>
+  switch log->Js.Json.decodeObject {
+  | None => Decco.error("Unable to decode as object", log)
+  | Some(dict) => {
+      dict->Js.Dict.set("runId", runId->runId_encode)
+      dict->Js.Dict.set("logId", logId->logId_encode)
+      (logId, dict->Js.Json.object_)->Result.Ok
+    }
+  }

@@ -1,13 +1,5 @@
 open Belt
 
-@decco
-type runId = int
-
-@decco
-type logId = int
-
-type logEntry = (int, Js.Json.t)
-
 module RunQuery = %graphql(`
 query logs($runId: Int!) {
   run(where: {id: {_eq: $runId}}) {
@@ -36,7 +28,7 @@ subscription logs($runId: Int!, $minLogId: Int!) {
 @react.component
 let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   module DataSource = {
-    type subscriptionData = list<logEntry>
+    type subscriptionData = Data.subscriptionData
     type data = {specs: list<Js.Json.t>, logs: subscriptionData}
     let initial = () => {
       switch RunQuery.use({runId: runId}) {
@@ -50,7 +42,7 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
             ->List.map(({charts}) => charts->List.fromArray->List.map(({spec}) => spec))
             ->List.flatten
 
-          let data: Result.t<list<logEntry>, Decco.decodeError> =
+          let data: Result.t<list<Data.logEntry>, Decco.decodeError> =
             run
             ->List.fromArray
             ->List.map(({run_logs}) =>
@@ -60,8 +52,8 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
                 switch log->Js.Json.decodeObject {
                 | None => Decco.error("Unable to decode as object", log)
                 | Some(dict) => {
-                    dict->Js.Dict.set("runId", runId->runId_encode)
-                    dict->Js.Dict.set("logId", logId->logId_encode)
+                    dict->Js.Dict.set("runId", runId->Data.runId_encode)
+                    dict->Js.Dict.set("logId", logId->Data.logId_encode)
                     (logId, dict->Js.Json.object_)->Result.Ok
                   }
                 }
@@ -80,16 +72,6 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
       }
     }
 
-    let encodeLog = (log: Js.Json.t, ~runId: int, ~logId: int) =>
-      switch log->Js.Json.decodeObject {
-      | None => Decco.error("Unable to decode as object", log)
-      | Some(dict) => {
-          dict->Js.Dict.set("runId", runId->runId_encode)
-          dict->Js.Dict.set("logId", logId->logId_encode)
-          (logId, dict->Js.Json.object_)->Result.Ok
-        }
-      }
-
     let subscribe = (
       ~currentData: data,
       ~addData: subscriptionData => unit,
@@ -105,7 +87,7 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
           let data =
             run_log
             ->List.fromArray
-            ->List.map(({id: logId, log, run_id: runId}) => log->encodeLog(~runId, ~logId))
+            ->List.map(({id: logId, log, run_id: runId}) => log->Data.encodeLog(~runId, ~logId))
             ->List.reduce(Result.Ok(list{}), (list, result) =>
               list->Result.flatMap(list =>
                 result->Result.map((r: (int, Js.Json.t)) => list->List.add(r))
