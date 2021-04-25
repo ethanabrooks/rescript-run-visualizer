@@ -1,4 +1,5 @@
 open Belt
+open ChartWrapper
 
 type data = {specs: list<Js.Json.t>, metadata: option<Js.Json.t>, logs: list<(int, Js.Json.t)>}
 
@@ -13,10 +14,14 @@ let make = (~state: Data.state<data>) => {
         {specs
         ->List.mapWithIndex((i, spec) => {
           <div className="py-5">
-            <ChartWrapper key={i->Int.toString} data spec={spec->Some} />
+            <ChartWrapper key={i->Int.toString} data state={spec->Visualizing} />
           </div>
         })
-        ->List.add(<ChartWrapper key={"last"} data spec=None />)
+        ->List.add(
+          <ChartWrapper
+            key={"last"} data state={Editing({text: "", specState: AddToSpecs(_ => ())})}
+          />,
+        )
         ->List.reverse
         ->List.toArray
         ->React.array}

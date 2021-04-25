@@ -1,13 +1,14 @@
 open Belt
-type state = Editing({current: string, original: option<Js.Json.t>}) | Visualizing(Js.Json.t)
+type specState =
+  | Spec(Js.Json.t)
+  | AddToSpecs(Js.Json.t => unit)
+type state =
+  | Editing({text: string, specState: specState})
+  | Visualizing(Js.Json.t)
+
 @react.component
-let make = (~data: list<Js.Json.t>, ~spec: option<Js.Json.t>) => {
-  let (state, setState) = React.useState(_ =>
-    switch spec {
-    | None => Editing({current: "", original: None})
-    | Some(spec) => Visualizing(spec)
-    }
-  )
+let make = (~data: list<Js.Json.t>, ~state: state) => {
+  let (state, setState) = React.useState(_ => state)
   let buttonClassName = "inline-flex items-center m-1 px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50 disabled:cursor-default"
   switch state {
   | Visualizing(spec) => <>
@@ -18,7 +19,7 @@ let make = (~data: list<Js.Json.t>, ~spec: option<Js.Json.t>) => {
             type_="button"
             onClick={_ =>
               setState(_ => {
-                Editing({current: spec->Js.Json.stringifyWithSpace(2), original: spec->Some})
+                Editing({text: spec->Js.Json.stringifyWithSpace(2), specState: spec->Spec})
               })}
             className=buttonClassName>
             {"Edit chart"->React.string}
@@ -30,54 +31,54 @@ let make = (~data: list<Js.Json.t>, ~spec: option<Js.Json.t>) => {
         </span>
       </div>
     </>
-  | Editing({current, original}) => {
-      let spec = try current->Js.Json.parseExn->Result.Ok catch {
+  | Editing({text, specState}) => {
+      let parsed = try text->Js.Json.parseExn->Result.Ok catch {
       | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
       }
-      Js.log(spec)
       let textAreaClassName =
         "focus:outline-none border shadow w-full rounded-md"->Js.String2.concat(
-          switch spec {
+          switch parsed {
           | Result.Ok(_) => " focus:border-indigo-500 "
           | Result.Error(_) => " focus:border-red-300"
           },
         )
-      Js.log(textAreaClassName)
       <div className="sm:gap-4 sm:items-start">
         <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>
         <textarea
           rows=20
           onChange={evt =>
             setState(_ => Editing({
-              original: original,
-              current: ReactEvent.Form.target(evt)["value"],
+              specState: specState,
+              text: ReactEvent.Form.target(evt)["value"],
             }))}
           className={textAreaClassName}
           placeholder={"Enter new vega spec"}
-          value={current}
+          value={text}
         />
         <div className="pt-5">
           <div className="flex justify-end">
-            {switch spec {
+            {switch parsed {
             | Result.Error(Some(e)) =>
               <p className="flex-1 mt-2 text-sm text-red-600" id="json-error">
                 {e->React.string}
               </p>
             | _ => <> </>
             }}
-            {original->Option.mapWithDefault(<> </>, original =>
+            {switch specState {
+            | Spec(spec) =>
               <button
                 type_="submit"
-                onClick={_ => setState(_ => Visualizing(original))}
+                onClick={_ => setState(_ => Visualizing(spec))}
                 className={buttonClassName}>
                 {"Cancel"->React.string}
               </button>
-            )}
+            | _ => <> </>
+            }}
             <button
               type_="submit"
-              disabled={spec->Result.isError}
+              disabled={parsed->Result.isError}
               onClick={_ =>
-                switch spec {
+                switch parsed {
                 | Result.Ok(spec) => setState(_ => Visualizing(spec))
                 | _ => ()
                 }}
