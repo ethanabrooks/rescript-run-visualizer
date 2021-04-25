@@ -3,13 +3,13 @@ open Belt
 module SweepQuery = %graphql(`
 query logs($sweepId: Int!) {
   sweep(where: {id: {_eq: $sweepId}}) {
+    metadata
     runs {
       id
       run_logs {
         id
         log
       }
-      metadata
     }
     charts {
       spec
@@ -32,7 +32,7 @@ subscription logs($sweepId: Int!, $minLogId: Int!) {
 let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   module DataSource = {
     type subscriptionData = Data.subscriptionData
-    type data = {specs: list<Js.Json.t>, logs: subscriptionData}
+    type data = {specs: list<Js.Json.t>, metadata: option<Js.Json.t>, logs: subscriptionData}
     let initial = (): Data.state<data> => {
       let queryResult = SweepQuery.use({sweepId: sweepId})
       switch queryResult {
@@ -40,6 +40,7 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
       | {error: Some(e)} => Error(e.message)
       | {data: None, error: None, loading: false} => Error("Log query is in a hung state.")
       | {data: Some({sweep})} => {
+          let {metadata} = sweep->Array.getExn(0)
           let specs: list<Js.Json.t> =
             sweep
             ->List.fromArray
@@ -75,7 +76,7 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
             ->Result.map(list => list->List.sort(((logId1, _), (logId2, _)) => logId2 - logId1))
           switch data {
           | Result.Error(e) => Error(e.message)
-          | Result.Ok(logs) => Data({specs: specs, logs: logs})
+          | Result.Ok(logs) => Data({specs: specs, logs: logs, metadata: metadata})
           }
         }
       }
@@ -86,39 +87,42 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
       ~addData: subscriptionData => unit,
       ~setError: string => unit,
     ) => {
-      let (minLogId, _) = currentData.logs->List.headExn
-      client.subscribe(
-        ~subscription=module(LogSubscription),
-        {sweepId: sweepId, minLogId: minLogId},
-      ).subscribe(
-        ~onNext=({data: {run_log}}) => {
-          let data =
-            run_log
-            ->List.fromArray
-            ->List.map(({id: logId, log, run_id: runId}) => log->Data.encodeLog(~runId, ~logId))
-            ->List.reduce(Result.Ok(list{}), (list, result) =>
-              list->Result.flatMap(list =>
-                result->Result.map((r: (int, Js.Json.t)) => list->List.add(r))
+      currentData.logs
+      ->List.head
+      ->Option.map(((minLogId, _)) =>
+        client.subscribe(
+          ~subscription=module(LogSubscription),
+          {sweepId: sweepId, minLogId: minLogId},
+        ).subscribe(
+          ~onNext=({data: {run_log}}) => {
+            let data =
+              run_log
+              ->List.fromArray
+              ->List.map(({id: logId, log, run_id: runId}) => log->Data.encodeLog(~runId, ~logId))
+              ->List.reduce(Result.Ok(list{}), (list, result) =>
+                list->Result.flatMap(list =>
+                  result->Result.map((r: (int, Js.Json.t)) => list->List.add(r))
+                )
               )
-            )
-          switch data {
-          | Result.Error(e) => setError(e.message)
-          | Result.Ok(list) => list->List.sort(((id1, _), (id2, _)) => id1 - id2)->addData
-          }
-        },
-        ~onError=error => setError(error.message),
-        (),
+            switch data {
+            | Result.Error(e) => setError(e.message)
+            | Result.Ok(list) => list->List.sort(((id1, _), (id2, _)) => id1 - id2)->addData
+            }
+          },
+          ~onError=error => setError(error.message),
+          (),
+        )
       )
     }
-    let update = ({specs, logs: currentLogs}, newLogs) => {
-      {specs: specs, logs: List.concat(newLogs, currentLogs)}
+    let update = ({specs, metadata, logs: currentLogs}, newLogs) => {
+      {specs: specs, metadata: metadata, logs: List.concat(newLogs, currentLogs)}
     }
   }
   module DisplayCharts = Data.Stream(DataSource)
 
   <Display
     state={switch DisplayCharts.useData() {
-    | Data({specs, logs}) => Data({specs: specs, logs: logs})
+    | Data({specs, logs, metadata}) => Data({specs: specs, logs: logs, metadata: metadata})
     | Loading => Loading
     | Error(e) => Error(e)
     }}

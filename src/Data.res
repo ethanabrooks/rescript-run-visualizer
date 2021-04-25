@@ -13,7 +13,7 @@ module type Source = {
     ~currentData: data,
     ~addData: subscriptionData => unit,
     ~setError: string => unit,
-  ) => ApolloClient__ZenObservable.Subscription.t
+  ) => option<ApolloClient__ZenObservable.Subscription.t>
   let update: (data, subscriptionData) => data
 }
 
@@ -34,7 +34,7 @@ module Stream = (Source: Source) => {
       switch (state, initialState) {
       | (Loading, Data(data)) => {
           setState(_ => Data(data))
-          Source.subscribe(~currentData=data, ~addData, ~setError)->Some
+          Source.subscribe(~currentData=data, ~addData, ~setError)
         }
       | _ => None
       }->Option.map((subscription, ()) => subscription.unsubscribe())

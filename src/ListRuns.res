@@ -17,6 +17,7 @@ let make = () => {
     "You might think this is impossible, but depending on the situation it might not be!"->React.string
   | {data: Some({run})} =>
     <MenuList
+      path={id => `#run/${id}`}
       items={run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})}
     />
   }
