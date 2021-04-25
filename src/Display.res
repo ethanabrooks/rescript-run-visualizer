@@ -5,19 +5,39 @@ type data = {specs: list<Js.Json.t>, metadata: option<Js.Json.t>, logs: list<(in
 
 @react.component
 let make = (~state: Data.state<data>) => {
+  let (specs, setSpecs) = React.useState(_ => list{})
+  React.useEffect1(() => {
+    switch state {
+    | Data({specs}) => setSpecs(_ => specs)
+    | _ => ()
+    }
+    None
+  }, [state])
   switch state {
   | Loading => <p> {"Loading..."->React.string} </p>
   | Error(e) => <p> {e->React.string} </p>
-  | Data({specs, logs}) => {
+  | Data({logs}) => {
       let data = logs->List.map(((_, log)) => log)
       <>
         {specs
-        ->List.mapWithIndex((i, spec) => {
-          <div className="py-5">
-            <ChartWrapper key={i->Int.toString} data specState={InCharts(spec)} />
+        ->List.reverse
+        ->List.mapWithIndex((i, spec) =>
+          <div key={i->Int.toString} className="py-5">
+            <ChartWrapper data specState={InCharts(spec)} />
           </div>
-        })
-        ->List.add(<ChartWrapper key={"last"} data specState={NotInCharts(_ => ())} />)
+        )
+        ->List.add(
+          <div key={"last"} className="py-5">
+            <ChartWrapper
+              data
+              specState={NotInCharts(
+                spec => {
+                  setSpecs(_ => list{spec, ...specs})
+                },
+              )}
+            />
+          </div>,
+        )
         ->List.reverse
         ->List.toArray
         ->React.array}
