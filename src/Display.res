@@ -14,14 +14,10 @@ let make = (~state: Data.state<data>) => {
         {specs
         ->List.mapWithIndex((i, spec) => {
           <div className="py-5">
-            <ChartWrapper key={i->Int.toString} data state={spec->Visualizing} />
+            <ChartWrapper key={i->Int.toString} data specState={InCharts(spec)} />
           </div>
         })
-        ->List.add(
-          <ChartWrapper
-            key={"last"} data state={Editing({text: "", specState: AddToSpecs(_ => ())})}
-          />,
-        )
+        ->List.add(<ChartWrapper key={"last"} data specState={NotInCharts(_ => ())} />)
         ->List.reverse
         ->List.toArray
         ->React.array}
