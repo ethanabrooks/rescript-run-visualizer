@@ -12,7 +12,9 @@ let make = (~state: Data.state<data>) => {
       <>
         {specs
         ->List.mapWithIndex((i, spec) => {
-          <Chart key={i->Int.toString} data={logs->List.map(((_, log)) => log)} spec />
+          <div className="py-5">
+            <ChartWrapper key={i->Int.toString} data={logs->List.map(((_, log)) => log)} spec />
+          </div>
         })
         ->List.toArray
         ->React.array}
