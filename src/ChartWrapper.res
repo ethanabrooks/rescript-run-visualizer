@@ -1,34 +1,32 @@
 open Belt
-type state = Editing(string) | Visualizing(Js.Json.t)
+type state = Editing({current: string, original: Js.Json.t}) | Visualizing(Js.Json.t)
 @react.component
 let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
-  let (state, setState) = React.useState(_ => Editing(spec->Js.Json.stringifyWithSpace(2)))
+  let (state, setState) = React.useState(_ => Visualizing(spec))
+  let buttonClassName = "inline-flex items-center m-1 px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md bg-white text-gray-700 hover:bg-gray-50 focus:outline-none disabled:opacity-50"
   switch state {
   | Visualizing(spec) => <>
       <Chart data spec />
       <div className="flex justify-end">
-        <span className="relative z-0 inline-flex shadow-sm rounded-md">
+        <span className="relative z-0 inline-flex">
           <button
             type_="button"
-            onClick={_ => setState(_ => Editing(spec->Js.Json.stringifyWithSpace(2)))}
-            className="relative inline-flex items-center px-4 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+            onClick={_ =>
+              setState(_ => {
+                Editing({current: spec->Js.Json.stringifyWithSpace(2), original: spec})
+              })}
+            className=buttonClassName>
             {"Edit chart"->React.string}
           </button>
-          <button
-            type_="button"
-            className="-ml-px relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-            {"Copy spec"->React.string}
-          </button>
-          <button
-            type_="button"
-            className="-ml-px relative inline-flex items-center px-4 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+          <button type_="button" className=buttonClassName> {"Copy spec"->React.string} </button>
+          <button type_="button" className=buttonClassName>
             {"Copy spec with some data"->React.string}
           </button>
         </span>
       </div>
     </>
-  | Editing(text) => {
-      let spec = try text->Js.Json.parseExn->Result.Ok catch {
+  | Editing({current, original}) => {
+      let spec = try current->Js.Json.parseExn->Result.Ok catch {
       | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
       }
       Js.log(spec)
@@ -44,10 +42,14 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
         <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>
         <textarea
           rows=20
-          onChange={evt => setState(_ => Editing(ReactEvent.Form.target(evt)["value"]))}
+          onChange={evt =>
+            setState(_ => Editing({
+              original: original,
+              current: ReactEvent.Form.target(evt)["value"],
+            }))}
           className={textAreaClassName}
           placeholder={"Enter new vega spec"}
-          value={text}
+          value={current}
         />
         <div className="pt-5">
           <div className="flex justify-end">
@@ -60,18 +62,19 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
             }}
             <button
               type_="submit"
+              onClick={_ => setState(_ => Visualizing(original))}
+              className={buttonClassName}>
+              {"Cancel"->React.string}
+            </button>
+            <button
+              type_="submit"
               disabled={spec->Result.isError}
               onClick={_ =>
                 switch spec {
                 | Result.Ok(spec) => setState(_ => Visualizing(spec))
                 | _ => ()
                 }}
-              className={"ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none"->Js.String2.concat(
-                switch spec {
-                | Result.Ok(_) => " bg-indigo-600 hover:bg-indigo-700"
-                | Result.Error(_) => " bg-gray-400 cursor-default"
-                },
-              )}>
+              className={buttonClassName}>
               {"Submit"->React.string}
             </button>
           </div>
