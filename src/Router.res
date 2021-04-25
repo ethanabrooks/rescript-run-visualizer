@@ -22,34 +22,43 @@ let urlToPath = (url: ReasonReactRouter.url) =>
 @react.component
 let make = (~client) => {
   let path = ReasonReactRouter.useUrl()->urlToPath
-  <>
-    <div className="tabs">
-      <ul>
-        <li
-          onClick={_ => ReasonReactRouter.replace("#sweeps")}
-          className={switch path {
-          | Sweeps => "is-active"
-          | _ => ""
-          }}>
-          <a> {"Sweeps"->React.string} </a>
-        </li>
-        <li
-          onClick={_ => ReasonReactRouter.replace("#runs")}
-          className={switch path {
-          | Runs => "is-active"
-          | _ => ""
-          }}>
-          <a> {"Runs"->React.string} </a>
-        </li>
-      </ul>
-    </div>
-    {switch path {
-    | Loading => <p> {"Loading"->React.string} </p>
-    | Sweeps => <ListSweeps />
-    | Sweep(sweepId) => <DisplaySweep sweepId client />
-    | Runs => <ListRuns />
-    | Run(runId) => <DisplayRun runId client />
-    | NotFound => <p> {React.string("Not found")} </p>
-    }}
-  </>
+  let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+  let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+
+  <div className="min-h-screen bg-white">
+    <nav className="bg-white border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          <div className="flex">
+            <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+              <a
+                className={switch path {
+                | Sweeps => activeClassName
+                | _ => inactiveClassName
+                }}
+                onClick={_ => ReasonReactRouter.replace("#sweeps")}>
+                {"Sweeps"->React.string}
+              </a>
+              <a
+                className={switch path {
+                | Runs => activeClassName
+                | _ => inactiveClassName
+                }}
+                onClick={_ => ReasonReactRouter.replace("#runs")}>
+                {"Runs"->React.string}
+              </a>
+            </div>
+          </div>
+        </div>
+        {switch path {
+        | Loading => <p> {"Loading"->React.string} </p>
+        | Sweeps => <ListSweeps />
+        | Sweep(sweepId) => <DisplaySweep sweepId client />
+        | Runs => <ListRuns />
+        | Run(runId) => <DisplayRun runId client />
+        | NotFound => <p> {React.string("Not found")} </p>
+        }}
+      </div>
+    </nav>
+  </div>
 }
