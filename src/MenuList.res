@@ -12,7 +12,7 @@ let make = (~items: array<entry>, ~path: string => string) => {
         let id = id->Int.toString
         <li
           key={id}
-          className={"col-span-1 flex hover:bg-gray-50"}
+          className={"col-span-1 flex hover:bg-gray-50 cursor-pointer"}
           onClick={_ => ReasonReactRouter.push(id->path)}>
           <div className="flex-shrink-0 flex items-center justify-center w-16">
             {id->React.string}

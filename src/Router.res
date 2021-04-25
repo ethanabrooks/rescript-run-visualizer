@@ -22,8 +22,8 @@ let urlToPath = (url: ReasonReactRouter.url) =>
 @react.component
 let make = (~client) => {
   let path = ReasonReactRouter.useUrl()->urlToPath
-  let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-  let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+  let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-default"
+  let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer"
 
   <div className="min-h-screen bg-white">
     <nav className="bg-white border-b border-gray-200">
