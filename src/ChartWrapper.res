@@ -32,25 +32,32 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
       | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
       }
       Js.log(spec)
-      let className =
-        "shadow block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"->Js.String2.concat(
+      let textAreaClassName =
+        "focus:outline-none border shadow w-full rounded-md"->Js.String2.concat(
           switch spec {
-          | Result.Error(e) => " border-red-300 focus:ring-red-500 focus:border-red-500"
-          | _ => ""
+          | Result.Ok(_) => " focus:border-indigo-500 "
+          | Result.Error(_) => " focus:border-red-300"
           },
         )
-      Js.log(className)
+      Js.log(textAreaClassName)
       <div className="sm:gap-4 sm:items-start">
         <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>
         <textarea
           rows=20
           onChange={evt => setState(_ => Editing(ReactEvent.Form.target(evt)["value"]))}
-          className={"focus:outline-none focus:ring focus:ring-red-300 shadow w-full rounded-md"}
+          className={textAreaClassName}
           placeholder={"Enter new vega spec"}
           value={text}
         />
         <div className="pt-5">
           <div className="flex justify-end">
+            {switch spec {
+            | Result.Error(Some(e)) =>
+              <p className="flex-1 mt-2 text-sm text-red-600" id="email-error">
+                {e->React.string}
+              </p>
+            | _ => <> </>
+            }}
             <button
               type_="submit"
               className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
