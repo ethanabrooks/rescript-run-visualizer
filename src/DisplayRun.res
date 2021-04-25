@@ -108,16 +108,11 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   }
   module DisplayCharts = Data.Stream(DataSource)
 
-  switch DisplayCharts.useData() {
-  | Loading => <p> {"Loading..."->React.string} </p>
-  | Error(e) => <p> {e->React.string} </p>
-  | Data({specs, logs}) => <>
-      {specs
-      ->List.mapWithIndex((i, spec) =>
-        <Chart key={i->Int.toString} data={logs->List.map(((_, log)) => log)} spec />
-      )
-      ->List.toArray
-      ->React.array}
-    </>
-  }
+  <Display
+    state={switch DisplayCharts.useData() {
+    | Data({specs, logs}) => Data({specs: specs, logs: logs})
+    | Loading => Loading
+    | Error(e) => Error(e)
+    }}
+  />
 }

@@ -1,4 +1,5 @@
 open Belt
+
 type state<'a> =
   | Loading
   | Error(string)
