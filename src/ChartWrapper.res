@@ -1,3 +1,4 @@
+open Belt
 type state = Editing(string) | Visualizing(Js.Json.t)
 @react.component
 let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
@@ -27,14 +28,14 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
       </div>
     </>
   | Editing(text) => {
-      let spec = try text->Js.Json.parseExn->Some catch {
-      | _ => None
+      let spec = try text->Js.Json.parseExn->Result.Ok catch {
+      | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
       }
       Js.log(spec)
       let className =
         "shadow block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"->Js.String2.concat(
           switch spec {
-          | None => " border-red-300 focus:ring-red-500 focus:border-red-500"
+          | Result.Error(e) => " border-red-300 focus:ring-red-500 focus:border-red-500"
           | _ => ""
           },
         )
@@ -44,12 +45,7 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
         <textarea
           rows=20
           onChange={evt => setState(_ => Editing(ReactEvent.Form.target(evt)["value"]))}
-          className={"shadow block w-full focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm border-gray-300 rounded-md"->Js.String2.concat(
-            switch spec {
-            | None => " border-red-300 focus:ring-red-500 focus:border-red-500"
-            | _ => ""
-            },
-          )}
+          className={"focus:outline-none focus:ring focus:ring-red-300 shadow w-full rounded-md"}
           placeholder={"Enter new vega spec"}
           value={text}
         />
