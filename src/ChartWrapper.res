@@ -60,7 +60,18 @@ let make = (~data: list<Js.Json.t>, ~spec: Js.Json.t) => {
             }}
             <button
               type_="submit"
-              className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              disabled={spec->Result.isError}
+              onClick={_ =>
+                switch spec {
+                | Result.Ok(spec) => setState(_ => Visualizing(spec))
+                | _ => ()
+                }}
+              className={"ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none"->Js.String2.concat(
+                switch spec {
+                | Result.Ok(_) => " bg-indigo-600 hover:bg-indigo-700"
+                | Result.Error(_) => " bg-gray-400 cursor-default"
+                },
+              )}>
               {"Submit"->React.string}
             </button>
           </div>
