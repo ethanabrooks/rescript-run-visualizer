@@ -1,5 +1,4 @@
 open Belt
-open ViewChart
 type action =
   | RevertToOriginalSpec({spec: Js.Json.t, callback: unit => unit})
   | AddSpecToCharts(Js.Json.t => unit)
@@ -40,14 +39,14 @@ let make = (~action, ~visualize: Js.Json.t => unit) => {
         }}
         {switch action {
         | RevertToOriginalSpec({callback}) =>
-          <button type_="submit" onClick={_ => callback()} className={buttonClassName}>
+          <button type_="submit" onClick={_ => callback()} className={"button"}>
             {"Cancel"->React.string}
           </button>
         | AddSpecToCharts(callback) =>
           <button
             type_="submit"
             onClick={_ => parsed->Result.mapWithDefault((), callback)}
-            className={buttonClassName}>
+            className={"button"}>
             {"Add spec to charts"->React.string}
           </button>
         }}
@@ -55,7 +54,7 @@ let make = (~action, ~visualize: Js.Json.t => unit) => {
           type_="submit"
           disabled={parsed->Result.isError}
           onClick={_ => parsed->Result.mapWithDefault((), visualize)}
-          className={buttonClassName}>
+          className={"button"}>
           {"Submit"->React.string}
         </button>
       </div>
