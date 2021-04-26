@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+
 .button {
     @apply inline-flex; 
     @apply items-center;
@@ -21,6 +22,10 @@
 
 .button:hover {
     @apply bg-gray-50;
+}
+
+.button:active {
+    @apply bg-gray-100
 }
 
 .button:focus {
