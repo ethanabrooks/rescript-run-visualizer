@@ -1,6 +1,6 @@
 @react.component
 let make = (): React.element => {
-  let graphqlEndpoint = "rldl12.eecs.umich.edu:8080/v1/graphql"
+  let graphqlEndpoint = "rldl1.eecs.umich.edu:8080/v1/graphql"
 
   let headers = {"Authorization": "There are a bunch of ways to get a token in here"}
 
