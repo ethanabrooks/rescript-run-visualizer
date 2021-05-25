@@ -1,0 +1,33 @@
+table:
+  name: sweep
+  schema: public
+array_relationships:
+- name: charts
+  using:
+    foreign_key_constraint_on:
+      column: sweep_id
+      table:
+        name: chart
+        schema: public
+- name: parameter_choices
+  using:
+    foreign_key_constraint_on:
+      column: sweep_id
+      table:
+        name: parameter_choices
+        schema: public
+- name: runs
+  using:
+    foreign_key_constraint_on:
+      column: sweep_id
+      table:
+        name: run
+        schema: public
+select_permissions:
+- permission:
+    columns:
+    - id
+    - grid_index
+    - metadata
+    filter: {}
+  role: public

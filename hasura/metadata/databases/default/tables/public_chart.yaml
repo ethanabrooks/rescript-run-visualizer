@@ -1,0 +1,19 @@
+table:
+  name: chart
+  schema: public
+object_relationships:
+- name: run
+  using:
+    foreign_key_constraint_on: run_id
+- name: sweep
+  using:
+    foreign_key_constraint_on: sweep_id
+select_permissions:
+- permission:
+    columns:
+    - id
+    - run_id
+    - sweep_id
+    - spec
+    filter: {}
+  role: public
