@@ -5,7 +5,6 @@ subscription logs($sweepId: Int!) {
   run_log(where: {sweep: {id: {_eq: $sweepId}}}) {
     id
     log
-    run_id
     run {
       metadata
       charts {

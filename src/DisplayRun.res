@@ -5,7 +5,6 @@ subscription logs($runId: Int!) {
   run_log(where: {run: {id: {_eq: $runId}}}) {
     id
     log
-    run_id
     run {
       metadata
       charts {
