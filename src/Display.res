@@ -1,14 +1,32 @@
 open Belt
 open ChartWrapper
 
-type data = {specs: list<Js.Json.t>, metadata: option<Js.Json.t>, logs: list<(int, Js.Json.t)>}
+module JsonComparator = Belt.Id.MakeComparable({
+  type t = Js.Json.t
+  let cmp = Pervasives.compare
+})
+
+type data = {
+  specs: Set.t<Js.Json.t, JsonComparator.identity>,
+  metadata: option<Js.Json.t>,
+  logs: list<(int, Js.Json.t)>,
+}
+
+let mergeData = (oldData: option<data>, newData: data) =>
+  oldData
+  ->Option.mapWithDefault(newData, oldData => {
+    specs: oldData.specs,
+    metadata: oldData.metadata,
+    logs: oldData.logs->List.concat(newData.logs),
+  })
+  ->Some
 
 @react.component
 let make = (~state: Data.state<data>) => {
   let (specs, setSpecs) = React.useState(_ => list{})
   React.useEffect1(() => {
     switch state {
-    | Data({specs}) => setSpecs(_ => specs)
+    | Data({specs}) => setSpecs(_ => specs->Set.toList)
     | _ => ()
     }
     None

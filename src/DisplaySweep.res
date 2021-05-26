@@ -120,11 +120,12 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   }
   module DisplayCharts = Data.Stream(DataSource)
 
-  <Display
-    state={switch DisplayCharts.useData() {
-    | Data({specs, logs, metadata}) => Data({specs: specs, logs: logs, metadata: metadata})
-    | Loading => Loading
-    | Error(e) => Error(e)
-    }}
-  />
+  <> </>
+  // <Display
+  //   state={switch DisplayCharts.useData() {
+  //   | Data({specs, logs, metadata}) => Data({specs: specs, logs: logs, metadata: metadata})
+  //   | Loading => Loading
+  //   | Error(e) => Error(e)
+  //   }}
+  // />
 }
