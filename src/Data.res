@@ -44,3 +44,16 @@ type state =
   | Loading
   | Error(string)
   | Data(t)
+
+let useAccumulator = (~convertToData: 'a => array<t>) => {
+  let (state, setState) = React.useState(() => None->Result.Ok)
+  let onError = error => setState(_ => error->Result.Error)
+  let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<'a>) =>
+    switch (value, state) {
+    | ({error: Some(error)}, _) => error->onError
+    | ({data}, Result.Ok(oldData)) =>
+      setState(_ => data->convertToData->Array.reduce(oldData, merge)->Result.Ok)
+    | _ => ()
+    }
+  (state, onNext, onError)
+}
