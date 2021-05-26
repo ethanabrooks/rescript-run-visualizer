@@ -1,48 +1,5 @@
 open Belt
 
-type state<'a> =
-  | Loading
-  | Error(string)
-  | Data('a)
-
-module type Source = {
-  type data
-  type subscriptionData
-  let initial: unit => state<data>
-  let subscribe: (
-    ~currentData: data,
-    ~addData: subscriptionData => unit,
-    ~setError: string => unit,
-  ) => option<ApolloClient__ZenObservable.Subscription.t>
-  let update: (data, subscriptionData) => data
-}
-
-module Stream = (Source: Source) => {
-  let useData = () => {
-    let (state, setState) = React.useState(() => Loading)
-    let initialState = Source.initial()
-
-    let setError = (message: string) => setState(_ => message->Error)
-    let addData = (newData: Source.subscriptionData) => {
-      switch state {
-      | Data(data) => setState(_ => data->Source.update(newData)->Data)
-      | _ => ()
-      }
-    }
-
-    React.useEffect3(() => {
-      switch (state, initialState) {
-      | (Loading, Data(data)) => {
-          setState(_ => Data(data))
-          Source.subscribe(~currentData=data, ~addData, ~setError)
-        }
-      | _ => None
-      }->Option.map((subscription, ()) => subscription.unsubscribe())
-    }, (setState, state, initialState))
-    state
-  }
-}
-
 @decco
 type runId = int
 
@@ -52,7 +9,6 @@ type logId = int
 type logEntry = (int, Js.Json.t)
 
 type subscriptionData = list<logEntry>
-type data = {specs: list<Js.Json.t>, logs: subscriptionData}
 
 let encodeLog = (log: Js.Json.t, ~runId: int, ~logId: int) =>
   switch log->Js.Json.decodeObject {
@@ -63,3 +19,28 @@ let encodeLog = (log: Js.Json.t, ~runId: int, ~logId: int) =>
       (logId, dict->Js.Json.object_)->Result.Ok
     }
   }
+
+module JsonComparator = Belt.Id.MakeComparable({
+  type t = Js.Json.t
+  let cmp = Pervasives.compare
+})
+
+type t = {
+  specs: Set.t<Js.Json.t, JsonComparator.identity>,
+  metadata: option<Js.Json.t>,
+  logs: list<(int, Js.Json.t)>,
+}
+
+let merge = (oldData: option<t>, newData: t) =>
+  oldData
+  ->Option.mapWithDefault(newData, oldData => {
+    specs: oldData.specs,
+    metadata: oldData.metadata,
+    logs: oldData.logs->List.concat(newData.logs),
+  })
+  ->Some
+
+type state =
+  | Loading
+  | Error(string)
+  | Data(t)

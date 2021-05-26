@@ -1,21 +1,6 @@
 open Belt
 
-module RunQuery = %graphql(`
-query logs($runId: Int!) {
-  run(where: {id: {_eq: $runId}}) {
-    metadata
-    run_logs {
-      id
-      log
-    }
-    charts {
-      spec
-    }
-  }
-}
-`)
-
-module LogSubscription = %graphql(`
+module Subscription = %graphql(`
 subscription logs($runId: Int!) {
   run_log(where: {run: {id: {_eq: $runId}}}) {
     id
@@ -34,20 +19,18 @@ subscription logs($runId: Int!) {
 let useAccumulator = () => {
   let (state, setState) = React.useState(() => None->Result.Ok)
   let onError = error => setState(_ => error->Result.Error)
-  let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<LogSubscription.t>) =>
+  let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) =>
     switch (value, state) {
     | ({error: Some(error)}, _) => error->onError
     | ({data: {run_log}}, Result.Ok(oldData)) =>
       setState(_ =>
         run_log
-        ->Array.map(({id, log, run: {metadata, charts: spec}}): Display.data => {
-          specs: spec
-          ->Array.map(({spec}) => spec)
-          ->Set.fromArray(~id=module(Display.JsonComparator)),
+        ->Array.map(({id, log, run: {metadata, charts: spec}}): Data.t => {
+          specs: spec->Array.map(({spec}) => spec)->Set.fromArray(~id=module(Data.JsonComparator)),
           metadata: metadata,
           logs: list{(id, log)},
         })
-        ->Array.reduce(oldData, Display.mergeData)
+        ->Array.reduce(oldData, Data.merge)
         ->Result.Ok
       )
     | _ => ()
@@ -58,7 +41,7 @@ let useAccumulator = () => {
 @react.component
 let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   let (state, onNext, onError) = useAccumulator()
-  client.subscribe(~subscription=module(LogSubscription), {runId: runId}).subscribe(
+  client.subscribe(~subscription=module(Subscription), {runId: runId}).subscribe(
     ~onNext,
     ~onError,
     (),
