@@ -11,3 +11,4 @@
 /release.tzst
 /src/**/*.bs.js
 .idea
+.envrc
