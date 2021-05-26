@@ -14,9 +14,12 @@ let make = (~state: Data.state) => {
   switch state {
   | Loading => <p> {"Loading..."->React.string} </p>
   | Error(e) => <p> {e->React.string} </p>
-  | Data({logs}) => {
+  | Data({logs, metadata}) => {
       let data = logs->List.map(((_, log)) => log)
       <>
+        {metadata->Option.mapWithDefault(<> </>, metadata =>
+          <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
+        )}
         {specs
         ->List.reverse
         ->List.mapWithIndex((i, spec) =>
