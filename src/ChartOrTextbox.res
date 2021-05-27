@@ -17,7 +17,7 @@ let make = (~data: list<Js.Json.t>, ~specState) => {
   )
 
   switch state {
-  | Rendering(spec) => <ViewChart data spec edit={spec => setState(_ => Editing)} />
+  | Rendering(spec) => <ChartAndButtons data spec edit={spec => setState(_ => Editing)} />
   | Editing =>
     <EditSpec
       action={switch specState {
