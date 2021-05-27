@@ -2,6 +2,8 @@ open Belt
 
 @module external copy: string => bool = "copy-to-clipboard"
 
+type button = {text: string, onClick: (Js.Json.t, array<Js.Json.t>) => unit}
+
 @react.component
 let make = (~data: array<Js.Json.t>, ~spec: Js.Json.t, ~edit: Js.Json.t => unit) => {
   let specString = spec->Js.Json.stringifyWithSpace(2)
