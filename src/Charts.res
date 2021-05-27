@@ -12,6 +12,7 @@ let make = (~state: Data.state) => {
     None
   }, [state])
   switch state {
+  | NoMatch => <p> {"No matching run found..."->React.string} </p>
   | Loading => <p> {"Loading..."->React.string} </p>
   | Error(e) => <p> {e->React.string} </p>
   | Data({logs, metadata}) => {

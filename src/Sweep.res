@@ -1,40 +1,38 @@
 open Belt
-
-module Subscription = %graphql(`
-subscription logs($sweepId: Int!) {
-  run_log(where: {sweep: {id: {_eq: $sweepId}}}) {
-    id
-    log
-    run {
-      metadata
-      charts {
-        spec
-      }
-    }
-  }
-}
-`)
-
-let convertToData = (data: Subscription.t): array<Data.t> =>
-  data.run_log->Array.map(({id, log, run: {metadata, charts: spec}}): Data.t => {
-    specs: spec->Array.map(({spec}) => spec)->Set.fromArray(~id=module(Data.JsonComparator)),
-    metadata: metadata,
-    logs: list{(id, log)},
-  })
+open Data
 
 @react.component
 let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
-  let (state, onNext, onError) = Data.useAccumulator(~convertToData)
-  client.subscribe(~subscription=module(Subscription), {sweepId: sweepId}).subscribe(
+  let _eq = sweepId
+  let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_eq, ())
+  let run = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
+  let runLogBoolExp = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
+  let variables: Subscription.t_variables = {condition: runLogBoolExp}
+
+  let convertData = (data: Subscription.t): array<(int, Js.Json.t)> =>
+    data.run_log->Array.map(({id, log}): (int, Js.Json.t) => (id, log))
+  let (logs, onNext, onError) = Data.useAccumulator(~convertData)
+
+  client.subscribe(~subscription=module(Subscription), variables).subscribe(
     ~onNext,
     ~onError,
     (),
   )->ignore
-  <Charts
-    state={switch state {
-    | Ok(Some({specs, logs, metadata})) => Data({specs: specs, logs: logs, metadata: metadata})
-    | Ok(None) => Loading
-    | Error({message}) => Error(message)
-    }}
-  />
+
+  let sweep_id = Query.makeInputObjectInt_comparison_exp(~_eq, ())
+  let run = Query.makeInputObjectrun_bool_exp(~sweep_id, ())
+  let runLogBoolExp = Query.makeInputObjectrun_log_bool_exp(~run, ())
+  let variables: Query.t_variables = {condition: runLogBoolExp}
+
+  switch Query.use(variables) {
+  | {data: runs} => {
+      let runs = runs->Option.map(({run}) =>
+        run->Array.map(({charts, metadata}): Data.queryResult => {
+          specs: charts->Array.map(({spec}) => spec),
+          metadata: metadata,
+        })
+      )
+      <Charts state={Data.getState(~logs, ~runs)} />
+    }
+  }
 }
