@@ -64,7 +64,7 @@ let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
     ~onError,
     (),
   )->ignore
-  <ChartsOrVoyager
+  <Charts
     state={switch state {
     | Ok(Some({specs, logs, metadata})) => Data({specs: specs, logs: logs, metadata: metadata})
     | Ok(None) => Loading
