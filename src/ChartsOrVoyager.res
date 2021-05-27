@@ -3,10 +3,11 @@ open ChartOrTextbox
 
 @react.component
 let make = (~state: Data.state) => {
-  let (specs, setSpecs) = React.useState(_ => list{}->Some)
+  let (specs, setSpecs) = React.useState(_ => list{})
+  let (voyager, setVoyager) = React.useState(_ => false)
   React.useEffect1(() => {
     switch state {
-    | Data({specs}) => setSpecs(_ => specs->Set.toList->Some)
+    | Data({specs}) => setSpecs(_ => specs->Set.toList)
     | _ => ()
     }
     None
@@ -20,30 +21,35 @@ let make = (~state: Data.state) => {
         {metadata->Option.mapWithDefault(<> </>, metadata =>
           <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
         )}
-        {specs->Option.mapWithDefault(<Voyager data={data->List.toArray} />, specs =>
-          specs
-          ->List.reverse
-          ->List.mapWithIndex((i, spec) =>
-            <div key={i->Int.toString} className="py-5">
-              <ChartOrTextbox data specState={InCharts(spec)} />
-            </div>
-          )
-          ->List.add(
-            <div key={"last"} className="py-5">
-              <ChartOrTextbox
-                data
-                specState={NotInCharts(
-                  spec => {
-                    setSpecs(_ => list{spec, ...specs}->Some)
-                  },
-                )}
-              />
-            </div>,
-          )
-          ->List.reverse
-          ->List.toArray
-          ->React.array
-        )}
+        {voyager
+          ? <Voyager data={data->List.toArray} />
+          : {
+              specs
+              ->List.reverse
+              ->List.mapWithIndex((i, spec) =>
+                <div key={i->Int.toString} className="py-5">
+                  <ChartOrTextbox data specState={InCharts(spec)} />
+                </div>
+              )
+              ->List.add(
+                <div key={"last"} className="py-5">
+                  <ChartOrTextbox
+                    data
+                    specState={NotInCharts(
+                      spec => {
+                        setSpecs(_ => list{spec, ...specs})
+                      },
+                    )}
+                  />
+                </div>,
+              )
+              ->List.reverse
+              ->List.toArray
+              ->React.array
+            }}
+        <button type_="button" onClick={_ => setVoyager(_ => !voyager)} className="button">
+          {"Voyager"->React.string}
+        </button>
       </>
     }
   }
