@@ -4,7 +4,7 @@ type buttons = array<button>
 
 @react.component
 let make = (~buttons: buttons) => {
-  <div className="flex justify-end">
+  <div className="flex">
     <span className="relative z-0 inline-flex">
       {buttons
       ->Array.map(({text, onClick, disabled}) =>
