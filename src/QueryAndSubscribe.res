@@ -31,13 +31,12 @@ let make = (
   let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) =>
     switch (value, logs) {
     | ({error: Some(error)}, _) => error->onError
-    | ({data}, Result.Ok(old)) =>
+    | ({data}, Result.Ok(_)) =>
       setLogs(_ =>
         data.run_log
         ->Array.map(({id, log}): (int, Js.Json.t) => (id, log))
-        ->Array.reduce(old, (old, new) =>
-          old->Option.mapWithDefault(list{new}, old => list{new, ...old})->Some
-        )
+        ->List.fromArray
+        ->Some
         ->Result.Ok
       )
     | _ => ()
@@ -64,10 +63,9 @@ let make = (
       | (Ok(Some(logs)), Some(runs)) =>
         runs
         ->Array.reduce(None, (aggregated, {metadata, specs}): option<(
-          array<Js.Json.t>,
-          Data.jsonSet,
+          array<Js.Json.t>, // metadata
+          Data.jsonSet, // specs
         )> => {
-          // metadata // specs
           let specs: Data.jsonSet = specs->Set.fromArray(~id=module(Data.JsonComparator))
           let metadata = metadata->Option.mapWithDefault([], m => [m])
           aggregated
