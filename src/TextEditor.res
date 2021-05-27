@@ -1,13 +1,9 @@
-open Belt
-
-let useText = (~valid: option<string => bool>=?, ~initialText: string) => {
+let useText = (~valid: string => bool, ~initialText: string) => {
   let (text, setText) = React.useState(_ => initialText)
 
   let textAreaClassName =
     "focus:outline-none border shadow w-full rounded-md"->Js.String2.concat(
-      valid->Option.mapWithDefault(true, valid => text->valid)
-        ? " focus:border-indigo-500 "
-        : " focus:border-red-300",
+      text->valid ? " focus:border-indigo-500 " : " focus:border-red-300",
     )
   let component =
     <textarea

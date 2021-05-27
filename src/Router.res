@@ -1,6 +1,6 @@
 open Belt
 
-type path = Loading | Sweeps | Sweep(int) | Runs | Run(int) | NotFound
+type path = Sweeps | Sweep(int) | Runs | Run(int) | NotFound
 
 let urlToPath = (url: ReasonReactRouter.url) =>
   switch url.hash->Js.String2.split("/") {
@@ -51,7 +51,6 @@ let make = (~client) => {
           </div>
         </div>
         {switch path {
-        | Loading => <p> {"Loading"->React.string} </p>
         | Sweeps => <Sweeps />
         | Sweep(sweepId) => <Sweep sweepId client />
         | Runs => <Runs />
