@@ -7,8 +7,10 @@ let make = (~buttons: buttons) => {
   <div className="flex">
     <span className="relative z-0 inline-flex">
       {buttons
-      ->Array.map(({text, onClick, disabled}) =>
-        <button type_="button" onClick disabled className="button"> {text->React.string} </button>
+      ->Array.mapWithIndex((i, {text, onClick, disabled}) =>
+        <button key={i->Int.toString} type_="button" onClick disabled className="button">
+          {text->React.string}
+        </button>
       )
       ->React.array}
     </span>
