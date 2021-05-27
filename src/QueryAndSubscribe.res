@@ -1,7 +1,7 @@
 open Belt
 
 module Query = %graphql(`
-  query run($condition: run_log_bool_exp!) {
+  query run($condition: run_bool_exp!) {
     run(where: $condition) {
       metadata
       charts {
@@ -20,14 +20,19 @@ module Subscription = %graphql(`
   }
 `)
 
-let useAccumulator = () => {
-  let (state, setState) = React.useState(() => None->Result.Ok)
-  let onError = error => setState(_ => error->Result.Error)
+@react.component
+let make = (
+  ~subscriptionVariables: Subscription.t_variables,
+  ~queryVariables: Query.t_variables,
+  ~client: ApolloClient__Core_ApolloClient.t,
+) => {
+  let (logs, setLogs) = React.useState(() => None->Result.Ok)
+  let onError = error => setLogs(_ => error->Result.Error)
   let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) =>
-    switch (value, state) {
+    switch (value, logs) {
     | ({error: Some(error)}, _) => error->onError
     | ({data}, Result.Ok(old)) =>
-      setState(_ =>
+      setLogs(_ =>
         data.run_log
         ->Array.map(({id, log}): (int, Js.Json.t) => (id, log))
         ->Array.reduce(old, (old, new) =>
@@ -37,16 +42,6 @@ let useAccumulator = () => {
       )
     | _ => ()
     }
-  (state, onNext, onError)
-}
-
-@react.component
-let make = (
-  ~subscriptionVariables: Subscription.t_variables,
-  ~queryVariables: Query.t_variables,
-  ~client: ApolloClient__Core_ApolloClient.t,
-) => {
-  let (logs, onNext, onError) = useAccumulator()
 
   client.subscribe(~subscription=module(Subscription), subscriptionVariables).subscribe(
     ~onNext,
@@ -54,7 +49,9 @@ let make = (
     (),
   )->ignore
 
-  switch Query.use(queryVariables) {
+  let state: Data.state = switch Query.use(queryVariables) {
+  | {error: Some({message})} => Error(message)
+  | {loading: true} => Loading
   | {data: runs} => {
       let runs = runs->Option.map(({run}) =>
         run->Array.map(({charts, metadata}): Data.queryResult => {
@@ -63,7 +60,7 @@ let make = (
         })
       )
 
-      let state = switch (logs, runs) {
+      switch (logs, runs) {
       | (Ok(Some(logs)), Some(runs)) =>
         runs
         ->Array.reduce(None, (aggregated, {metadata, specs}): option<(
@@ -94,7 +91,7 @@ let make = (
         Loading
       | (Error({message}), _) => Error(message)
       }
-      <Charts state />
     }
   }
+  <Charts state />
 }
