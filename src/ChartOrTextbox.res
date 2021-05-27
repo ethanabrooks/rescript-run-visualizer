@@ -1,4 +1,4 @@
-open EditSpec
+open SpecEditor
 type specState =
   | InCharts(Js.Json.t)
   | NotInCharts(Js.Json.t => unit)
@@ -19,7 +19,7 @@ let make = (~data: list<Js.Json.t>, ~specState) => {
   switch state {
   | Rendering(spec) => <ChartAndButtons data spec edit={spec => setState(_ => Editing)} />
   | Editing =>
-    <EditSpec
+    <SpecEditor
       action={switch specState {
       | InCharts(spec) =>
         RevertToOriginalSpec({spec: spec, callback: _ => setState(_ => Rendering(spec))})
