@@ -2,48 +2,41 @@ open Belt
 open ChartOrTextbox
 
 @react.component
-let make = (~state: Data.state) => {
-  let (specs, setSpecs) = React.useState(_ => list{})
-  React.useEffect1(() => {
-    switch state {
-    | Data({specs}) => setSpecs(_ => specs->Set.toList)
-    | _ => ()
-    }
-    None
-  }, [state])
-  switch state {
-  | NoMatch => <p> {"No matching run found..."->React.string} </p>
-  | Loading => <p> {"Loading..."->React.string} </p>
-  | Error(e) => <p> {e->React.string} </p>
-  | Data({logs, metadata}) => {
-      let data = logs->List.map(((_, log)) => log)
-      <>
-        {metadata->Option.mapWithDefault(<> </>, metadata =>
-          <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
-        )}
-        {specs
-        ->List.reverse
-        ->List.mapWithIndex((i, spec) =>
-          <div key={i->Int.toString} className="py-5">
-            <ChartOrTextbox data specState={InCharts(spec)} />
-          </div>
-        )
-        ->List.add(
-          <div key={"last"} className="py-5">
-            <ChartOrTextbox
-              data
-              specState={NotInCharts(
-                spec => {
-                  setSpecs(_ => list{spec, ...specs})
-                },
-              )}
-            />
-          </div>,
-        )
-        ->List.reverse
-        ->List.toArray
-        ->React.array}
-      </>
-    }
-  }
+let make = (~logs: array<(int, Js.Json.t)>, ~specs, ~metadata) => {
+  let (specs, setSpecs) = React.useState(_ => specs)
+  let data = logs->Array.map(((_, log)) => log)
+  let charts = specs->Array.mapWithIndex((i, spec) =>
+    <div key={i->Int.toString} className="py-5">
+      <ChartOrTextbox
+        data
+        specState={Spec({
+          spec: spec,
+          submit: spec =>
+            setSpecs(_ => {
+              specs->Array.mapWithIndex((j, oldSpec) => i == j ? spec : oldSpec)
+            }),
+        })}
+      />
+    </div>
+  )
+  let emptyChart =
+    <div key={charts->Array.length->Int.toString} className="py-5">
+      <ChartOrTextbox
+        data
+        specState={NoSpec({
+          submit: spec => {
+            setSpecs(_ => specs->Array.concat([spec]))
+          },
+        })}
+      />
+    </div>
+
+  let charts = charts->Array.concat([emptyChart])
+
+  <>
+    {metadata->Option.mapWithDefault(<> </>, metadata =>
+      <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
+    )}
+    {charts->React.array}
+  </>
 }

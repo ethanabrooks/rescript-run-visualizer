@@ -32,13 +32,7 @@ let make = (
     switch (value, logs) {
     | ({error: Some(error)}, _) => error->onError
     | ({data}, Result.Ok(_)) =>
-      setLogs(_ =>
-        data.run_log
-        ->Array.map(({id, log}): (int, Js.Json.t) => (id, log))
-        ->List.fromArray
-        ->Some
-        ->Result.Ok
-      )
+      setLogs(_ => data.run_log->Array.map(({id, log}) => (id, log))->Some->Result.Ok)
     | _ => ()
     }
 
@@ -91,5 +85,12 @@ let make = (
       }
     }
   }
-  <Charts state />
+
+  switch state {
+  | NoMatch => <p> {"No matching run found..."->React.string} </p>
+  | Loading => <p> {"Loading..."->React.string} </p>
+  | Error(e) => <p> {e->React.string} </p>
+  | Data({logs, specs, metadata}) =>
+    <Charts logs metadata specs={specs->Set.toArray->Array.reverse} />
+  }
 }

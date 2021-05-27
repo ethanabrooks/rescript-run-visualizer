@@ -19,6 +19,6 @@ type state =
   | NoMatch
   | Loading
   | Error(string)
-  | Data({logs: list<(int, Js.Json.t)>, specs: jsonSet, metadata: option<Js.Json.t>})
+  | Data({logs: array<(int, Js.Json.t)>, specs: jsonSet, metadata: option<Js.Json.t>})
 
 type queryResult = {metadata: option<Js.Json.t>, specs: array<Js.Json.t>}

@@ -7,7 +7,7 @@ let useText = (~valid: string => bool, ~initialText: string) => {
     )
   let component =
     <textarea
-      rows=20
+      rows=10
       onChange={evt => setText(_ => ReactEvent.Form.target(evt)["value"])}
       className={textAreaClassName}
       placeholder={"Enter new vega spec"}
