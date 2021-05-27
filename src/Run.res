@@ -22,41 +22,16 @@ let convertToData = (data: Subscription.t): array<Data.t> =>
     logs: list{(id, log)},
   })
 
-type condition = {condition: Subscription.t_variables_run_log_bool_exp}
-
 @react.component
 let make = (~runId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
   let (state, onNext, onError) = Data.useAccumulator(~convertToData)
-  let runLogBoolExp: Subscription.t_variables_run_log_bool_exp = {
-    _and: None,
-    _not: None,
-    _or: None,
-    id: None,
-    log: None,
-    run_id: None,
-    run: Some({
-      _not: None,
-      _or: None,
-      _and: None,
-      sweep_id: None,
-      charts: None,
-      images: None,
-      metadata: None,
-      run_logs: None,
-      sweep: None,
-      id: Some({
-        _eq: Some(runId),
-        _gt: None,
-        _gte: None,
-        _in: None,
-        _is_null: None,
-        _lt: None,
-        _lte: None,
-        _neq: None,
-        _nin: None,
-      }),
-    }),
-  }
+  let runLogBoolExp: Subscription.t_variables_run_log_bool_exp = Subscription.makeInputObjectrun_log_bool_exp(
+    ~run=Subscription.makeInputObjectrun_bool_exp(
+      ~id=Subscription.makeInputObjectInt_comparison_exp(~_eq=runId, ()),
+      (),
+    ),
+    (),
+  )
   let variables: Subscription.t_variables = {condition: runLogBoolExp}
 
   client.subscribe(~subscription=module(Subscription), variables).subscribe(
