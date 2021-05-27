@@ -3261,10 +3261,10 @@ readdirp@~3.5.0:
   dependencies:
     picomatch "^2.2.1"
 
-reanalyze@^2.13.0:
-  version "2.13.0"
-  resolved "https://registry.npmjs.org/reanalyze/-/reanalyze-2.13.0.tgz"
-  integrity sha512-Ao4U0U3Bb2ZDQMR65VnTHojldvQQvvN6TQPCb2V24vrKGGN5fhAqiNo7PLhLcqfV0OGC1q4Us+MVuDOuRW21IQ==
+reanalyze@^2.16.0:
+  version "2.16.0"
+  resolved "https://registry.yarnpkg.com/reanalyze/-/reanalyze-2.16.0.tgz#954e5d479c8b2d394de6efc24a6a8ecbe4be80a0"
+  integrity sha512-6LXzV/JNgXKZ31UL1C0SMCQi6t0rcEEN4wlOZtBlAndrVWr9ZzopjEKjj/bsdCWZBRtNNS0Naojh0IhnkZpXjA==
 
 reason-react@^0.9.1:
   version "0.9.1"
