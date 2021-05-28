@@ -25,33 +25,25 @@ let make = (~data: array<Js.Json.t>, ~specState) => {
   switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
-    let first10datapoints = data->Js.Array2.slice(~start=0, ~end_=10)
-    let specWithDataButton: option<Buttons.button> =
+    let first10datapoints = data->Js.Array2.slice(~start=0, ~end_=10)->Js.Json.array
+    let jsonToMap = json =>
+      json->Js.Json.decodeObject->Option.map(dict => dict->Js.Dict.entries->Map.String.fromArray)
+    let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
+    let specWithData: option<Js.Json.t> =
       spec
-      ->Js.Json.decodeObject
-      ->Option.flatMap((specObject: Js.Dict.t<Js.Json.t>) => {
-        let dataJson: option<Js.Json.t> =
-          specObject
-          ->Js.Dict.get("data")
-          ->Option.flatMap((dataJson: Js.Json.t) =>
-            dataJson
-            ->Js.Json.decodeObject
-            ->Option.map((dataObject: Js.Dict.t<Js.Json.t>) => {
-              dataObject->Js.Dict.set("values", first10datapoints->Js.Json.array)
-              dataObject->Js.Json.object_
-            })
-          )
-        let specObject: option<Js.Json.t> = dataJson->Option.map(dataJson => {
-          specObject->Js.Dict.set("data", dataJson)
-          specObject->Js.Json.object_
+      ->jsonToMap
+      ->Option.flatMap((specMap: Map.String.t<Js.Json.t>) =>
+        specMap
+        ->Map.String.get("data")
+        ->Option.flatMap((dataJson: Js.Json.t) => {
+          dataJson
+          ->jsonToMap
+          ->Option.map((dataMap: Map.String.t<Js.Json.t>) => {
+            let dataObject = dataMap->Map.String.set("values", first10datapoints)->mapToJson
+            specMap->Map.String.set("data", dataObject)->mapToJson
+          })
         })
-        specObject
-      })
-      ->Option.map((specWithData): Buttons.button => {
-        text: "Copy spec with first 10 datapoints",
-        onClick: _ => specWithData->Js.Json.stringifyWithSpace(2)->copy->ignore,
-        disabled: false,
-      })
+      )
     let buttons = [
       (
         {
@@ -69,7 +61,16 @@ let make = (~data: array<Js.Json.t>, ~specState) => {
       ),
     ]
     let buttons =
-      specWithDataButton
+      specWithData
+      ->Option.map(
+        (
+          s => {
+            text: "Copy spec with first 10 datapoints",
+            onClick: _ => s->Js.Json.stringifyWithSpace(2)->copy->ignore,
+            disabled: false,
+          }: Js.Json.t => Buttons.button
+        ),
+      )
       ->Option.map(b => [b])
       ->Option.mapWithDefault(buttons, buttons->Js.Array2.concat)
     <> <Chart data spec /> <Buttons buttons /> </>

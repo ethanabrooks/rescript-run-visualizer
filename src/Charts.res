@@ -2,9 +2,9 @@ open Belt
 open ChartOrTextbox
 
 @react.component
-let make = (~logs: array<(int, Js.Json.t)>, ~specs, ~metadata) => {
+let make = (~logs: Data.pairSet, ~specs, ~metadata) => {
   let (specs, setSpecs) = React.useState(_ => specs)
-  let data = logs->Array.map(((_, log)) => log)
+  let data = logs->Set.toArray->Array.map(((_, log)) => log)
   let charts = specs->Array.mapWithIndex((i, spec) =>
     <div key={i->Int.toString} className="py-5">
       <ChartOrTextbox
