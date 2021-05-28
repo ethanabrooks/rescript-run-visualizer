@@ -21,6 +21,7 @@
   "namespace": true,
   "bs-dependencies": [
     "@reasonml-community/graphql-ppx",
+    "@ryyppy/rescript-promise",
     "rescript-apollo-client",
     "reason-react",
     "bs-fetch",

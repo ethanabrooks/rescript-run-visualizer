@@ -1,10 +1,11 @@
 open Belt
 open ChartOrTextbox
+open Util
 
 @react.component
-let make = (~logs: Data.pairSet, ~specs, ~metadata) => {
-  let (specs, setSpecs) = React.useState(_ => specs)
-  let data = logs->Set.toArray->Array.map(((_, log)) => log)
+let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
+  let (specs: array<Js.Json.t>, setSpecs) = React.useState(_ => specs->Set.toArray)
+  let data = logs->Map.Int.valuesToArray
   let charts = specs->Array.mapWithIndex((i, spec) =>
     <div key={i->Int.toString} className="py-5">
       <ChartOrTextbox
@@ -20,13 +21,11 @@ let make = (~logs: Data.pairSet, ~specs, ~metadata) => {
     </div>
   )
   let emptyChart =
-    <div key={charts->Array.length->Int.toString} className="py-5">
+    <div key={specs->Array.length->Int.toString} className="py-5">
       <ChartOrTextbox
         data
         specState={NoSpec({
-          submit: spec => {
-            setSpecs(_ => specs->Array.concat([spec]))
-          },
+          submit: (spec: Js.Json.t) => setSpecs(_ => specs->Array.concat([spec])),
         })}
       />
     </div>
@@ -34,9 +33,13 @@ let make = (~logs: Data.pairSet, ~specs, ~metadata) => {
   let charts = charts->Array.concat([emptyChart])
 
   <>
-    {metadata->Option.mapWithDefault(<> </>, metadata =>
-      <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
-    )}
+    {metadata
+    ->Array.mapWithIndex((i, m) =>
+      <pre key={i->Int.toString} className="p-4">
+        {m->Js.Json.stringifyWithSpace(2)->React.string}
+      </pre>
+    )
+    ->React.array}
     {charts->React.array}
   </>
 }
