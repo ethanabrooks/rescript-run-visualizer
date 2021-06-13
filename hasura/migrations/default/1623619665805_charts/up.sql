@@ -1,3 +1,4 @@
+
 SET check_function_bodies = false;
 CREATE TABLE public.chart (
     id integer NOT NULL,
@@ -81,3 +82,9 @@ ALTER TABLE ONLY public.run_log
     ADD CONSTRAINT run_log_run_id_fkey FOREIGN KEY (run_id) REFERENCES public.run(id);
 ALTER TABLE ONLY public.run
     ADD CONSTRAINT run_sweep_id_fkey FOREIGN KEY (sweep_id) REFERENCES public.sweep(id);
+
+ALTER TABLE "public"."sweep" ALTER COLUMN "metadata" TYPE jsonb;
+
+ALTER TABLE "public"."parameter_choices" ALTER COLUMN "choice" TYPE jsonb[];
+
+ALTER TABLE "public"."run" ALTER COLUMN "metadata" TYPE jsonb;
