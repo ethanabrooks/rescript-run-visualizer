@@ -13,6 +13,11 @@ module Subscription = %graphql(`
       charts {
         spec
       }
+      sweep {
+        charts {
+          spec
+        }
+      }
     }
   }
 `)
@@ -46,13 +51,19 @@ let make = (
           // combine values from multiple runs returned from query
           let newState =
             run
-            ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs}) => {
+            ->Array.reduce((None: option<queryResult>), (
+              acc,
+              {metadata, charts, run_logs, sweep},
+            ) => {
               // collect possibly multiple metadata into array
               let metadata = metadata->Option.mapWithDefault([], m => [m])
 
               // combine multiple charts from run
               let specs =
-                charts->Array.map(({spec}) => spec)->Set.fromArray(~id=module(JsonComparator))
+                sweep
+                ->Option.mapWithDefault([], ({charts}) => charts->Array.map(({spec}) => spec))
+                ->Array.concat(charts->Array.map(({spec}) => spec))
+                ->Set.fromArray(~id=module(JsonComparator))
 
               // combine multiple logs from run
               let logs = run_logs->Array.map(({id, log}) => (id, log))->Map.Int.fromArray
@@ -66,7 +77,7 @@ let make = (
               }) => {
                 let metadata: array<Js.Json.t> = m->Array.concat(metadata)
                 let specs = s->Set.union(specs)
-                let logs = l->Map.Int.merge(logs, (_, l, _) => l)
+                let logs = l->Map.Int.merge(logs, merge)
                 {metadata: metadata, specs: specs, logs: logs}
               })
               ->Some

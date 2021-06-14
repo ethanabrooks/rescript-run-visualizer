@@ -35,15 +35,7 @@ let make = (
         error->onError
       | {data} => {
           let new = data.run_log->Array.map(({id, log}) => (id, log))->Map.Int.fromArray
-          let merge = old =>
-            old->Map.Int.merge(new, (_, old, new) =>
-              switch (old, new) {
-              | (None, None) => None
-              | (Some(x), _)
-              | (None, Some(x)) =>
-                Some(x)
-              }
-            )
+          let merge = old => old->Map.Int.merge(new, Util.merge)
           setLogs(old => old->Result.map(merge))
         }
       }

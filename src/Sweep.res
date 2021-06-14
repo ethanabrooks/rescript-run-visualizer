@@ -4,8 +4,8 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
 
   let variables1 = {
     open Subscribe1
-    let id = Subscription.makeInputObjectInt_comparison_exp(~_eq, ())
-    let condition = Subscription.makeInputObjectrun_bool_exp(~id, ())
+    let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_eq, ())
+    let condition = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
     let variables: Subscription.t_variables = {condition: condition}
     variables
   }

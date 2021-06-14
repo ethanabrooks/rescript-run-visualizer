@@ -33,6 +33,7 @@ let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
   let charts = charts->Array.concat([emptyChart])
 
   <>
+    {charts->React.array}
     {metadata
     ->Array.mapWithIndex((i, m) =>
       <pre key={i->Int.toString} className="p-4">
@@ -40,6 +41,5 @@ let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
       </pre>
     )
     ->React.array}
-    {charts->React.array}
   </>
 }
