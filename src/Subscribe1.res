@@ -24,6 +24,11 @@ module Subscription = %graphql(`
 
 @val external max_logs: string = "NODE_MAX_LOGS"
 
+let objToMap = (obj: Js.Json.t) =>
+  obj->Js.Json.decodeObject->Option.map(obj => obj->Js.Dict.entries->Map.String.fromArray)
+let mapToObj = (map: Map.String.t<'a>) =>
+  map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
+
 type queryResult = {
   metadata: array<Js.Json.t>,
   specs: jsonSet,
@@ -55,6 +60,8 @@ let make = (
               acc,
               {metadata, charts, run_logs, sweep},
             ) => {
+              let metadataMap = metadata->Option.flatMap(objToMap)
+
               // collect possibly multiple metadata into array
               let metadata = metadata->Option.mapWithDefault([], m => [m])
 
@@ -66,7 +73,18 @@ let make = (
                 ->Set.fromArray(~id=module(JsonComparator))
 
               // combine multiple logs from run
-              let logs = run_logs->Array.map(({id, log}) => (id, log))->Map.Int.fromArray
+              let logs =
+                run_logs
+                ->Array.map(({id, log}) => (id, log))
+                ->Map.Int.fromArray
+                // add metadata to each log
+                ->Map.Int.map(log =>
+                  switch (metadataMap, log->objToMap) {
+                  | (Some(metadataMap), Some(logMap)) =>
+                    metadataMap->Map.String.merge(logMap, merge)->mapToObj
+                  | _ => log
+                  }
+                )
 
               // combine values from this run with values from previous runs
               acc
