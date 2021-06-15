@@ -1,0 +1,3 @@
+- add ability to group runs arbitrarily
+- add mechanism for deleting runs
+- add authentication
