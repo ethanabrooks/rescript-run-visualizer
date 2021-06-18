@@ -1,5 +1,4 @@
-open Util
-
+open Belt
 module Deletion = %graphql(`
 mutation deletion($id: Int!) {
   delete_chart(where: {sweep_id: {_eq: $id}}) {
@@ -22,7 +21,10 @@ mutation deletion($id: Int!) {
 
 @react.component
 let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
-  let (delete, deleted) = Deletion.use()
+  let (
+    delete,
+    {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.Deletion_inner.t>,
+  ) = Deletion.use()
 
   let _eq = sweepId
 
@@ -43,16 +45,18 @@ let make = (~sweepId: int, ~client: ApolloClient__Core_ApolloClient.t) => {
     variables
   }
 
-  switch deleted {
-  | {called: false} => <>
-      <Subscribe1 variables1 variables2 client />
-      <button type_="button" onClick={_ => delete({id: sweepId})->ignore} className="button">
-        {"Delete"->React.string}
-      </button>
-    </>
-  | {data: Some(_), error: None} => <p> {"Deleted"->React.string} </p>
-  | {data: None, error: None, called: true} => <p> {"Deleting..."->React.string} </p>
-  | {loading: true} => <p> {"Deleting..."->React.string} </p>
-  | {error: Some({message})} => <ErrorPage message />
+  let deleted: DeleteButton.deleted = {
+    called: called,
+    error: error,
+    dataMessage: switch data {
+    | Some({
+        delete_run: Some({affected_rows: runsDeleted}),
+        delete_sweep: Some({affected_rows: sweepsDeleted}),
+      }) =>
+      `Deleted ${sweepsDeleted->Int.toString} sweeps and ${runsDeleted->Int.toString} rows.`->Some
+    | _ => None
+    },
   }
+  let onClick = _ => delete({id: sweepId})->ignore
+  <> <Subscribe1 variables1 variables2 client /> <DeleteButton deleted onClick /> </>
 }
