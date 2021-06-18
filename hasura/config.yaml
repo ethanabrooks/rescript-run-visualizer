@@ -1,5 +1,5 @@
 version: 3
-endpoint: http://141.212.113.180:8080
+endpoint: http://141.212.113.98:8080
 metadata_directory: metadata
 actions:
   kind: synchronous
