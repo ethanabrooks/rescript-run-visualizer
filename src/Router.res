@@ -52,9 +52,9 @@ let make = (~client) => {
         </div>
         {switch path {
         | Sweeps => <Sweeps />
-        | Sweep(sweepId) => <Sweep sweepId client />
+        | Sweep(sweepId) => <Sweep sweepIds={Set.Int.empty->Set.Int.add(sweepId)} client />
         | Runs => <Runs />
-        | Run(runId) => <Run runId client />
+        | Run(runId) => <Run runIds={Set.Int.empty->Set.Int.add(runId)} client />
         | NotFound => <p> {React.string("Not found")} </p>
         }}
       </div>
