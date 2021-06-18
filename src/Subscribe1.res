@@ -1,5 +1,4 @@
 open Belt
-open Subscribe2
 open Util
 
 module Subscription = %graphql(`
