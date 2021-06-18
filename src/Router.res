@@ -36,7 +36,7 @@ let make = (~client) => {
                 | Sweeps => activeClassName
                 | _ => inactiveClassName
                 }}
-                onClick={_ => ReasonReactRouter.replace("#sweeps")}>
+                href={"/#sweeps"}>
                 {"Sweeps"->React.string}
               </a>
               <a
@@ -44,7 +44,7 @@ let make = (~client) => {
                 | Runs => activeClassName
                 | _ => inactiveClassName
                 }}
-                onClick={_ => ReasonReactRouter.replace("#runs")}>
+                href={"/#runs"}>
                 {"Runs"->React.string}
               </a>
             </div>

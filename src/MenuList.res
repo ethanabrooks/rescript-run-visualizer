@@ -10,16 +10,15 @@ let make = (~items: array<entry>, ~path: string => string) => {
       ->List.sort(({id: id1}, {id: id2}) => id2 - id1)
       ->List.map(({id, metadata}) => {
         let id = id->Int.toString
-        <li
-          key={id}
-          className={"col-span-1 flex hover:bg-gray-50 cursor-pointer"}
-          onClick={_ => ReasonReactRouter.push(id->path)}>
-          <div className="flex-shrink-0 flex items-center justify-center w-16">
-            {id->React.string}
-          </div>
-          {metadata->Option.mapWithDefault(<> </>, metadata =>
-            <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
-          )}
+        <li key={id}>
+          <a className={"col-span-1 flex hover:bg-gray-50 cursor-pointer"} href={`/${id->path}`}>
+            <div className="flex-shrink-0 flex items-center justify-center w-16">
+              {id->React.string}
+            </div>
+            {metadata->Option.mapWithDefault(<> </>, metadata =>
+              <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
+            )}
+          </a>
         </li>
       })
       ->List.toArray
