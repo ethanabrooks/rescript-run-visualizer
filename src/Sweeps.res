@@ -9,8 +9,7 @@ subscription {
 `)
 
 @react.component
-let make = (~client) => {
-  let (selected, setSelected) = React.useState(_ => Set.Int.empty)
+let make = (~client, ~ids) => {
   switch SweepsQuery.use() {
   | {loading: true} => "Loading..."->React.string
   | {error: Some(_error)} => "Error loading data"->React.string
@@ -20,9 +19,9 @@ let make = (~client) => {
     <div>
       <MenuList
         items={sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})}
-        setSelected
+        ids
       />
-      <Sweep sweepIds={selected} client />
+      <Sweep ids client />
     </div>
   }
 }

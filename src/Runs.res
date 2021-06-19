@@ -9,8 +9,7 @@ subscription {
 `)
 
 @react.component
-let make = (~client) => {
-  let (selected, setSelected) = React.useState(_ => Set.Int.empty)
+let make = (~client, ~ids) => {
   switch RunsQuery.use() {
   | {loading: true} => "Loading..."->React.string
   | {error: Some(_error)} => "Error loading data"->React.string
@@ -19,10 +18,9 @@ let make = (~client) => {
   | {data: Some({run})} =>
     <div>
       <MenuList
-        items={run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})}
-        setSelected
+        items={run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})} ids
       />
-      <Run runIds={selected} client />
+      <Run ids client />
     </div>
   }
 }

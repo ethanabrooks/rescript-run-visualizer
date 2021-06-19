@@ -15,13 +15,13 @@ mutation deletion($ids: [Int!]) {
 `)
 
 @react.component
-let make = (~runIds: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
+let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
   let (
     delete,
     {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.Deletion_inner.t>,
   ) = Deletion.use()
 
-  let _in = runIds->Set.Int.toArray
+  let _in = ids->Set.Int.toArray
 
   let variables1 = {
     open Subscribe1
@@ -49,7 +49,7 @@ let make = (~runIds: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     | _ => None
     },
   }
-  let ids = runIds->Set.Int.toArray->Some
+  let ids = ids->Set.Int.toArray->Some
   let onClick = _ => delete({ids: ids})->ignore
   <> <Subscribe1 variables1 variables2 client /> <DeleteButton deleted onClick /> </>
 }

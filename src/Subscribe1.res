@@ -41,7 +41,7 @@ type queryResult = {
   logs: jsonMap,
 }
 
-type state = Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
+type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
 
 @react.component
 let make = (
@@ -51,10 +51,10 @@ let make = (
 ) => {
   let (state, setState) = React.useState(() => Waiting)
 
-  React.useEffect0(() => {
+  React.useEffect3(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let onError = error => setState(_ => error->Error)
-    let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) =>
+    let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
       | {data: {run}} =>
@@ -106,12 +106,13 @@ let make = (
               })
               ->Some
             })
-            ->Option.mapWithDefault(Waiting, data => Data(data))
+            ->Option.mapWithDefault(NoData, data => Data(data))
           setState(_ => newState)
         }
 
         (subscription.contents->Option.getExn).unsubscribe()->ignore
       }
+    }
 
     subscription :=
       client.subscribe(~subscription=module(Subscription), variables1).subscribe(
@@ -120,10 +121,11 @@ let make = (
         (),
       )->Some
     None
-  })
+  }, (client, variables1, setState))
 
   switch state {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
+  | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) => <Subscribe2 logs specs metadata variables2 client />
   }

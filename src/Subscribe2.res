@@ -25,7 +25,7 @@ let make = (
 ) => {
   let (logs, setLogs) = React.useState(() => logs->Result.Ok)
 
-  React.useEffect0(() => {
+  React.useEffect3(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let onError = error => setLogs(_ => error->Result.Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
@@ -47,7 +47,7 @@ let make = (
         (),
       )->Some
     None
-  })
+  }, (client, variables2, setLogs))
 
   switch logs {
   | Error({message}) => <ErrorPage message />

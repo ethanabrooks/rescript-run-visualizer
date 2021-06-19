@@ -1,22 +1,24 @@
 open Belt
 
-type path = Sweeps | Sweep(int) | Runs | Run(int) | NotFound
+type path = Sweeps(Set.Int.t) | Sweep(int) | Runs(Set.Int.t) | Run(int) | NotFound(string)
+
+let processIds = (ids: list<string>) =>
+  ids
+  ->List.map(Int.fromString)
+  ->List.reduce(list{}, (list, option) =>
+    switch option {
+    | None => list
+    | Some(int) => list{int, ...list}
+    }
+  )
+  ->List.toArray
+  ->Set.Int.fromArray
 
 let urlToPath = (url: ReasonReactRouter.url) =>
-  switch url.hash->Js.String2.split("/") {
-  | ["sweeps"] => Sweeps
-  | ["sweep", sweepIdString] =>
-    switch sweepIdString->Int.fromString {
-    | None => NotFound
-    | Some(sweepId) => Sweep(sweepId)
-    }
-  | ["runs"] => Runs
-  | ["run", runIdString] =>
-    switch runIdString->Int.fromString {
-    | None => NotFound
-    | Some(runId) => Run(runId)
-    }
-  | _ => NotFound
+  switch url.hash->Util.splitHash->List.fromArray {
+  | list{"sweeps", ...sweepIds} => Sweeps(sweepIds->processIds)
+  | list{"runs", ...runIds} => Runs(runIds->processIds)
+  | _ => NotFound(url.hash)
   }
 
 @react.component
@@ -24,6 +26,7 @@ let make = (~client) => {
   let path = ReasonReactRouter.useUrl()->urlToPath
   let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-default"
   let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer"
+  let singleton = Set.Int.empty->Set.Int.add
 
   <div className="min-h-screen bg-white">
     <nav className="bg-white border-b border-gray-200">
@@ -33,7 +36,7 @@ let make = (~client) => {
             <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
               <a
                 className={switch path {
-                | Sweeps => activeClassName
+                | Sweeps(_) => activeClassName
                 | _ => inactiveClassName
                 }}
                 href={"/#sweeps"}>
@@ -41,7 +44,7 @@ let make = (~client) => {
               </a>
               <a
                 className={switch path {
-                | Runs => activeClassName
+                | Runs(_) => activeClassName
                 | _ => inactiveClassName
                 }}
                 href={"/#runs"}>
@@ -51,11 +54,11 @@ let make = (~client) => {
           </div>
         </div>
         {switch path {
-        | Sweeps => <Sweeps client />
-        | Sweep(sweepId) => <Sweep sweepIds={Set.Int.empty->Set.Int.add(sweepId)} client />
-        | Runs => <Runs client />
-        | Run(runId) => <Run runIds={Set.Int.empty->Set.Int.add(runId)} client />
-        | NotFound => <p> {React.string("Not found")} </p>
+        | Sweeps(ids) => <Sweeps ids client />
+        | Runs(ids) => <Runs ids client />
+        | Sweep(id) => <Sweep ids={id->singleton} client />
+        | Run(id) => <Run ids={id->singleton} client />
+        | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
         }}
       </div>
     </nav>
