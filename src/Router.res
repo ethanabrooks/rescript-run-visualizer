@@ -51,9 +51,9 @@ let make = (~client) => {
           </div>
         </div>
         {switch path {
-        | Sweeps => <Sweeps />
+        | Sweeps => <Sweeps client />
         | Sweep(sweepId) => <Sweep sweepIds={Set.Int.empty->Set.Int.add(sweepId)} client />
-        | Runs => <Runs />
+        | Runs => <Runs client />
         | Run(runId) => <Run runIds={Set.Int.empty->Set.Int.add(runId)} client />
         | NotFound => <p> {React.string("Not found")} </p>
         }}
