@@ -1,5 +1,5 @@
 open Belt
-module RunsQuery = %graphql(`
+module Subscription = %graphql(`
 subscription {
     run {
         id
@@ -10,7 +10,7 @@ subscription {
 
 @react.component
 let make = (~client, ~ids) => {
-  switch RunsQuery.use() {
+  switch Subscription.use() {
   | {loading: true} => "Loading..."->React.string
   | {error: Some(_error)} => "Error loading data"->React.string
   | {data: None, error: None, loading: false} =>

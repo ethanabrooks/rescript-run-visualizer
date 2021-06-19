@@ -53,6 +53,7 @@ let make = (
 
   React.useEffect3(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
+    let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     let onError = error => setState(_ => error->Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
@@ -110,7 +111,7 @@ let make = (
           setState(_ => newState)
         }
 
-        (subscription.contents->Option.getExn).unsubscribe()->ignore
+        unsubscribe()
       }
     }
 
@@ -120,7 +121,7 @@ let make = (
         ~onError,
         (),
       )->Some
-    None
+    Some(unsubscribe)
   }, (client, variables1, setState))
 
   switch state {
