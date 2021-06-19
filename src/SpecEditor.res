@@ -2,13 +2,8 @@ open Belt
 
 type parseResult = Result.t<Js.Json.t, option<string>>
 
-type button = {
-  text: string,
-  onClick: parseResult => unit,
-  disabled: parseResult => bool,
-}
 @react.component
-let make = (~initialText, ~buttons) => {
+let make = (~initialText, ~makeButtons) => {
   let parse = text =>
     try text->Js.Json.parseExn->Result.Ok catch {
     | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
@@ -17,11 +12,7 @@ let make = (~initialText, ~buttons) => {
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parsed = text->parse
-  let buttons = buttons->Array.map(({text, onClick, disabled}): Buttons.button => {
-    text: text,
-    onClick: _ => parsed->onClick,
-    disabled: parsed->disabled,
-  })
+  let buttons = parsed->makeButtons
 
   <div className="sm:gap-4 sm:items-start">
     <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>

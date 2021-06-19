@@ -45,71 +45,63 @@ let make = (~data: array<Js.Json.t>, ~specState) => {
         })
       )
     let buttons = [
-      (
-        {
-          text: "Edit chart",
-          onClick: _ => setState(_ => Editing),
-          disabled: false,
-        }: Buttons.button
-      ),
-      (
-        {
-          text: "Copy spec",
-          onClick: _ => specString->copy->ignore,
-          disabled: false,
-        }: Buttons.button
-      ),
+      <Button text={"Edit chart"} onClick={_ => setState(_ => Editing)} disabled={false} />,
+      <Button text={"Copy spec"} onClick={_ => specString->copy->ignore} disabled={false} />,
     ]
     let buttons =
       specWithData
-      ->Option.map(
-        (
-          s => {
-            text: "Copy spec with first 10 datapoints",
-            onClick: _ => s->Js.Json.stringifyWithSpace(2)->copy->ignore,
-            disabled: false,
-          }: Js.Json.t => Buttons.button
-        ),
-      )
+      ->Option.map(s => {
+        <Button
+          text={"Copy spec with first 10 datapoints"}
+          onClick={_ => s->Js.Json.stringifyWithSpace(2)->copy->ignore}
+          disabled={false}
+        />
+      })
       ->Option.map(b => [b])
       ->Option.mapWithDefault(buttons, buttons->Js.Array2.concat)
     <> <Chart data spec /> <Buttons buttons /> </>
 
   | Editing => {
-      let (initialText, buttons) = switch specState {
+      let (initialText, makeButtons) = switch specState {
       | Spec({spec, submit}) => {
           let initialText = spec->Js.Json.stringifyWithSpace(2)
-          let buttons = [
-            {
-              text: "Submit",
-              onClick: spec =>
-                spec->Result.mapWithDefault((), spec => {
+          let makeButtons = (parseResult: parseResult) => [
+            <Button
+              text={"Submit"}
+              onClick={_ =>
+                parseResult->Result.mapWithDefault((), spec => {
                   spec->submit
                   setState(_ => Rendering(spec))
-                }),
-              disabled: Result.isError,
-            },
-            {text: "Cancel", onClick: _ => setState(_ => Rendering(spec)), disabled: _ => false},
+                })}
+              disabled={parseResult->Result.isError}
+            />,
+            <Button
+              text={"Cancel"}
+              onClick={_ => setState(_ => Rendering(spec))}
+              disabled={parseResult->Result.isError}
+            />,
           ]
-          (initialText, buttons)
+
+          (initialText, makeButtons)
         }
       | NoSpec({submit}) => {
           let initialText = "{}"
-          let buttons = [
-            {
-              text: "Submit",
-              onClick: spec =>
-                spec->Result.mapWithDefault((), spec => {
+          let makeButtons = (parseResult: parseResult) => [
+            <Button
+              text={"Submit"}
+              onClick={result =>
+                parseResult->Result.mapWithDefault((), spec => {
                   setState(_ => Rendering(spec))
                   spec->submit
-                }),
-              disabled: Result.isError,
-            },
+                })}
+              disabled={parseResult->Result.isError}
+            />,
           ]
-          (initialText, buttons)
+
+          (initialText, makeButtons)
         }
       }
-      <SpecEditor initialText buttons />
+      <SpecEditor initialText makeButtons />
     }
   }
 }
