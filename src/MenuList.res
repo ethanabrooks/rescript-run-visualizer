@@ -17,7 +17,7 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
           )
 
         let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
-        let newIds = newIds->Set.Int.toArray->Array.map(Int.toString)->Js.Array2.joinWith("/")
+        let newIds = newIds->Set.Int.toArray->Array.map(Int.toString)->Js.Array2.joinWith(",")
         let href = switch hash->Util.splitHash->List.fromArray {
         | list{base, ..._} => `#${base}/${newIds}`
         | _ => Js.Exn.raiseError(`Invalid hash: ${hash}`)

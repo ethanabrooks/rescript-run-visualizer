@@ -2,8 +2,10 @@ open Belt
 
 type path = Sweeps(Set.Int.t) | Sweep(int) | Runs(Set.Int.t) | Run(int) | NotFound(string)
 
-let processIds = (ids: list<string>) =>
+let processIds = (ids: string) =>
   ids
+  ->Js.String2.split(",")
+  ->List.fromArray
   ->List.map(Int.fromString)
   ->List.reduce(list{}, (list, option) =>
     switch option {
@@ -13,11 +15,12 @@ let processIds = (ids: list<string>) =>
   )
   ->List.toArray
   ->Set.Int.fromArray
-
 let urlToPath = (url: ReasonReactRouter.url) =>
   switch url.hash->Util.splitHash->List.fromArray {
-  | list{"sweeps", ...sweepIds} => Sweeps(sweepIds->processIds)
-  | list{"runs", ...runIds} => Runs(runIds->processIds)
+  | list{"sweeps"} => Sweeps(Set.Int.empty)
+  | list{"runs"} => Runs(Set.Int.empty)
+  | list{"sweeps", sweepIds} => Sweeps(sweepIds->processIds)
+  | list{"runs", runIds} => Runs(runIds->processIds)
   | _ => NotFound(url.hash)
   }
 
