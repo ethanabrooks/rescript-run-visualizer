@@ -14,7 +14,7 @@ let make = (~initialText, ~buttons) => {
     | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
     }
   let valid = text => text->parse->Result.isOk
-  let (text, textbox) = TextEditor.useText(~valid, ~initialText)
+  let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parsed = text->parse
   let buttons = buttons->Array.map(({text, onClick, disabled}): Buttons.button => {
