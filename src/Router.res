@@ -1,6 +1,6 @@
 open Belt
 
-type path = Sweeps(Set.Int.t) | Sweep(int) | Runs(Set.Int.t) | Run(int) | NotFound(string)
+type path = Sweeps(Set.Int.t) | Runs(Set.Int.t) | NotFound(string)
 
 let processIds = (ids: string) =>
   ids
@@ -29,7 +29,6 @@ let make = (~client) => {
   let path = ReasonReactRouter.useUrl()->urlToPath
   let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-default"
   let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer"
-  let singleton = Set.Int.empty->Set.Int.add
 
   <div className="min-h-screen bg-white">
     <nav className="bg-white border-b border-gray-200">
@@ -57,10 +56,8 @@ let make = (~client) => {
           </div>
         </div>
         {switch path {
-        | Sweeps(ids) => <Sweeps ids client />
-        | Runs(ids) => <Runs ids client />
-        | Sweep(id) => <Sweep ids={id->singleton} client />
-        | Run(id) => <Run ids={id->singleton} client />
+        | Sweeps(ids) => <SweepsListAndDisplay ids client />
+        | Runs(ids) => <RunsListAndDisplay ids client />
         | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
         }}
       </div>

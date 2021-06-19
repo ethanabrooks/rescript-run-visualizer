@@ -21,7 +21,7 @@ let make = (~client, ~ids) => {
         items={sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})}
         ids
       />
-      <Sweep ids client />
+      <SweepsDisplay ids client />
     </div>
   }
 }

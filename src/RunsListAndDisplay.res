@@ -20,7 +20,7 @@ let make = (~client, ~ids) => {
       <MenuList
         items={run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})} ids
       />
-      <Run ids client />
+      <RunsDisplay ids client />
     </div>
   }
 }
