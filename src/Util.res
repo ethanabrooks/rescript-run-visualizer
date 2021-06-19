@@ -1,5 +1,7 @@
 open Belt
 
+@module("js-yaml") external dump: Js.Json.t => string = "dump"
+
 module JsonComparator = Belt.Id.MakeComparable({
   type t = Js.Json.t
   @dead("JsonComparator.+cmp") let cmp = Pervasives.compare

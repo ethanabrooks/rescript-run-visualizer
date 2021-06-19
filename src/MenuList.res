@@ -3,6 +3,7 @@ type entry = {id: int, metadata: option<Js.Json.t>}
 
 @react.component
 let make = (~items: array<entry>, ~path: string => string) => {
+  let (selected, setSelected) = React.useState(_ => Set.Int.empty)
   <div className="py-10">
     <ul className="relative z-0 divide-y divide-gray-200">
       {items
@@ -15,9 +16,9 @@ let make = (~items: array<entry>, ~path: string => string) => {
             <div className="flex-shrink-0 flex items-center justify-center w-16">
               {id->React.string}
             </div>
-            {metadata->Option.mapWithDefault(<> </>, metadata =>
-              <pre className="p-4"> {metadata->Js.Json.stringifyWithSpace(2)->React.string} </pre>
-            )}
+            {metadata->Option.mapWithDefault(<> </>, metadata => {
+              <pre className="p-4"> {metadata->Util.dump->React.string} </pre>
+            })}
           </a>
         </li>
       })

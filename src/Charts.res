@@ -36,9 +36,7 @@ let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
     {charts->React.array}
     {metadata
     ->Array.mapWithIndex((i, m) =>
-      <pre key={i->Int.toString} className="p-4">
-        {m->Js.Json.stringifyWithSpace(2)->React.string}
-      </pre>
+      <pre key={i->Int.toString} className="p-4"> {m->Util.dump->React.string} </pre>
     )
     ->React.array}
   </>
