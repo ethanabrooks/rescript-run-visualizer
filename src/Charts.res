@@ -6,7 +6,7 @@ open Util
 let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
   let (specs: array<Js.Json.t>, setSpecs) = React.useState(_ => specs->Set.toArray)
   let data = logs->Map.Int.valuesToArray
-  <div className={"flex flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
+  <>
     {specs
     ->Array.mapWithIndex((i, spec) =>
       <div key={i->Int.toString} className="py-5">
@@ -39,5 +39,5 @@ let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
       <pre key={i->Int.toString} className="p-4"> {m->Util.yaml->React.string} </pre>
     )
     ->React.array}
-  </div>
+  </>
 }

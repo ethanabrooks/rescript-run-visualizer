@@ -32,37 +32,35 @@ let make = (~client) => {
   let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-default"
   let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer"
 
-  <div className="min-h-screen bg-white">
-    <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-              <a
-                className={switch path {
-                | Sweeps(_) => activeClassName
-                | _ => inactiveClassName
-                }}
-                href={"/#sweeps"}>
-                {"Sweeps"->React.string}
-              </a>
-              <a
-                className={switch path {
-                | Runs(_) => activeClassName
-                | _ => inactiveClassName
-                }}
-                href={"/#runs"}>
-                {"Runs"->React.string}
-              </a>
-            </div>
+  <nav className="bg-white border-b border-gray-200">
+    <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between h-16">
+        <div className="flex">
+          <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+            <a
+              className={switch path {
+              | Sweeps(_) => activeClassName
+              | _ => inactiveClassName
+              }}
+              href={"/#sweeps"}>
+              {"Sweeps"->React.string}
+            </a>
+            <a
+              className={switch path {
+              | Runs(_) => activeClassName
+              | _ => inactiveClassName
+              }}
+              href={"/#runs"}>
+              {"Runs"->React.string}
+            </a>
           </div>
         </div>
-        {switch path {
-        | Sweeps(ids) => <SubscribeToSweeps ids client />
-        | Runs(ids) => <SubscribeToRuns ids client />
-        | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
-        }}
       </div>
-    </nav>
-  </div>
+      {switch path {
+      | Sweeps(ids) => <SubscribeToSweeps ids client />
+      | Runs(ids) => <SubscribeToRuns ids client />
+      | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
+      }}
+    </div>
+  </nav>
 }

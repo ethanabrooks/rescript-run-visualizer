@@ -51,5 +51,7 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
   }
   let ids = ids->Set.Int.toArray->Some
   let onClick = _ => delete({ids: ids})->ignore
-  <> <Subscribe1 variables1 variables2 client /> <DeleteButton deleted onClick /> </>
+  <div className={"flex flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
+    <Subscribe1 variables1 variables2 client /> <DeleteButton deleted onClick />
+  </div>
 }
