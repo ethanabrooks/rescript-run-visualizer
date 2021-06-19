@@ -32,6 +32,7 @@ let client: ApolloClient__Core_ApolloClient.t = {
     (),
   )
 }
+
 @react.component
 let make = (): React.element =>
   <ApolloClient.React.ApolloProvider client> <Router client /> </ApolloClient.React.ApolloProvider>

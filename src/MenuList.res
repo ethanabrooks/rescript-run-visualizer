@@ -6,7 +6,7 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
   let {hash} = ReasonReactRouter.useUrl()
   let (text, textbox) = TextInput.useText(~initialText="name,parameters")
   let keywords = ","->Js.String.split(text)->Set.String.fromArray->Set.String.remove("")
-  <div className="py-10">
+  <div className="py-10 m-5 max-h-screen overflow-y-scroll overscroll-contain">
     {textbox}
     <ul className="bg-white rounded-lg -space-y-px">
       {items
