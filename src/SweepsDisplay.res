@@ -1,4 +1,7 @@
 open Belt
+open SpecEditor
+open SubmitSpecButton
+
 module Deletion = %graphql(`
 mutation deletion($ids: [Int!]) {
   delete_run_log(where: {run_id: {_in: $ids}}) {
@@ -23,7 +26,7 @@ mutation deletion($ids: [Int!]) {
 let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
   let (
     delete,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.Deletion_inner.t>,
+    {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
   ) = Deletion.use()
 
   let _in = ids->Set.Int.toArray
@@ -45,6 +48,27 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     variables
   }
 
+  let makeSubmitButton = (~setRendering: Js.Json.t => unit, ~parseResult: parseResult) =>
+    <SubmitSpecButton
+      onClick={insertChart => {
+        parseResult->Result.mapWithDefault((), spec => {
+          ids
+          ->Set.Int.toArray
+          ->Array.map((id: int): InsertChart.t_variables_chart_insert_input => {
+            id: None,
+            run: None,
+            sweep: None,
+            run_id: None,
+            sweep_id: id->Some,
+            spec: spec->Some,
+          })
+          ->ignore
+          setRendering(spec)
+        })
+      }}
+      disabled={parseResult->Result.isError}
+    />
+
   let deleted: DeleteButton.deleted = {
     called: called,
     error: error,
@@ -58,5 +82,7 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     },
   }
   let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
-  <> <Subscribe1 variables1 variables2 client /> <DeleteButton deleted onClick /> </>
+  <>
+    <Subscribe1 variables1 variables2 makeSubmitButton client /> <DeleteButton deleted onClick />
+  </>
 }

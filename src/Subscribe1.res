@@ -47,6 +47,7 @@ type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data
 let make = (
   ~variables1: Subscription.t_variables,
   ~variables2,
+  ~makeSubmitButton,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
   let (state, setState) = React.useState(() => Waiting)
@@ -128,6 +129,7 @@ let make = (
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logs, specs, metadata}) => <Subscribe2 logs specs metadata variables2 client />
+  | Data({logs, specs, metadata}) =>
+    <Subscribe2 logs specs makeSubmitButton metadata variables2 client />
   }
 }

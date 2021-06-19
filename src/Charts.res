@@ -3,7 +3,7 @@ open ChartOrTextbox
 open Util
 
 @react.component
-let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
+let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray, ~makeSubmitButton) => {
   let (specs: array<Js.Json.t>, setSpecs) = React.useState(_ => specs->Set.toArray)
   let data = logs->Map.Int.valuesToArray
   <>
@@ -25,12 +25,7 @@ let make = (~logs: jsonMap, ~specs: jsonSet, ~metadata: jsonArray) => {
     ->Array.concat([
       // empty chart
       <div key={specs->Array.length->Int.toString} className="py-5">
-        <ChartOrTextbox
-          data
-          specState={NoSpec({
-            submit: (spec: Js.Json.t) => setSpecs(_ => specs->Array.concat([spec])),
-          })}
-        />
+        <ChartOrTextbox data specState={NoSpec({makeSubmitButton: makeSubmitButton})} />
       </div>,
     ])
     ->React.array}

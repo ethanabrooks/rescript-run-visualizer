@@ -4,14 +4,18 @@ open Belt
 @module external copy: string => bool = "copy-to-clipboard"
 
 type submit = Js.Json.t => unit
-
-type specState =
-  | Spec({spec: Js.Json.t, submit: submit})
-  | NoSpec({submit: submit})
-
 type state =
   | Rendering(Js.Json.t)
   | Editing
+
+type specState =
+  | Spec({spec: Js.Json.t, submit: submit})
+  | NoSpec({
+      makeSubmitButton: (
+        ~setRendering: Js.Json.t => unit,
+        ~parseResult: parseResult,
+      ) => React.element,
+    })
 
 @react.component
 let make = (~data: array<Js.Json.t>, ~specState) => {
@@ -84,20 +88,10 @@ let make = (~data: array<Js.Json.t>, ~specState) => {
 
           (initialText, makeButtons)
         }
-      | NoSpec({submit}) => {
+      | NoSpec({makeSubmitButton}) => {
           let initialText = "{}"
-          let makeButtons = (parseResult: parseResult) => [
-            <Button
-              text={"Submit"}
-              onClick={result =>
-                parseResult->Result.mapWithDefault((), spec => {
-                  setState(_ => Rendering(spec))
-                  spec->submit
-                })}
-              disabled={parseResult->Result.isError}
-            />,
-          ]
-
+          let setRendering = spec => setState(_ => Rendering(spec))
+          let makeButtons = parseResult => [makeSubmitButton(~setRendering, ~parseResult)]
           (initialText, makeButtons)
         }
       }

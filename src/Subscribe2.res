@@ -19,6 +19,7 @@ module ErrorPage = {
 let make = (
   ~logs: jsonMap,
   ~specs: jsonSet,
+  ~makeSubmitButton,
   ~metadata: array<Js.Json.t>,
   ~variables2: Subscription.t_variables,
   ~client: ApolloClient__Core_ApolloClient.t,
@@ -51,6 +52,6 @@ let make = (
 
   switch logs {
   | Error({message}) => <ErrorPage message />
-  | Ok(logs) => <Charts logs metadata specs />
+  | Ok(logs) => <Charts logs metadata specs makeSubmitButton />
   }
 }
