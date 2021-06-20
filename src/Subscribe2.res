@@ -28,11 +28,13 @@ let make = (
 
   React.useEffect3(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
+
+    let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     let onError = error => setLogs(_ => error->Result.Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} =>
-        (subscription.contents->Option.getExn).unsubscribe()->ignore
+        unsubscribe()
         error->onError
       | {data} => {
           let new = data.run_log->Array.map(({id, log}) => (id, log))->Map.Int.fromArray
@@ -47,7 +49,7 @@ let make = (
         ~onError,
         (),
       )->Some
-    None
+    Some(unsubscribe)
   }, (client, variables2, setLogs))
 
   switch logs {

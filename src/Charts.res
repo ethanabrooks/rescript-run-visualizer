@@ -1,9 +1,8 @@
 open Belt
 open Util
-open SubmitSpecButton
 
 @react.component
-let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runOrSweepIds: runOrSweepIds) => {
+let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runOrSweepIds) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   let data = logs->Map.Int.valuesToArray
   let reverseSpecs = specs->Map.Int.reduce(Map.make(~id=module(JsonComparator)), (

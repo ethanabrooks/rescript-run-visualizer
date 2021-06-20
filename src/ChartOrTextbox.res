@@ -1,5 +1,4 @@
 open Belt
-open SubmitSpecButton
 open SpecEditor
 
 @module external copy: string => bool = "copy-to-clipboard"
@@ -12,7 +11,7 @@ let make = (
   ~initialSpec: option<Js.Json.t>,
   ~chartIds: Set.Int.t,
   ~setSpecs,
-  ~runOrSweepIds: runOrSweepIds,
+  ~runOrSweepIds,
 ) => {
   let (state, setState) = React.useState(_ =>
     initialSpec->Option.mapWithDefault(Editing, x => Rendering(x))
