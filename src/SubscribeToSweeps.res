@@ -17,6 +17,6 @@ let make = (~client, ~ids) => {
       sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
-  let display = <RunsDisplay ids client />
+  let display = <Runs ids client />
   <ListAndDisplay queryResult ids display />
 }

@@ -1,9 +1,11 @@
 open Belt
 
-type parseResult = Result.t<Js.Json.t, option<string>>
+type state =
+  | Rendering(Js.Json.t)
+  | Editing
 
 @react.component
-let make = (~initialText, ~makeButtons: parseResult => array<React.element>) => {
+let make = (~initialText, ~chartIds, ~runOrSweepIds, ~onCancel, ~setSpecs) => {
   let parse = text =>
     try text->Js.Json.parseExn->Result.Ok catch {
     | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
@@ -12,7 +14,21 @@ let make = (~initialText, ~makeButtons: parseResult => array<React.element>) => 
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parseResult = text->parse
-  let buttons = parseResult->makeButtons
+  let onClick = list{
+    _ =>
+      setSpecs(specs =>
+        chartIds->Set.Int.reduce(specs, (specs, chartId) =>
+          // we can getExn because button is disabled if parseResult is not Ok
+          specs->Map.Int.set(chartId, parseResult->Result.getExn)
+        )
+      ),
+  }
+  let buttons =
+    [<SubmitSpecButton parseResult onClick chartIds runOrSweepIds />]->Array.concat(
+      onCancel->Option.mapWithDefault([], onCancel => [
+        <Button text={"Cancel"} onClick={onCancel} disabled={parseResult->Result.isError} />,
+      ]),
+    )
 
   <div className="sm:gap-4 sm:items-start">
     <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>

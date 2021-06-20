@@ -1,5 +1,4 @@
 open Belt
-open SpecEditor
 open SubmitSpecButton
 
 module Deletion = %graphql(`
@@ -42,27 +41,6 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     variables
   }
 
-  let makeSubmitButton = (~setRendering: Js.Json.t => unit, ~parseResult: parseResult) =>
-    <SubmitSpecButton
-      onClick={insertChart => {
-        parseResult->Result.mapWithDefault((), spec => {
-          ids
-          ->Set.Int.toArray
-          ->Array.map((id: int): InsertChart.t_variables_chart_insert_input => {
-            id: None,
-            run: None,
-            sweep: None,
-            run_id: id->Some,
-            sweep_id: None,
-            spec: spec->Some,
-          })
-          ->ignore
-          setRendering(spec)
-        })
-      }}
-      disabled={parseResult->Result.isError}
-    />
-
   let deleted: DeleteButton.deleted = {
     called: called,
     error: error,
@@ -72,9 +50,7 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     | _ => None
     },
   }
-  let ids = ids->Set.Int.toArray->Some
-  let onClick = _ => delete(({ids: ids}: Deletion.t_variables))->ignore
-  <>
-    <Subscribe1 variables1 variables2 makeSubmitButton client /> <DeleteButton deleted onClick />
-  </>
+  let runOrSweepIds = Run(ids)
+  let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
+  <> <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick /> </>
 }

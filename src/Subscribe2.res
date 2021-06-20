@@ -18,8 +18,8 @@ module ErrorPage = {
 @react.component
 let make = (
   ~logs: jsonMap,
-  ~specs: jsonSet,
-  ~makeSubmitButton,
+  ~specs: specs,
+  ~runOrSweepIds,
   ~metadata: array<Js.Json.t>,
   ~variables2: Subscription.t_variables,
   ~client: ApolloClient__Core_ApolloClient.t,
@@ -52,6 +52,6 @@ let make = (
 
   switch logs {
   | Error({message}) => <ErrorPage message />
-  | Ok(logs) => <Charts logs metadata specs makeSubmitButton />
+  | Ok(logs) => <Charts logs metadata specs runOrSweepIds />
   }
 }

@@ -1,29 +1,21 @@
-open SpecEditor
 open Belt
+open SubmitSpecButton
+open SpecEditor
 
 @module external copy: string => bool = "copy-to-clipboard"
 
 type submit = Js.Json.t => unit
-type state =
-  | Rendering(Js.Json.t)
-  | Editing
-
-type specState =
-  | Spec({spec: Js.Json.t, submit: submit})
-  | NoSpec({
-      makeSubmitButton: (
-        ~setRendering: Js.Json.t => unit,
-        ~parseResult: parseResult,
-      ) => React.element,
-    })
 
 @react.component
-let make = (~data: array<Js.Json.t>, ~specState) => {
+let make = (
+  ~data: array<Js.Json.t>,
+  ~initialSpec: option<Js.Json.t>,
+  ~chartIds: Set.Int.t,
+  ~setSpecs,
+  ~runOrSweepIds: runOrSweepIds,
+) => {
   let (state, setState) = React.useState(_ =>
-    switch specState {
-    | Spec({spec}) => Rendering(spec)
-    | NoSpec(_) => Editing
-    }
+    initialSpec->Option.mapWithDefault(Editing, x => Rendering(x))
   )
 
   switch state {
@@ -66,36 +58,10 @@ let make = (~data: array<Js.Json.t>, ~specState) => {
     <> <Chart data spec /> <Buttons buttons /> </>
 
   | Editing => {
-      let (initialText, makeButtons) = switch specState {
-      | Spec({spec, submit}) => {
-          let initialText = spec->Js.Json.stringifyWithSpace(2)
-          let makeButtons = (parseResult: parseResult) => [
-            <Button
-              text={"Submit"}
-              onClick={_ =>
-                parseResult->Result.mapWithDefault((), spec => {
-                  spec->submit
-                  setState(_ => Rendering(spec))
-                })}
-              disabled={parseResult->Result.isError}
-            />,
-            <Button
-              text={"Cancel"}
-              onClick={_ => setState(_ => Rendering(spec))}
-              disabled={parseResult->Result.isError}
-            />,
-          ]
-
-          (initialText, makeButtons)
-        }
-      | NoSpec({makeSubmitButton}) => {
-          let initialText = "{}"
-          let setRendering = spec => setState(_ => Rendering(spec))
-          let makeButtons = parseResult => [makeSubmitButton(~setRendering, ~parseResult)]
-          (initialText, makeButtons)
-        }
-      }
-      <SpecEditor initialText makeButtons />
+      let initialText =
+        initialSpec->Option.mapWithDefault("{}", spec => spec->Js.Json.stringifyWithSpace(2))
+      let onCancel = initialSpec->Option.map((spec, _) => setState(_ => Rendering(spec)))
+      <SpecEditor initialText chartIds runOrSweepIds onCancel setSpecs />
     }
   }
 }

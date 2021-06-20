@@ -1,5 +1,6 @@
 open Belt
 open Util
+open SubmitSpecButton
 
 module Subscription = %graphql(`
   query subscription($condition: run_bool_exp!) {
@@ -10,10 +11,12 @@ module Subscription = %graphql(`
         log
       }
       charts {
+        id
         spec
       }
       sweep {
         charts {
+          id
           spec
         }
       }
@@ -37,7 +40,7 @@ let mapToObj = (map: Map.String.t<'a>) =>
 
 type queryResult = {
   metadata: array<Js.Json.t>,
-  specs: jsonSet,
+  specs: specs,
   logs: jsonMap,
 }
 
@@ -47,8 +50,8 @@ type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data
 let make = (
   ~variables1: Subscription.t_variables,
   ~variables2,
-  ~makeSubmitButton,
   ~client: ApolloClient__Core_ApolloClient.t,
+  ~runOrSweepIds: runOrSweepIds,
 ) => {
   let (state, setState) = React.useState(() => Waiting)
 
@@ -74,11 +77,13 @@ let make = (
               let metadata = metadata->Option.mapWithDefault([], m => [m])
 
               // combine multiple charts from run
-              let specs =
+              let specs: specs =
                 sweep
-                ->Option.mapWithDefault([], ({charts}) => charts->Array.map(({spec}) => spec))
-                ->Array.concat(charts->Array.map(({spec}) => spec))
-                ->Set.fromArray(~id=module(JsonComparator))
+                ->Option.mapWithDefault([], ({charts}) =>
+                  charts->Array.map(({id, spec}) => (id, spec))
+                )
+                ->Array.concat(charts->Array.map(({id, spec}) => (id, spec)))
+                ->Map.Int.fromArray
 
               // combine multiple logs from run
               let logs =
@@ -102,7 +107,7 @@ let make = (
                 logs: l,
               }) => {
                 let metadata: array<Js.Json.t> = m->Array.concat(metadata)
-                let specs = s->Set.union(specs)
+                let specs = s->Map.Int.merge(specs, merge)
                 let logs = l->Map.Int.merge(logs, merge)
                 {metadata: metadata, specs: specs, logs: logs}
               })
@@ -130,6 +135,6 @@ let make = (
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) =>
-    <Subscribe2 logs specs makeSubmitButton metadata variables2 client />
+    <Subscribe2 logs specs runOrSweepIds metadata variables2 client />
   }
 }
