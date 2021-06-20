@@ -57,8 +57,8 @@ let make = (~client) => {
         </div>
       </div>
       {switch path {
-      | Sweeps(ids) => <SubscribeToSweeps ids client />
-      | Runs(ids) => <SubscribeToRuns ids client />
+      | Sweeps(ids) => <Sweeps ids client />
+      | Runs(ids) => <Runs ids client />
       | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
       }}
     </div>

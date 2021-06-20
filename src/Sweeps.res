@@ -1,28 +1,45 @@
 open Belt
 open SubmitSpecButton
 
+module SweepSubscription = %graphql(`
+  subscription {
+      sweep {
+          id
+          metadata
+      }
+  }
+`)
+
 module Deletion = %graphql(`
-mutation deletion($ids: [Int!]) {
-  delete_run_log(where: {run_id: {_in: $ids}}) {
-    affected_rows
+  mutation deletion($ids: [Int!]) {
+    delete_run_log(where: {run_id: {_in: $ids}}) {
+      affected_rows
+    }
+    delete_run(where: {id: {_in: $ids}}) {
+      affected_rows
+    }
+    delete_chart(where: {run_id: {_in: $ids}}) {
+      affected_rows
+    }
+    delete_parameter_choices(where: {sweep_id: {_in: $ids}}) {
+      affected_rows
+    }
+    delete_sweep(where: {id: {_in: $ids}}) {
+      affected_rows
+    }
   }
-  delete_run(where: {id: {_in: $ids}}) {
-    affected_rows
-  }
-  delete_chart(where: {run_id: {_in: $ids}}) {
-    affected_rows
-  }
-  delete_parameter_choices(where: {sweep_id: {_in: $ids}}) {
-    affected_rows
-  }
-  delete_sweep(where: {id: {_in: $ids}}) {
-    affected_rows
-  }
-}
 `)
 
 @react.component
-let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
+let make = (~client, ~ids) => {
+  let {loading, error, data} = SweepSubscription.use()
+  let error = error->Option.map(({message}) => message)
+  let data =
+    data->Option.map(({sweep}) =>
+      sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
+    )
+  let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
+
   let (
     delete,
     {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
@@ -61,5 +78,10 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
     },
   }
   let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
-  <> <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick /> </>
+  let display =
+    <>
+      <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick />
+    </>
+
+  <ListAndDisplay queryResult ids display />
 }

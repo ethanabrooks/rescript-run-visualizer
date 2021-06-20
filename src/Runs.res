@@ -1,5 +1,13 @@
 open Belt
 open SubmitSpecButton
+module RunSubscription = %graphql(`
+  subscription {
+      run {
+          id
+          metadata
+      }
+  }
+`)
 
 module Deletion = %graphql(`
   mutation deletion($ids: [Int!]) {
@@ -16,7 +24,15 @@ module Deletion = %graphql(`
 `)
 
 @react.component
-let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
+let make = (~client, ~ids) => {
+  let {loading, error, data} = RunSubscription.use()
+  let error = error->Option.map(({message}) => message)
+  let data =
+    data->Option.map(({run}) =>
+      run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
+    )
+  let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
+
   let (
     delete,
     {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
@@ -52,5 +68,9 @@ let make = (~ids: Set.Int.t, ~client: ApolloClient__Core_ApolloClient.t) => {
   }
   let runOrSweepIds = Run(ids)
   let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
-  <> <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick /> </>
+  let display =
+    <>
+      <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick />
+    </>
+  <ListAndDisplay queryResult ids display />
 }
