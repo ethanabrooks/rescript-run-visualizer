@@ -17,7 +17,7 @@ let processIds = (ids: string) =>
   ->Set.Int.fromArray
 let urlToPath = (url: ReasonReactRouter.url) =>
   switch url.hash->Util.splitHash->List.fromArray {
-  | list{}
+  | list{""}
   | list{"runs"} =>
     Runs(Set.Int.empty)
   | list{"runs", runIds} => Runs(runIds->processIds)
