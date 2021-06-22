@@ -4,8 +4,13 @@ type state =
   | Rendering(Js.Json.t)
   | Editing
 
-@react.component
-let make = (~initialText, ~chartIds, ~runOrSweepIds, ~onCancel, ~setSpecs) => {
+let _make = (
+  ~initialText,
+  ~chartIds,
+  ~insertChartButton: (~parseResult: Util.parseResult) => React.element,
+  ~onCancel,
+  ~setSpecs,
+) => {
   let parse = text =>
     try text->Js.Json.parseExn->Result.Ok catch {
     | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
@@ -14,17 +19,17 @@ let make = (~initialText, ~chartIds, ~runOrSweepIds, ~onCancel, ~setSpecs) => {
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parseResult = text->parse
-  let onClick = list{
-    _ =>
+  let onClick = _ =>
+    parseResult->Result.mapWithDefault((), parsed =>
       setSpecs(specs =>
-        chartIds->Set.Int.reduce(specs, (specs, chartId) =>
-          // we can getExn because button is disabled if parseResult is not Ok
-          specs->Map.Int.set(chartId, parseResult->Result.getExn)
-        )
-      ),
-  }
+        chartIds->Set.Int.reduce(specs, (specs, chartId) => specs->Map.Int.set(chartId, parsed))
+      )
+    )
   let buttons =
-    [<SubmitSpecButton parseResult onClick chartIds runOrSweepIds />]->Array.concat(
+    [
+      insertChartButton(~parseResult),
+      <Button text={"Submit"} onClick disabled={parseResult->Result.isError} />,
+    ]->Array.concat(
       onCancel->Option.mapWithDefault([], onCancel => [
         <Button text={"Cancel"} onClick={onCancel} disabled={parseResult->Result.isError} />,
       ]),
@@ -43,3 +48,7 @@ let make = (~initialText, ~chartIds, ~runOrSweepIds, ~onCancel, ~setSpecs) => {
     </div>
   </div>
 }
+
+@react.component
+let make = (~initialText, ~chartIds, ~insertChartButton, ~onCancel, ~setSpecs) =>
+  _make(~initialText, ~chartIds, ~insertChartButton, ~onCancel, ~setSpecs)

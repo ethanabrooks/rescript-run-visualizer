@@ -1,6 +1,5 @@
 open Belt
 open Util
-open SubmitSpecButton
 
 module Subscription = %graphql(`
   query subscription($condition: run_bool_exp!) {
@@ -51,7 +50,7 @@ let make = (
   ~variables1: Subscription.t_variables,
   ~variables2,
   ~client: ApolloClient__Core_ApolloClient.t,
-  ~runOrSweepIds: runOrSweepIds,
+  ~runOrSweepIds,
 ) => {
   let (state, setState) = React.useState(() => Waiting)
 
@@ -130,11 +129,14 @@ let make = (
     Some(unsubscribe)
   }, (client, variables1, setState))
 
+  let insertChartButton = InsertChartButton._make(~runOrSweepIds)
   switch state {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logs, specs, metadata}) =>
-    <Subscribe2 logs specs runOrSweepIds metadata variables2 client />
+  | Data({logs, specs, metadata}) => {
+      let makeCharts = Charts._make(~metadata, ~specs, ~insertChartButton)
+      <Subscribe2 logs variables2 client makeCharts />
+    }
   }
 }

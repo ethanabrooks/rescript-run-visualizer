@@ -1,5 +1,4 @@
 open Belt
-open SubmitSpecButton
 module RunSubscription = %graphql(`
   subscription {
       run {
@@ -66,7 +65,7 @@ let make = (~client, ~ids) => {
     | _ => None
     },
   }
-  let runOrSweepIds = Run(ids)
+  let runOrSweepIds = InsertChartButton.Run(ids)
   let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
   let display =
     <>

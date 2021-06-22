@@ -18,11 +18,9 @@ module ErrorPage = {
 @react.component
 let make = (
   ~logs: jsonMap,
-  ~specs: specs,
-  ~runOrSweepIds,
-  ~metadata: array<Js.Json.t>,
   ~variables2: Subscription.t_variables,
   ~client: ApolloClient__Core_ApolloClient.t,
+  ~makeCharts: (~logs: jsonMap) => React.element,
 ) => {
   let (logs, setLogs) = React.useState(() => logs->Result.Ok)
 
@@ -54,6 +52,6 @@ let make = (
 
   switch logs {
   | Error({message}) => <ErrorPage message />
-  | Ok(logs) => <Charts logs metadata specs runOrSweepIds />
+  | Ok(logs) => makeCharts(~logs)
   }
 }

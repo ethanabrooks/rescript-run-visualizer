@@ -1,8 +1,12 @@
 open Belt
 open Util
 
-@react.component
-let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runOrSweepIds) => {
+let _make = (
+  ~logs: jsonMap,
+  ~specs: specs,
+  ~metadata: jsonArray,
+  ~insertChartButton: (~parseResult: Util.parseResult, ~chartIds: Set.Int.t) => React.element,
+) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   let data = logs->Map.Int.valuesToArray
   let reverseSpecs = specs->Map.Int.reduce(Map.make(~id=module(JsonComparator)), (
@@ -13,18 +17,28 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runOrSweepIds)
     let ids = map->Map.get(spec)->Option.getWithDefault(Set.Int.empty)->Set.Int.add(id)
     map->Map.set(spec, ids)
   })
+  let makeSpecEditor = SpecEditor._make(~setSpecs)
+
   <>
     {reverseSpecs
     ->Map.toArray
-    ->Array.mapWithIndex((i, (spec, chartIds)) =>
+    ->Array.mapWithIndex((i, (spec, chartIds)) => {
+      let insertChartButton = insertChartButton(~chartIds)
+      let makeSpecEditor = makeSpecEditor(~chartIds, ~insertChartButton)
       <div key={i->Int.toString} className="py-5">
-        <ChartOrTextbox initialSpec={spec->Some} chartIds runOrSweepIds data setSpecs />
+        <ChartOrTextbox initialSpec={spec->Some} data makeSpecEditor />
       </div>
-    )
+    })
     ->Array.concat([
       // empty chart
       <div key={reverseSpecs->Map.size->Int.toString} className="py-5">
-        <ChartOrTextbox data initialSpec={None} chartIds={Set.Int.empty} runOrSweepIds setSpecs />
+        {
+          let initialSpec = None
+          let chartIds = Set.Int.empty
+          let insertChartButton = insertChartButton(~chartIds)
+          let makeSpecEditor = makeSpecEditor(~chartIds, ~insertChartButton)
+          <ChartOrTextbox initialSpec data makeSpecEditor />
+        }
       </div>,
     ])
     ->React.array}
@@ -34,4 +48,9 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runOrSweepIds)
     )
     ->React.array}
   </>
+}
+
+@react.component
+let make = (~logs, ~specs, ~metadata, ~insertChartButton) => {
+  _make(~logs, ~specs, ~metadata, ~insertChartButton)
 }

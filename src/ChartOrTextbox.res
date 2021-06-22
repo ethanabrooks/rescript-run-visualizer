@@ -6,13 +6,7 @@ open SpecEditor
 type submit = Js.Json.t => unit
 
 @react.component
-let make = (
-  ~data: array<Js.Json.t>,
-  ~initialSpec: option<Js.Json.t>,
-  ~chartIds: Set.Int.t,
-  ~setSpecs,
-  ~runOrSweepIds,
-) => {
+let make = (~data: array<Js.Json.t>, ~initialSpec: option<Js.Json.t>, ~makeSpecEditor) => {
   let (state, setState) = React.useState(_ =>
     initialSpec->Option.mapWithDefault(Editing, x => Rendering(x))
   )
@@ -60,7 +54,7 @@ let make = (
       let initialText =
         initialSpec->Option.mapWithDefault("{}", spec => spec->Js.Json.stringifyWithSpace(2))
       let onCancel = initialSpec->Option.map((spec, _) => setState(_ => Rendering(spec)))
-      <SpecEditor initialText chartIds runOrSweepIds onCancel setSpecs />
+      {makeSpecEditor(~initialText, ~onCancel)}
     }
   }
 }

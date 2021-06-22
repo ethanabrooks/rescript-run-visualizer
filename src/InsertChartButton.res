@@ -12,13 +12,7 @@ module InsertChart = %graphql(`
 type runOrSweepIds = Sweep(Set.Int.t) | Run(Set.Int.t)
 let setToList = set => set->Set.Int.toArray->List.fromArray
 
-@react.component
-let make = (
-  ~parseResult: parseResult,
-  ~onClick: list<unit => unit>,
-  ~chartIds: Set.Int.t,
-  ~runOrSweepIds: runOrSweepIds,
-) => {
+let _make = (~parseResult: parseResult, ~chartIds: Set.Int.t, ~runOrSweepIds: runOrSweepIds) => {
   let (
     insertChart,
     inserted: ApolloClient__React_Types.MutationResult.t<InsertChart.t>,
@@ -26,7 +20,6 @@ let make = (
   let disabled = parseResult->Result.isError
   let onClick = _ =>
     parseResult->Result.mapWithDefault((), spec => {
-      onClick->List.forEach(callback => callback())
       let objects =
         switch runOrSweepIds {
         | Sweep(sweepOrRunIds)
@@ -65,3 +58,7 @@ let make = (
   | {error: None} => <p> {"Deleting..."->React.string} </p>
   }
 }
+
+@react.component
+let make = (~parseResult, ~chartIds, ~runOrSweepIds) =>
+  _make(~parseResult, ~chartIds, ~runOrSweepIds)

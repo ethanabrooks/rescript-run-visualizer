@@ -1,5 +1,4 @@
 open Belt
-open SubmitSpecButton
 
 module SweepSubscription = %graphql(`
   subscription {
@@ -63,7 +62,7 @@ let make = (~client, ~ids) => {
     let variables: Subscription.t_variables = {condition: condition}
     variables
   }
-  let runOrSweepIds = Sweep(ids)
+  let runOrSweepIds = InsertChartButton.Sweep(ids)
 
   let deleted: DeleteButton.deleted = {
     called: called,
