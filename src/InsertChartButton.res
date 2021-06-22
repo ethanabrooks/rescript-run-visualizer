@@ -12,47 +12,46 @@ module InsertChart = %graphql(`
 type runOrSweepIds = Sweep(Set.Int.t) | Run(Set.Int.t)
 let setToList = set => set->Set.Int.toArray->List.fromArray
 
-let _make = (~parseResult: parseResult, ~chartIds: Set.Int.t, ~runOrSweepIds: runOrSweepIds) => {
+let _make = (~spec: Js.Json.t, ~chartIds: Set.Int.t, ~runOrSweepIds: runOrSweepIds) => {
   let (
     insertChart,
     inserted: ApolloClient__React_Types.MutationResult.t<InsertChart.t>,
   ) = InsertChart.use()
-  let disabled = parseResult->Result.isError
-  let onClick = _ =>
-    parseResult->Result.mapWithDefault((), spec => {
-      let objects =
-        switch runOrSweepIds {
-        | Sweep(sweepOrRunIds)
-        | Run(sweepOrRunIds) =>
-          sweepOrRunIds
-          ->setToList
-          ->List.map((sweepOrRunId): list<InsertChart.t_variables_chart_insert_input> => {
-            let chartIds = chartIds->setToList
-            let chartIds: list<option<int>> =
-              chartIds->Js.List.isEmpty ? list{None} : chartIds->List.map(x => x->Some)
-            chartIds->List.map((chartId): InsertChart.t_variables_chart_insert_input => {
-              id: chartId,
-              run: None,
-              sweep: None,
-              spec: spec->Some,
-              run_id: switch runOrSweepIds {
-              | Run(_) => sweepOrRunId->Some
-              | _ => None
-              },
-              sweep_id: switch runOrSweepIds {
-              | Sweep(_) => sweepOrRunId->Some
-              | _ => None
-              },
-            })
+  let disabled = false
+  let onClick = _ => {
+    let objects =
+      switch runOrSweepIds {
+      | Sweep(sweepOrRunIds)
+      | Run(sweepOrRunIds) =>
+        sweepOrRunIds
+        ->setToList
+        ->List.map((sweepOrRunId): list<InsertChart.t_variables_chart_insert_input> => {
+          let chartIds = chartIds->setToList
+          let chartIds: list<option<int>> =
+            chartIds->Js.List.isEmpty ? list{None} : chartIds->List.map(x => x->Some)
+          chartIds->List.map((chartId): InsertChart.t_variables_chart_insert_input => {
+            id: chartId,
+            run: None,
+            sweep: None,
+            spec: spec->Some,
+            run_id: switch runOrSweepIds {
+            | Run(_) => sweepOrRunId->Some
+            | _ => None
+            },
+            sweep_id: switch runOrSweepIds {
+            | Sweep(_) => sweepOrRunId->Some
+            | _ => None
+            },
           })
-        }
-        ->List.flatten
-        ->List.toArray
-      insertChart({objects: objects})->ignore
-    })
+        })
+      }
+      ->List.flatten
+      ->List.toArray
+    insertChart({objects: objects})->ignore
+  }
 
   switch inserted {
-  | {called: false} => <Button text={"Submit"} onClick disabled />
+  | {called: false} => <Button text={"Add to DB"} onClick disabled />
   | {error: Some({message})} => <ErrorPage message />
   | {data: Some({insert_chart: Some(_)})} => <p> {"Inserted chart."->React.string} </p>
   | {error: None} => <p> {"Deleting..."->React.string} </p>
@@ -60,5 +59,4 @@ let _make = (~parseResult: parseResult, ~chartIds: Set.Int.t, ~runOrSweepIds: ru
 }
 
 @react.component
-let make = (~parseResult, ~chartIds, ~runOrSweepIds) =>
-  _make(~parseResult, ~chartIds, ~runOrSweepIds)
+let make = (~spec, ~chartIds, ~runOrSweepIds) => _make(~spec, ~chartIds, ~runOrSweepIds)

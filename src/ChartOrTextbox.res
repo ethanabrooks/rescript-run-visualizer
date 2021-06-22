@@ -3,14 +3,19 @@ open SpecEditor
 
 @module external copy: string => bool = "copy-to-clipboard"
 
-type submit = Js.Json.t => unit
-
 @react.component
-let make = (~data: array<Js.Json.t>, ~initialSpec: option<Js.Json.t>, ~makeSpecEditor) => {
-  let (state, setState) = React.useState(_ =>
-    initialSpec->Option.mapWithDefault(Editing, x => Rendering(x))
-  )
+let make = (
+  ~data: array<Js.Json.t>,
+  ~initialState: state,
+  ~insertChartButton: (~spec: Js.Json.t) => React.element,
+  ~onSubmit: Js.Json.t => unit,
+) => {
+  let (state, setState) = React.useState(_ => initialState)
 
+  let insertChartButton = switch state {
+  | Rendering(spec) => insertChartButton(~spec)
+  | Editing(_) => insertChartButton(~spec=Js.Json.null) // dummy required by React
+  }
   switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
@@ -33,28 +38,34 @@ let make = (~data: array<Js.Json.t>, ~initialSpec: option<Js.Json.t>, ~makeSpecE
           })
         })
       )
-    let buttons = [
-      <Button text={"Edit chart"} onClick={_ => setState(_ => Editing)} disabled={false} />,
+
+    let buttons = list{
+      insertChartButton,
+      <Button text={"Edit chart"} onClick={_ => setState(_ => Editing(spec))} disabled={false} />,
       <Button text={"Copy spec"} onClick={_ => specString->copy->ignore} disabled={false} />,
-    ]
+    }
+
+    let copyButton = specWithData->Option.map(s => {
+      <Button
+        text={"Copy spec with first 10 datapoints"}
+        onClick={_ => s->Js.Json.stringifyWithSpace(2)->copy->ignore}
+        disabled={false}
+      />
+    })
+
     let buttons =
-      specWithData
-      ->Option.map(s => {
-        <Button
-          text={"Copy spec with first 10 datapoints"}
-          onClick={_ => s->Js.Json.stringifyWithSpace(2)->copy->ignore}
-          disabled={false}
-        />
-      })
-      ->Option.map(b => [b])
-      ->Option.mapWithDefault(buttons, buttons->Js.Array2.concat)
+      copyButton
+      ->Option.mapWithDefault(buttons, button => list{buttons, list{button}}->List.flatten)
+      ->List.toArray
+
     <> <Chart data spec /> <Buttons buttons /> </>
 
-  | Editing => {
-      let initialText =
-        initialSpec->Option.mapWithDefault("{}", spec => spec->Js.Json.stringifyWithSpace(2))
-      let onCancel = initialSpec->Option.map((spec, _) => setState(_ => Rendering(spec)))
-      {makeSpecEditor(~initialText, ~onCancel)}
+  | Editing(initialSpec) => {
+      let onSubmit = spec => {
+        spec->onSubmit->ignore
+        setState(_ => Rendering(spec))
+      }
+      <SpecEditor initialSpec onSubmit setState />
     }
   }
 }

@@ -1,11 +1,12 @@
 open Belt
 open Util
+open SpecEditor
 
 let _make = (
   ~logs: jsonMap,
   ~specs: specs,
   ~metadata: jsonArray,
-  ~insertChartButton: (~parseResult: Util.parseResult, ~chartIds: Set.Int.t) => React.element,
+  ~insertChartButton: (~spec: Js.Json.t, ~chartIds: Set.Int.t) => React.element,
 ) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   let data = logs->Map.Int.valuesToArray
@@ -17,30 +18,35 @@ let _make = (
     let ids = map->Map.get(spec)->Option.getWithDefault(Set.Int.empty)->Set.Int.add(id)
     map->Map.set(spec, ids)
   })
-  let makeSpecEditor = SpecEditor._make(~setSpecs)
 
   <>
     {reverseSpecs
     ->Map.toArray
     ->Array.mapWithIndex((i, (spec, chartIds)) => {
       let insertChartButton = insertChartButton(~chartIds)
-      let makeSpecEditor = makeSpecEditor(~chartIds, ~insertChartButton)
+      let initialState = Rendering(spec)
+      let onSubmit = spec =>
+        setSpecs(specs =>
+          chartIds->Set.Int.reduce(specs, (specs, chartId) => specs->Map.Int.set(chartId, spec))
+        )
       <div key={i->Int.toString} className="py-5">
-        <ChartOrTextbox initialSpec={spec->Some} data makeSpecEditor />
+        <ChartOrTextbox initialState data insertChartButton onSubmit />
       </div>
     })
-    ->Array.concat([
-      // empty chart
-      <div key={reverseSpecs->Map.size->Int.toString} className="py-5">
-        {
-          let initialSpec = None
-          let chartIds = Set.Int.empty
-          let insertChartButton = insertChartButton(~chartIds)
-          let makeSpecEditor = makeSpecEditor(~chartIds, ~insertChartButton)
-          <ChartOrTextbox initialSpec data makeSpecEditor />
-        }
-      </div>,
-    ])
+    // ->Array.concat([
+    //   // empty chart
+    //   <div key={reverseSpecs->Map.size->Int.toString} className="py-5">
+    //     {
+    //       let initialState = ChartOrTextbox.Editing(Js.Json.null)
+    //       let chartIds = Set.Int.empty
+    //       let insertChartButton = insertChartButton(~chartIds)
+    //       let onSubmit = spec => {
+
+    //       }
+    //       <ChartOrTextbox initialState data insertChartButton  />
+    //     }
+    //   </div>,
+    // ])
     ->React.array}
     {metadata
     ->Array.mapWithIndex((i, m) =>

@@ -2,15 +2,11 @@ open Belt
 
 type state =
   | Rendering(Js.Json.t)
-  | Editing
+  | Editing(Js.Json.t)
 
-let _make = (
-  ~initialText,
-  ~chartIds,
-  ~insertChartButton: (~parseResult: Util.parseResult) => React.element,
-  ~onCancel,
-  ~setSpecs,
-) => {
+@react.component
+let make = (~initialSpec, ~onSubmit, ~setState) => {
+  let initialText = initialSpec->Js.Json.stringifyWithSpace(2)
   let parse = text =>
     try text->Js.Json.parseExn->Result.Ok catch {
     | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
@@ -19,21 +15,17 @@ let _make = (
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parseResult = text->parse
-  let onClick = _ =>
-    parseResult->Result.mapWithDefault((), parsed =>
-      setSpecs(specs =>
-        chartIds->Set.Int.reduce(specs, (specs, chartId) => specs->Map.Int.set(chartId, parsed))
-      )
-    )
-  let buttons =
-    [
-      insertChartButton(~parseResult),
-      <Button text={"Submit"} onClick disabled={parseResult->Result.isError} />,
-    ]->Array.concat(
-      onCancel->Option.mapWithDefault([], onCancel => [
-        <Button text={"Cancel"} onClick={onCancel} disabled={parseResult->Result.isError} />,
-      ]),
-    )
+  let submitButton = switch parseResult {
+  | Result.Error(_) => <Button text={"Submit"} onClick={_ => ()} disabled={true} />
+  | Result.Ok(spec) => <Button text={"Submit"} onClick={_ => spec->onSubmit} disabled={false} />
+  }
+  let cancelButton =
+    <Button
+      text={"Cancel"}
+      onClick={_ => setState(_ => Rendering(initialSpec))}
+      disabled={parseResult->Result.isError}
+    />
+  let buttons = [submitButton, cancelButton]
 
   <div className="sm:gap-4 sm:items-start">
     <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>
@@ -48,7 +40,3 @@ let _make = (
     </div>
   </div>
 }
-
-@react.component
-let make = (~initialText, ~chartIds, ~insertChartButton, ~onCancel, ~setSpecs) =>
-  _make(~initialText, ~chartIds, ~insertChartButton, ~onCancel, ~setSpecs)
