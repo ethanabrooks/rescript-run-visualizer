@@ -120,8 +120,13 @@ let make = (
       }
     }
 
+    let notArchived = Subscription.makeInputObjectrun_bool_exp(
+      ~archived=Subscription.makeInputObjectBoolean_comparison_exp(~_eq=true, ()),
+      (),
+    )
+    let condition = Subscription.makeInputObjectrun_bool_exp(~_and=[condition1, notArchived], ())
     subscription :=
-      client.subscribe(~subscription=module(Subscription), {condition: condition1}).subscribe(
+      client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
         ~onNext,
         ~onError,
         (),
