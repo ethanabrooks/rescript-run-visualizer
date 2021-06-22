@@ -10,13 +10,13 @@ module RunSubscription = %graphql(`
 
 module Deletion = %graphql(`
   mutation deletion($ids: [Int!]) {
-    delete_run_log(where: {run_id: {_in: $ids}}) {
+    update_run_log(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
       affected_rows
     }
-    delete_chart(where: {run_id: {_in: $ids}}) {
+    update_chart(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
       affected_rows
     }
-    delete_run(where: {id: {_in: $ids}}) {
+    update_run(_set: {archived: true}, where: {id: {_in: $ids}}) {
       affected_rows
     }
   }
@@ -58,7 +58,7 @@ let make = (~client, ~ids) => {
     called: called,
     error: error,
     dataMessage: switch data {
-    | Some({delete_run: Some({affected_rows: runsDeleted})}) =>
+    | Some({update_chart: Some({affected_rows: runsDeleted})}) =>
       `Deleted  ${runsDeleted->Int.toString} rows.`->Some
     | _ => None
     },

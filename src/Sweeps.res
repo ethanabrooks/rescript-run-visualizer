@@ -10,20 +10,20 @@ module SweepSubscription = %graphql(`
 `)
 
 module Deletion = %graphql(`
-  mutation deletion($ids: [Int!]) {
-    delete_run_log(where: {run_id: {_in: $ids}}) {
+  mutation archive($ids: [Int!]) {
+    update_run_log(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
       affected_rows
     }
-    delete_run(where: {id: {_in: $ids}}) {
+    update_run(_set: {archived: true}, where: {id: {_in: $ids}}) {
       affected_rows
     }
-    delete_chart(where: {run_id: {_in: $ids}}) {
+    update_chart(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
       affected_rows
     }
-    delete_parameter_choices(where: {sweep_id: {_in: $ids}}) {
+    update_parameter_choices(_set: {archived: true}, where: {sweep_id: {_in: $ids}}) {
       affected_rows
     }
-    delete_sweep(where: {id: {_in: $ids}}) {
+    update_sweep(_set: {archived: true}, where: {id: {_in: $ids}}) {
       affected_rows
     }
   }
@@ -67,8 +67,8 @@ let make = (~client, ~ids) => {
     error: error,
     dataMessage: switch data {
     | Some({
-        delete_run: Some({affected_rows: runsDeleted}),
-        delete_sweep: Some({affected_rows: sweepsDeleted}),
+        update_run: Some({affected_rows: runsDeleted}),
+        update_sweep: Some({affected_rows: sweepsDeleted}),
       }) =>
       `Deleted ${sweepsDeleted->Int.toString} sweeps and ${runsDeleted->Int.toString} rows.`->Some
     | _ => None

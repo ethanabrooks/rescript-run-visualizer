@@ -23,13 +23,6 @@ module Subscription = %graphql(`
   }
 `)
 
-module Deletion = %graphql(`
-  mutation deletion($condition: run_bool_exp!) {
-    delete_run(where: $condition) {
-      affected_rows
-    }
-}`)
-
 @val external max_logs: string = "NODE_MAX_LOGS"
 
 let objToMap = (obj: Js.Json.t) =>
