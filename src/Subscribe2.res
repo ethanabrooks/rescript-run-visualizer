@@ -18,7 +18,7 @@ module ErrorPage = {
 @react.component
 let make = (
   ~logs: jsonMap,
-  ~variables2: Subscription.t_variables,
+  ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
   ~makeCharts: (~logs: jsonMap) => React.element,
 ) => {
@@ -42,13 +42,13 @@ let make = (
       }
     }
     subscription :=
-      client.subscribe(~subscription=module(Subscription), variables2).subscribe(
+      client.subscribe(~subscription=module(Subscription), {condition: condition2}).subscribe(
         ~onNext,
         ~onError,
         (),
       )->Some
     Some(unsubscribe)
-  }, (client, variables2, setLogs))
+  }, (client, condition2, setLogs))
 
   switch logs {
   | Error({message}) => <ErrorPage message />

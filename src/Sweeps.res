@@ -46,21 +46,19 @@ let make = (~client, ~ids) => {
 
   let _in = ids->Set.Int.toArray
 
-  let variables1 = {
+  let condition1 = {
     open Subscribe1
     let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_in, ())
     let condition = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
-    let variables: Subscription.t_variables = {condition: condition}
-    variables
+    condition
   }
 
-  let variables2 = {
+  let condition2 = {
     open Subscribe2
     let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_in, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-    let variables: Subscription.t_variables = {condition: condition}
-    variables
+    condition
   }
   let runOrSweepIds = InsertChartButton.Sweep(ids)
 
@@ -79,7 +77,7 @@ let make = (~client, ~ids) => {
   let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
   let display =
     <>
-      <Subscribe1 variables1 variables2 runOrSweepIds client /> <DeleteButton deleted onClick />
+      <Subscribe1 condition1 condition2 runOrSweepIds client /> <DeleteButton deleted onClick />
     </>
 
   <ListAndDisplay queryResult ids display />

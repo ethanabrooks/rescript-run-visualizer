@@ -2,7 +2,7 @@ open Belt
 open Util
 
 module Subscription = %graphql(`
-  query subscription($condition: run_bool_exp!) {
+  subscription subscription($condition: run_bool_exp!) {
     run(where: $condition) {
       metadata
       run_logs {
@@ -47,8 +47,8 @@ type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data
 
 @react.component
 let make = (
-  ~variables1: Subscription.t_variables,
-  ~variables2,
+  ~condition1,
+  ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
   ~runOrSweepIds,
 ) => {
@@ -121,13 +121,13 @@ let make = (
     }
 
     subscription :=
-      client.subscribe(~subscription=module(Subscription), variables1).subscribe(
+      client.subscribe(~subscription=module(Subscription), {condition: condition1}).subscribe(
         ~onNext,
         ~onError,
         (),
       )->Some
     Some(unsubscribe)
-  }, (client, variables1, setState))
+  }, (client, condition1, setState))
 
   let insertChartButton = InsertChartButton._make(~runOrSweepIds)
   switch state {
@@ -136,7 +136,7 @@ let make = (
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) => {
       let makeCharts = Charts._make(~metadata, ~specs, ~insertChartButton)
-      <Subscribe2 logs variables2 client makeCharts />
+      <Subscribe2 logs condition2 client makeCharts />
     }
   }
 }
