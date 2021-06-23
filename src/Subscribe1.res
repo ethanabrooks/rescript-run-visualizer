@@ -13,12 +13,6 @@ module Subscription = %graphql(`
         id
         spec
       }
-      sweep {
-        charts {
-          id
-          spec
-        }
-      }
     }
   }
 `)
@@ -59,23 +53,14 @@ let make = (
           // combine values from multiple runs returned from query
           let newState =
             run
-            ->Array.reduce((None: option<queryResult>), (
-              acc,
-              {metadata, charts, run_logs, sweep},
-            ) => {
+            ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs}) => {
               let metadataMap = metadata->Option.flatMap(objToMap)
 
               // collect possibly multiple metadata into array
               let metadata = metadata->Option.mapWithDefault([], m => [m])
 
               // combine multiple charts from run
-              let specs: specs =
-                sweep
-                ->Option.mapWithDefault([], ({charts}) =>
-                  charts->Array.map(({id, spec}) => (id, spec))
-                )
-                ->Array.concat(charts->Array.map(({id, spec}) => (id, spec)))
-                ->Map.Int.fromArray
+              let specs: specs = charts->Array.map(({id, spec}) => (id, spec))->Map.Int.fromArray
 
               // combine multiple logs from run
               let logs =

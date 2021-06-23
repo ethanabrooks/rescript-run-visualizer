@@ -5,9 +5,6 @@ object_relationships:
 - name: run
   using:
     foreign_key_constraint_on: run_id
-- name: sweep
-  using:
-    foreign_key_constraint_on: sweep_id
 insert_permissions:
 - permission:
     backend_only: false
@@ -15,7 +12,6 @@ insert_permissions:
     columns:
     - id
     - run_id
-    - sweep_id
     - spec
   role: public
 select_permissions:
@@ -23,7 +19,6 @@ select_permissions:
     columns:
     - id
     - run_id
-    - sweep_id
     - spec
     filter: {}
   role: public
