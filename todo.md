@@ -1,3 +1,8 @@
-- add ability to group runs arbitrarily
-- add mechanism for deleting runs
-- add authentication
+- validate json before passing to Vega
+- add archive button to charts
+- add ability to add charts
+- add ability to undo chart edits?
+- add ability to select parameters in menu (click selects run but click+hold selects text)
+- get charts to update when selected/unselected
+- add ability to copy variable number of datapoints
+- add visual indicator that spec is copied

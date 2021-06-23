@@ -30,6 +30,7 @@ let insertChartObjects = (
         chartIds->Js.List.isEmpty ? list{None} : chartIds->List.map(x => x->Some)
       chartIds->List.map((chartId): InsertChart.t_variables_chart_insert_input => {
         id: chartId,
+        archive: false->Some,
         run: None,
         sweep: None,
         spec: spec->Some,
