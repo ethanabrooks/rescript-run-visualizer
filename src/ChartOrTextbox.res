@@ -12,8 +12,8 @@ module SetSpec = %graphql(`
 `)
 
 module SetArchived = %graphql(`
-  mutation set_archived($chartIds: [Int!], $spec: jsonb!) {
-    update_chart(_set: {spec: $spec}, where: {id: {_in: $chartIds}}) {
+  mutation set_archived($chartIds: [Int!]) {
+    update_chart(_set: {archived: true}, where: {id: {_in: $chartIds}}) {
       affected_rows
     }
   }
@@ -25,7 +25,8 @@ let setToList = set => set->Set.Int.toArray->List.fromArray
 @react.component
 let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds) => {
   let (state, setState) = React.useState(_ => initialState)
-  let (mutate, mutated) = SetSpec.use()
+  let (setSpec, setSpecResult) = SetSpec.use()
+  let (archiveChart, archiveChartResult) = SetArchived.use()
   let mainWindow = switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
@@ -49,8 +50,20 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
         })
       )
 
+    let chartIds: option<array<int>> = chartIds->Option.map(Set.Int.toArray)
+
+    let archiveChartButton = switch archiveChartResult {
+    | {error: Some({message})} => <ErrorPage message />
+    | {data: Some({update_chart: Some({affected_rows})})} =>
+      <p> {`Updated ${affected_rows->Int.toString} chart.`->React.string} </p>
+    | {error: None} =>
+      <Button
+        text={"Archive"} onClick={_ => archiveChart({chartIds: chartIds})->ignore} disabled={false}
+      />
+    }
     let buttons = list{
       <Button text={"Edit chart"} onClick={_ => setState(_ => Editing(spec))} disabled={false} />,
+      archiveChartButton,
       <Button text={"Copy spec"} onClick={_ => specString->copy->ignore} disabled={false} />,
     }
 
@@ -75,7 +88,7 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
         ->Option.map(Set.Int.toArray)
         ->Option.map(a => a->Some)
         ->Option.mapWithDefault((), (chartIds: option<array<int>>) =>
-          mutate({spec: spec, chartIds: chartIds})->ignore
+          setSpec({spec: spec, chartIds: chartIds})->ignore
         )
         spec->setSpecs->ignore
         setState(_ => Rendering(spec))
@@ -84,11 +97,11 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
       <SpecEditor initialSpec onSubmit setState />
     }
   }
-  let mutationResult = switch mutated {
+  let setSpecResult = switch setSpecResult {
   | {error: Some({message})} => <ErrorPage message />
   | {data: Some({update_chart: Some({affected_rows})})} =>
     <p> {`Updated ${affected_rows->Int.toString} chart.`->React.string} </p>
   | {error: None} => <> </>
   }
-  <> {mutationResult} {mainWindow} </>
+  <> {setSpecResult} {mainWindow} </>
 }
