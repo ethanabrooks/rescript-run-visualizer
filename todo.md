@@ -1,5 +1,3 @@
-- add ability to copy variable number of datapoints
-- add visual indicator that spec is copied
 - validate json before passing to Vega
 - add ability to undo chart edits?
 - get charts to update when selected/unselected

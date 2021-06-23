@@ -22,6 +22,22 @@ module SetArchived = %graphql(`
 type runOrSweepIds = Sweep(Set.Int.t) | Run(Set.Int.t)
 let setToList = set => set->Set.Int.toArray->List.fromArray
 
+module CopyButton = {
+  @react.component
+  let make = (~text, ~copyString) => {
+    let (copied, setCopied) = React.useState(_ => false)
+    <Button
+      text={copied ? "Copied" : text}
+      onClick={_ => {
+        setCopied(_ => true)
+        Js.Global.setTimeout(_ => setCopied(_ => false), 1000)->ignore
+        copyString->copy->ignore
+      }}
+      disabled={false}
+    />
+  }
+}
+
 @react.component
 let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds) => {
   let (state, setState) = React.useState(_ => initialState)
@@ -65,7 +81,7 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
     let buttons = list{
       <Button text={"Edit chart"} onClick={_ => setState(_ => Editing(spec))} disabled={false} />,
       archiveChartButton,
-      <Button text={"Copy spec"} onClick={_ => specString->copy->ignore} disabled={false} />,
+      <CopyButton text={"Copy spec"} copyString=specString />,
     }
 
     let l =
@@ -108,10 +124,9 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
       list{
         l,
         r,
-        <Button
+        <CopyButton
           text={`Copy with first ${numCopyDataPoints->Int.toString} datapoints`}
-          onClick={_ => s->Js.Json.stringifyWithSpace(2)->copy->ignore}
-          disabled={false}
+          copyString={s->Js.Json.stringifyWithSpace(2)}
         />,
       }
     })
