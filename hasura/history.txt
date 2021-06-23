@@ -1,0 +1,16 @@
+ 1012  sudo su
+ 1013  echo hi | nc fd94:639b:be65:3b79:3f33:dc28:4b38:810f 8081
+ 1014  echo hi | nc fd94:639b:be65:3b79:3f33:dc28:4b38:810f 8081
+ 1015  echo hi | nc fd94:639b:be65:3b79:3f33:dc28:4b38:810f 8081
+ 1016  sudo su
+ 1017  iptables -A FORWARD -i wg0 -o wg0 -j ACCEPT
+ 1018  sudo iptables -A FORWARD -i wg0 -o wg0 -j ACCEPT
+ 1019  echo hi | nc fd94:639b:be65:3b79:3f33:dc28:4b38:810f 8081
+ 1020  sudo sysctl net.ipv6.ip_forward=1
+ 1021  sudo sysctl net.ipv4.ip_forward=1
+ 1022  sudo iptables -A FORWARD -i wg0 -j ACCEPT
+ 1023  sudo sysctl -w net.ipv6.conf.wg0.forwarding=1
+ 1024  sudo sysctl -w net.ipv6.conf.all.forwarding=1
+ 1025  history
+ 1026  cd run-visualizer
+ 1027  cd hasura
