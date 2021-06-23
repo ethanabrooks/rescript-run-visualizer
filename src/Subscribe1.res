@@ -33,12 +33,7 @@ type queryResult = {
 type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
 
 @react.component
-let make = (
-  ~condition1,
-  ~condition2,
-  ~client: ApolloClient__Core_ApolloClient.t,
-  ~runOrSweepIds,
-) => {
+let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t) => {
   let (state, setState) = React.useState(() => Waiting)
 
   React.useEffect3(() => {
@@ -107,13 +102,12 @@ let make = (
     Some(unsubscribe)
   }, (client, condition1, setState))
 
-  let insertChartObjects = ChartOrTextbox.insertChartObjects(~runOrSweepIds)
   switch state {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) => {
-      let makeCharts = Charts._make(~metadata, ~specs, ~insertChartObjects)
+      let makeCharts = Charts._make(~metadata, ~specs)
       <Subscribe2 logs condition2 client makeCharts />
     }
   }

@@ -9,8 +9,8 @@ module SweepSubscription = %graphql(`
   }
 `)
 
-module ArchiveMutation = %graphql(`
-  mutation archive($ids: [Int!], $bool: Boolean!) {
+module SetArchived = %graphql(`
+  mutation set_archived($ids: [Int!], $bool: Boolean!) {
     update_sweep(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
       affected_rows
     }
@@ -29,8 +29,8 @@ let make = (~client, ~ids) => {
 
   let (
     archive,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<ArchiveMutation.t>,
-  ) = ArchiveMutation.use()
+    {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
+  ) = SetArchived.use()
 
   let _in = ids->Set.Int.toArray
 
@@ -48,7 +48,6 @@ let make = (~client, ~ids) => {
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
     condition
   }
-  let runOrSweepIds = ChartOrTextbox.Sweep(ids)
 
   let archived: ArchiveButton.archived = {
     called: called,
@@ -67,10 +66,7 @@ let make = (~client, ~ids) => {
     condition
   }
   let display =
-    <>
-      <Subscribe1 condition1 condition2 runOrSweepIds client />
-      <ArchiveButton archived onClick condition />
-    </>
+    <> <Subscribe1 condition1 condition2 client /> <ArchiveButton archived onClick condition /> </>
 
   <ListAndDisplay queryResult ids display />
 }

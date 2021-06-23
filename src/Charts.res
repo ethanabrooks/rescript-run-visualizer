@@ -10,12 +10,7 @@ module ChartIdQuery = %graphql(`
   }
 `)
 
-let _make = (
-  ~logs: jsonMap,
-  ~specs: specs,
-  ~metadata: jsonArray,
-  ~insertChartObjects: (~spec: Js.Json.t, ~chartIds: Set.Int.t) => array<_>,
-) => {
+let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   switch ChartIdQuery.use() {
   | {loading: true} => <> </>
@@ -42,10 +37,10 @@ let _make = (
             setSpecs(specs =>
               chartIds->Set.Int.reduce(specs, (specs, chartId) => specs->Map.Int.set(chartId, spec))
             )
-          let insertChartObjects = insertChartObjects(~chartIds)
+          let chartIds = chartIds->Some
 
           <div key={i->Int.toString} className="py-5">
-            <ChartOrTextbox initialState data setSpecs insertChartObjects />
+            <ChartOrTextbox initialState data setSpecs chartIds />
           </div>
         })
         ->Array.concat([
@@ -53,11 +48,9 @@ let _make = (
           <div key={reverseSpecs->Map.size->Int.toString} className="py-5">
             {
               let initialState = Editing(Js.Json.null)
-              let insertChartObjects = insertChartObjects(
-                ~chartIds=Set.Int.empty->Set.Int.add(chartId + 1),
-              )
+              let chartIds = None
               let setSpecs = spec => setSpecs(specs => specs->Map.Int.set(chartId, spec))
-              <ChartOrTextbox initialState data setSpecs insertChartObjects />
+              <ChartOrTextbox initialState data setSpecs chartIds />
             }
           </div>,
         ])
@@ -75,6 +68,6 @@ let _make = (
 }
 
 @react.component
-let make = (~logs, ~specs, ~metadata, ~insertChartObjects) => {
-  _make(~logs, ~specs, ~metadata, ~insertChartObjects)
+let make = (~logs, ~specs, ~metadata) => {
+  _make(~logs, ~specs, ~metadata)
 }

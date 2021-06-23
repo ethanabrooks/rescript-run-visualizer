@@ -3,9 +3,17 @@ open SpecEditor
 
 @module external copy: string => bool = "copy-to-clipboard"
 
-module InsertChart = %graphql(`
-  mutation insert_chart($objects: [chart_insert_input!]!) {
-    insert_chart(objects: $objects, on_conflict: {update_columns: [id], constraint: chart_pkey}) {
+module SetSpec = %graphql(`
+  mutation set_spec($chartIds: [Int!], $spec: jsonb!) {
+    update_chart(_set: {spec: $spec}, where: {id: {_in: $chartIds}}) {
+      affected_rows
+    }
+  }
+`)
+
+module SetArchived = %graphql(`
+  mutation set_archived($chartIds: [Int!], $spec: jsonb!) {
+    update_chart(_set: {spec: $spec}, where: {id: {_in: $chartIds}}) {
       affected_rows
     }
   }
@@ -14,49 +22,10 @@ module InsertChart = %graphql(`
 type runOrSweepIds = Sweep(Set.Int.t) | Run(Set.Int.t)
 let setToList = set => set->Set.Int.toArray->List.fromArray
 
-let insertChartObjects = (
-  ~spec: Js.Json.t,
-  ~chartIds: Set.Int.t,
-  ~runOrSweepIds: runOrSweepIds,
-): array<InsertChart.t_variables_chart_insert_input> =>
-  switch runOrSweepIds {
-  | Sweep(sweepOrRunIds)
-  | Run(sweepOrRunIds) =>
-    sweepOrRunIds
-    ->setToList
-    ->List.map((sweepOrRunId): list<InsertChart.t_variables_chart_insert_input> => {
-      let chartIds = chartIds->setToList
-      let chartIds: list<option<int>> =
-        chartIds->Js.List.isEmpty ? list{None} : chartIds->List.map(x => x->Some)
-      chartIds->List.map((chartId): InsertChart.t_variables_chart_insert_input => {
-        id: chartId,
-        archive: false->Some,
-        run: None,
-        sweep: None,
-        spec: spec->Some,
-        run_id: switch runOrSweepIds {
-        | Run(_) => sweepOrRunId->Some
-        | _ => None
-        },
-        sweep_id: switch runOrSweepIds {
-        | Sweep(_) => sweepOrRunId->Some
-        | _ => None
-        },
-      })
-    })
-  }
-  ->List.flatten
-  ->List.toArray
-
 @react.component
-let make = (
-  ~data: array<Js.Json.t>,
-  ~initialState: state,
-  ~setSpecs,
-  ~insertChartObjects: (~spec: Js.Json.t) => array<InsertChart.t_variables_chart_insert_input>,
-) => {
+let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds) => {
   let (state, setState) = React.useState(_ => initialState)
-  let (mutate, mutated) = InsertChart.use()
+  let (mutate, mutated) = SetSpec.use()
   let mainWindow = switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
@@ -102,7 +71,12 @@ let make = (
 
   | Editing(initialSpec) => {
       let onSubmit = spec => {
-        mutate({objects: insertChartObjects(~spec)})->ignore
+        chartIds
+        ->Option.map(Set.Int.toArray)
+        ->Option.map(a => a->Some)
+        ->Option.mapWithDefault((), (chartIds: option<array<int>>) =>
+          mutate({spec: spec, chartIds: chartIds})->ignore
+        )
         spec->setSpecs->ignore
         setState(_ => Rendering(spec))
       }
@@ -112,7 +86,8 @@ let make = (
   }
   let mutationResult = switch mutated {
   | {error: Some({message})} => <ErrorPage message />
-  | {data: Some({insert_chart: Some(_)})} => <p> {"Inserted chart."->React.string} </p>
+  | {data: Some({update_chart: Some({affected_rows})})} =>
+    <p> {`Updated ${affected_rows->Int.toString} chart.`->React.string} </p>
   | {error: None} => <> </>
   }
   <> {mutationResult} {mainWindow} </>

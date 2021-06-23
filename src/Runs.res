@@ -8,8 +8,8 @@ module RunSubscription = %graphql(`
   }
 `)
 
-module Deletion = %graphql(`
-  mutation deletion($ids: [Int!], $bool: Boolean!) {
+module SetArchived = %graphql(`
+  mutation set_archived($ids: [Int!], $bool: Boolean!) {
     update_run(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
       affected_rows
     }
@@ -28,8 +28,8 @@ let make = (~client, ~ids) => {
 
   let (
     archive,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
-  ) = Deletion.use()
+    {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
+  ) = SetArchived.use()
 
   let _in = ids->Set.Int.toArray
 
@@ -48,8 +48,6 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let runOrSweepIds = ChartOrTextbox.Run(ids)
-
   let archived: ArchiveButton.archived = {
     called: called,
     error: error,
@@ -67,9 +65,6 @@ let make = (~client, ~ids) => {
     condition
   }
   let display =
-    <>
-      <Subscribe1 condition1 condition2 runOrSweepIds client />
-      <ArchiveButton archived onClick condition />
-    </>
+    <> <Subscribe1 condition1 condition2 client /> <ArchiveButton archived onClick condition /> </>
   <ListAndDisplay queryResult ids display />
 }
