@@ -30,10 +30,10 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
         | _ => Js.Exn.raiseError(`Invalid hash: ${hash}`)
         }
         <li key={key}>
-          <a className href>
-            <div className="flex-shrink-0 flex items-center justify-center w-16">
+          <div className>
+            <a className="flex-shrink-0 flex items-center justify-center w-16" href>
               {key->React.string}
-            </div>
+            </a>
             {metadata->Option.mapWithDefault(<> </>, metadata => {
               <pre className="p-4 font-extralight">
                 {metadata
@@ -49,7 +49,7 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
                 ->React.string}
               </pre>
             })}
-          </a>
+          </div>
         </li>
       })
       ->List.toArray

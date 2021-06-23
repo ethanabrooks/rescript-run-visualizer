@@ -1,5 +1,3 @@
-- add ability to add charts
-- add ability to select parameters in menu (click selects run but click+hold selects text)
 - get charts to update when selected/unselected
 - add ability to copy variable number of datapoints
 - add visual indicator that spec is copied
