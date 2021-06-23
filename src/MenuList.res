@@ -19,7 +19,7 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
           ${idx == 0 ? "rounded-tl-lg rounded-tr-lg" : ""}
           ${idx == items->Array.length - 1 ? "rounded-bl-lg rounded-br-lg" : ""}
           ${selected ? "bg-indigo-50 border-indigo-200 z-10" : "border-gray-200"}
-          ${"relative border p-4 flex cursor-pointer focus:outline-none"}
+          ${"relative border p-4 flex focus:outline-none"}
         `
 
         open Util
