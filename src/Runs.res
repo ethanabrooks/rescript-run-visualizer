@@ -1,7 +1,7 @@
 open Belt
 module RunSubscription = %graphql(`
   subscription {
-      run {
+      run(where: {archived: {_eq: false}}) {
           id
           metadata
       }

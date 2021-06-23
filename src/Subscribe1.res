@@ -113,22 +113,8 @@ let make = (
       }
     }
 
-    let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
-    let runNotArchived = Subscription.makeInputObjectrun_bool_exp(~archived, ())
-    let sweep = Subscription.makeInputObjectsweep_bool_exp(~archived, ())
-    let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_is_null=true, ())
-    let noAssociatedSweep = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
-    let sweepNotArchived = Subscription.makeInputObjectrun_bool_exp(~sweep, ())
-    let sweepNotArchived = Subscription.makeInputObjectrun_bool_exp(
-      ~_or=[noAssociatedSweep, sweepNotArchived],
-      (),
-    )
-    let condition = Subscription.makeInputObjectrun_bool_exp(
-      ~_and=[condition1, runNotArchived, sweepNotArchived],
-      (),
-    )
     subscription :=
-      client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
+      client.subscribe(~subscription=module(Subscription), {condition: condition1}).subscribe(
         ~onNext,
         ~onError,
         (),

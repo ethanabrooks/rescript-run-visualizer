@@ -2,7 +2,7 @@ open Belt
 
 module SweepSubscription = %graphql(`
   subscription {
-      sweep {
+      sweep(where: {archived: {_eq: false}}) {
           id
           metadata
       }
