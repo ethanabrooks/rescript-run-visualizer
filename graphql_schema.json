@@ -1265,7 +1265,7 @@
         "description": "columns and relationships of \"chart\"",
         "fields": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": null,
             "args": [],
             "type": {
@@ -1343,30 +1343,6 @@
                 "name": "jsonb",
                 "ofType": null
               }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep",
-            "description": "An object relationship",
-            "args": [],
-            "type": {
-              "kind": "OBJECT",
-              "name": "sweep",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1813,18 +1789,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -1850,16 +1814,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1926,7 +1880,7 @@
             "defaultValue": null
           },
           {
-            "name": "archive",
+            "name": "archived",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
@@ -1971,26 +1925,6 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "jsonb_comparison_exp",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "sweep_bool_exp",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "Int_comparison_exp",
               "ofType": null
             },
             "defaultValue": null
@@ -2113,16 +2047,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2136,7 +2060,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -2184,26 +2108,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "sweep_obj_rel_insert_input",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2229,18 +2133,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -2282,16 +2174,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2326,18 +2208,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -2363,16 +2233,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -2501,7 +2361,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -2542,26 +2402,6 @@
           },
           {
             "name": "spec",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "sweep_order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -2630,7 +2470,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null
@@ -2652,12 +2492,6 @@
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
-            "description": "column name",
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "possibleTypes": null
@@ -2669,7 +2503,7 @@
         "fields": null,
         "inputFields": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -2707,16 +2541,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2742,18 +2566,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -2795,16 +2607,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2830,18 +2632,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -2883,16 +2673,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -2918,18 +2698,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -2971,16 +2739,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -3006,18 +2764,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Int",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -3059,16 +2805,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -3084,7 +2820,7 @@
         "interfaces": null,
         "enumValues": [
           {
-            "name": "archive",
+            "name": "archived",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null
@@ -3103,12 +2839,6 @@
           },
           {
             "name": "spec",
-            "description": "column name",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": "column name",
             "isDeprecated": false,
             "deprecationReason": null
@@ -3135,18 +2865,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -3188,16 +2906,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -3223,18 +2931,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "args": [],
             "type": {
@@ -3276,16 +2972,6 @@
               "ofType": null
             },
             "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -3320,18 +3006,6 @@
             },
             "isDeprecated": false,
             "deprecationReason": null
-          },
-          {
-            "name": "sweep_id",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Float",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
           }
         ],
         "inputFields": null,
@@ -3357,16 +3031,6 @@
           },
           {
             "name": "run_id",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "sweep_id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -12446,180 +12110,6 @@
             "deprecationReason": null
           },
           {
-            "name": "charts",
-            "description": "An array relationship",
-            "args": [
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "chart_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "chart_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "chart_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "chart",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "charts_aggregate",
-            "description": "An aggregate relationship",
-            "args": [
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "chart_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "chart_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "chart_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "chart_aggregate",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "grid_index",
             "description": null,
             "args": [],
@@ -13366,16 +12856,6 @@
             "defaultValue": null
           },
           {
-            "name": "charts",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "chart_bool_exp",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
             "name": "grid_index",
             "description": null,
             "type": {
@@ -13561,16 +13041,6 @@
             "type": {
               "kind": "SCALAR",
               "name": "Boolean",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "charts",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "chart_arr_rel_insert_input",
               "ofType": null
             },
             "defaultValue": null
@@ -13855,16 +13325,6 @@
             "type": {
               "kind": "ENUM",
               "name": "order_by",
-              "ofType": null
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "charts_aggregate",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "chart_aggregate_order_by",
               "ofType": null
             },
             "defaultValue": null
