@@ -48,7 +48,7 @@ let make = (~client, ~ids) => {
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
     condition
   }
-  let runOrSweepIds = InsertChartButton.Sweep(ids)
+  let runOrSweepIds = ChartOrTextbox.Sweep(ids)
 
   let archived: ArchiveButton.archived = {
     called: called,

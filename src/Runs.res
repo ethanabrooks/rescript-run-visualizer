@@ -48,7 +48,7 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let runOrSweepIds = InsertChartButton.Run(ids)
+  let runOrSweepIds = ChartOrTextbox.Run(ids)
 
   let archived: ArchiveButton.archived = {
     called: called,

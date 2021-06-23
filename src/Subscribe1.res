@@ -122,13 +122,13 @@ let make = (
     Some(unsubscribe)
   }, (client, condition1, setState))
 
-  let insertChartButton = InsertChartButton._make(~runOrSweepIds)
+  let insertChartObjects = ChartOrTextbox.insertChartObjects(~runOrSweepIds)
   switch state {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) => {
-      let makeCharts = Charts._make(~metadata, ~specs, ~insertChartButton)
+      let makeCharts = Charts._make(~metadata, ~specs, ~insertChartObjects)
       <Subscribe2 logs condition2 client makeCharts />
     }
   }

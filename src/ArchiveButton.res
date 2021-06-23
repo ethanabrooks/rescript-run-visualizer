@@ -1,4 +1,3 @@
-open Util
 open Belt
 type archived = {
   called: bool,

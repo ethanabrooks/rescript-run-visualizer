@@ -35,8 +35,3 @@ let merge = (_, old, new) =>
   | (None, Some(x)) =>
     Some(x)
   }
-
-module ErrorPage = {
-  @react.component
-  let make = (~message: string) => <p> {message->React.string} </p>
-}
