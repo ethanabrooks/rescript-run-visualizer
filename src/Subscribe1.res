@@ -9,7 +9,7 @@ module Subscription = %graphql(`
         id
         log
       }
-      charts {
+      charts(where: {archive: {_eq: false}}) {
         id
         spec
       }
