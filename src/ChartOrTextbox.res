@@ -147,7 +147,8 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
         setState(_ => Rendering(spec))
       }
 
-      <SpecEditor initialSpec onSubmit setState />
+      let onCancel = _ => setState(_ => Rendering(initialSpec))
+      <SpecEditor initialSpec onSubmit onCancel />
     }
   }
   let setSpecResult = switch setSpecResult {
