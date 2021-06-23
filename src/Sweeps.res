@@ -9,21 +9,9 @@ module SweepSubscription = %graphql(`
   }
 `)
 
-module Deletion = %graphql(`
-  mutation archive($ids: [Int!]) {
-    update_run_log(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_run(_set: {archived: true}, where: {id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_chart(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_parameter_choices(_set: {archived: true}, where: {sweep_id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_sweep(_set: {archived: true}, where: {id: {_in: $ids}}) {
+module ArchiveMutation = %graphql(`
+  mutation archive($ids: [Int!], $bool: Boolean!) {
+    update_sweep(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
       affected_rows
     }
   }
@@ -40,9 +28,9 @@ let make = (~client, ~ids) => {
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
 
   let (
-    delete,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
-  ) = Deletion.use()
+    archive,
+    {called, error, data}: ApolloClient__React_Types.MutationResult.t<ArchiveMutation.t>,
+  ) = ArchiveMutation.use()
 
   let _in = ids->Set.Int.toArray
 
@@ -62,22 +50,26 @@ let make = (~client, ~ids) => {
   }
   let runOrSweepIds = InsertChartButton.Sweep(ids)
 
-  let deleted: DeleteButton.deleted = {
+  let archived: ArchiveButton.archived = {
     called: called,
     error: error,
     dataMessage: switch data {
-    | Some({
-        update_run: Some({affected_rows: runsDeleted}),
-        update_sweep: Some({affected_rows: sweepsDeleted}),
-      }) =>
-      `Deleted ${sweepsDeleted->Int.toString} sweeps and ${runsDeleted->Int.toString} rows.`->Some
+    | Some({update_sweep: Some({affected_rows: sweepsDeleted})}) =>
+      `Archived ${sweepsDeleted->Int.toString} sweeps.`->Some
     | _ => None
     },
   }
-  let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
+  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
+  let condition = {
+    open ArchiveButton
+    let sweep_id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
+    let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~sweep_id, ())
+    condition
+  }
   let display =
     <>
-      <Subscribe1 condition1 condition2 runOrSweepIds client /> <DeleteButton deleted onClick />
+      <Subscribe1 condition1 condition2 runOrSweepIds client />
+      <ArchiveButton archived onClick condition />
     </>
 
   <ListAndDisplay queryResult ids display />

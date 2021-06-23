@@ -9,14 +9,8 @@ module RunSubscription = %graphql(`
 `)
 
 module Deletion = %graphql(`
-  mutation deletion($ids: [Int!]) {
-    update_run_log(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_chart(_set: {archived: true}, where: {run_id: {_in: $ids}}) {
-      affected_rows
-    }
-    update_run(_set: {archived: true}, where: {id: {_in: $ids}}) {
+  mutation deletion($ids: [Int!], $bool: Boolean!) {
+    update_run(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
       affected_rows
     }
   }
@@ -33,7 +27,7 @@ let make = (~client, ~ids) => {
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
 
   let (
-    delete,
+    archive,
     {called, error, data}: ApolloClient__React_Types.MutationResult.t<Deletion.t>,
   ) = Deletion.use()
 
@@ -54,20 +48,28 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let deleted: DeleteButton.deleted = {
+  let runOrSweepIds = InsertChartButton.Run(ids)
+
+  let archived: ArchiveButton.archived = {
     called: called,
     error: error,
     dataMessage: switch data {
-    | Some({update_chart: Some({affected_rows: runsDeleted})}) =>
-      `Deleted  ${runsDeleted->Int.toString} rows.`->Some
+    | Some({update_run: Some({affected_rows: runsDeleted})}) =>
+      `Archived  ${runsDeleted->Int.toString} rows.`->Some
     | _ => None
     },
   }
-  let runOrSweepIds = InsertChartButton.Run(ids)
-  let onClick = _ => delete({ids: ids->Set.Int.toArray->Some})->ignore
+  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
+  let condition = {
+    open ArchiveButton
+    let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
+    let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~id, ())
+    condition
+  }
   let display =
     <>
-      <Subscribe1 condition1 condition2 runOrSweepIds client /> <DeleteButton deleted onClick />
+      <Subscribe1 condition1 condition2 runOrSweepIds client />
+      <ArchiveButton archived onClick condition />
     </>
   <ListAndDisplay queryResult ids display />
 }
