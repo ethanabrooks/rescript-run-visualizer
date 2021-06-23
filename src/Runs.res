@@ -55,7 +55,7 @@ let make = (~client, ~ids) => {
     error: error,
     dataMessage: switch data {
     | Some({update_run: Some({affected_rows: runsDeleted})}) =>
-      `Archived  ${runsDeleted->Int.toString} rows.`->Some
+      Some(runsDeleted == 0 ? "" : `Archived  ${runsDeleted->Int.toString} rows.`)
     | _ => None
     },
   }

@@ -55,7 +55,7 @@ let make = (~client, ~ids) => {
     error: error,
     dataMessage: switch data {
     | Some({update_sweep: Some({affected_rows: sweepsDeleted})}) =>
-      `Archived ${sweepsDeleted->Int.toString} sweeps.`->Some
+      Some(sweepsDeleted == 0 ? "" : `Archived ${sweepsDeleted->Int.toString} sweeps.`)
     | _ => None
     },
   }
