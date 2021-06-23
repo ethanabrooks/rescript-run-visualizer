@@ -36,7 +36,10 @@ let make = (~archived: archived, ~onClick, ~condition) =>
   switch ArchiveQuery.use({condition: condition}) {
   | {loading: true} => <> </>
   | {error: Some(_error)} => "Error loading ArchiveQuery data"->React.string
-  | {data: Some({run})} => {
+  | {data: Some({run})} =>
+    switch run {
+    | [] => <> </>
+    | _ =>
       let areArchived =
         run->Array.every(({archived}) => archived)
           ? [true]
@@ -44,13 +47,11 @@ let make = (~archived: archived, ~onClick, ~condition) =>
           ? [false]
           : [true, false]
 
-      {
-        areArchived
-        ->Array.mapWithIndex((i, isArchived: bool) =>
-          <Inner key={i->Int.toString} archived onClick isArchived />
-        )
-        ->React.array
-      }
+      areArchived
+      ->Array.mapWithIndex((i, isArchived: bool) =>
+        <Inner key={i->Int.toString} archived onClick isArchived />
+      )
+      ->React.array
     }
   | {data: None, error: None, loading: false} =>
     "You might think this is impossible, but depending on the situation it might not be!"->React.string
