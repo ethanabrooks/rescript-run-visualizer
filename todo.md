@@ -1,3 +1,5 @@
+- deploy to rldl12 and rldl7
+- fix chart editing
+- fix live chart updating
+- use jsoneditor
 - validate json before passing to Vega
-- add ability to undo chart edits?
-- get charts to update when selected/unselected
