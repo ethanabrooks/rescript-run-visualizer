@@ -14,6 +14,9 @@ module SetArchived = %graphql(`
     update_sweep(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
       affected_rows
     }
+    update_run(_set: {archived: $bool}, where: {sweep: {id: {_in: $ids}}}) {
+      affected_rows
+    }
   }
 `)
 
@@ -49,7 +52,7 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let archived: ArchiveButton.archived = {
+  let archived: ArchiveSweepsButton.archived = {
     called: called,
     error: error,
     dataMessage: switch data {
@@ -60,13 +63,15 @@ let make = (~client, ~ids) => {
   }
   let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
   let condition = {
-    open ArchiveButton
-    let sweep_id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
-    let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~sweep_id, ())
+    open ArchiveSweepsButton
+    let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
+    let condition = ArchiveQuery.makeInputObjectsweep_bool_exp(~id, ())
     condition
   }
   let display =
-    <> <Subscribe1 condition1 condition2 client /> <ArchiveButton archived onClick condition /> </>
+    <>
+      <Subscribe1 condition1 condition2 client /> <ArchiveSweepsButton archived onClick condition />
+    </>
 
   <ListAndDisplay queryResult ids display />
 }

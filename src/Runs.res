@@ -48,7 +48,7 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let archived: ArchiveButton.archived = {
+  let archived: ArchiveRunsButton.archived = {
     called: called,
     error: error,
     dataMessage: switch data {
@@ -59,12 +59,14 @@ let make = (~client, ~ids) => {
   }
   let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
   let condition = {
-    open ArchiveButton
+    open ArchiveRunsButton
     let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
     let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~id, ())
     condition
   }
   let display =
-    <> <Subscribe1 condition1 condition2 client /> <ArchiveButton archived onClick condition /> </>
+    <>
+      <Subscribe1 condition1 condition2 client /> <ArchiveRunsButton archived onClick condition />
+    </>
   <ListAndDisplay queryResult ids display />
 }
