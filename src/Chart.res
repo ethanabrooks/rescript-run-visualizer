@@ -12,7 +12,7 @@ let make = (~logs, ~newLogs, ~spec) => {
   let mapToArray = l => l->Map.Int.toArray->Array.map(((_, v)) => v)
   let newData = newLogs->mapToArray
   React.useEffect1(() => {
-    setInitialData(initialData => initialData->Option.getWithDefault(logs->mapToArray)->Some)
+    setInitialData(_ => logs->mapToArray->Some)
     None
   }, [logs])
   let data = initialData->Option.getWithDefault([])
