@@ -20,9 +20,9 @@ let make = (
   ~logs: jsonMap,
   ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
-  ~makeCharts: (~logs: jsonMap) => React.element,
+  ~makeCharts: (~logs: jsonMap, ~newLogs: jsonMap) => React.element,
 ) => {
-  let (logs, setLogs) = React.useState(() => logs->Result.Ok)
+  let (logs, setLogs) = React.useState(_ => Result.Ok((logs, Map.Int.empty)))
 
   React.useEffect3(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
@@ -34,11 +34,18 @@ let make = (
       | {error: Some(error)} =>
         unsubscribe()
         error->onError
-      | {data} => {
-          let new = data.run_log->Array.map(({id, log}) => (id, log))->Map.Int.fromArray
-          let merge = old => old->Map.Int.merge(new, Util.merge)
-          setLogs(old => old->Result.map(merge))
-        }
+      | {data} =>
+        setLogs(logs =>
+          logs->Result.mapWithDefault(logs, ((oldLogs, _)) => {
+            let newLogs =
+              data.run_log
+              ->Array.map(({id, log}) => (id, log))
+              ->Array.keep(((id, _)) => !(oldLogs->Map.Int.has(id)))
+              ->Map.Int.fromArray
+            let oldLogs = oldLogs->Map.Int.merge(newLogs, Util.merge)
+            Result.Ok((oldLogs, newLogs))
+          })
+        )
       }
     }
 
@@ -60,6 +67,6 @@ let make = (
 
   switch logs {
   | Error({message}) => <ErrorPage message />
-  | Ok(logs) => makeCharts(~logs)
+  | Ok((logs, newLogs)) => makeCharts(~logs, ~newLogs)
   }
 }

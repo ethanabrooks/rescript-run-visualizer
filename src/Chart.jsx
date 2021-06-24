@@ -2,19 +2,21 @@ import React from "react";
 import { Vega } from "react-vega";
 
 
-export function make(data, spec) {
+export function make(data, newData, spec) {
     const [view, setView] = React.useState(null);
-    const [initialData, setInitialData] = React.useState(null);
     React.useEffect(
         () => {
-            if (initialData === null) {
-                setInitialData(data);
-            } else if (data.length && view != null) {
-                const cs = view.changeset().insert(data[data.length - 1]);
-                view.change("data", cs).run();
+            if (view != null) {
+                var cs = null
+                for (d in newData) {
+                    cs = view.changeset().insert(d)
+                }
+                if (cs != null) {
+                    view.change("data", cs).run();
+                }
             }
         },
-        [initialData, data, view]
+        [data, view]
     );
     return <Vega spec={spec} data={{ data }} onNewView={setView} />;
 

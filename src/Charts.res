@@ -10,7 +10,7 @@ module ChartIdQuery = %graphql(`
   }
 `)
 
-let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
+let _make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   switch ChartIdQuery.use() {
   | {loading: true} => <> </>
@@ -18,7 +18,6 @@ let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
   | {data: None, error: None, loading: false} =>
     "You might think this is impossible, but depending on the situation it might not be!"->React.string
   | {data: Some({chart: [{id: chartId}]})} => {
-      let data = logs->Map.Int.valuesToArray
       let reverseSpecs = specs->Map.Int.reduce(Map.make(~id=module(JsonComparator)), (
         map,
         id,
@@ -40,7 +39,7 @@ let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
           let chartIds = chartIds->Some
 
           <div key={i->Int.toString} className="py-5">
-            <ChartOrTextbox initialState data setSpecs chartIds />
+            <ChartOrTextbox initialState logs newLogs setSpecs chartIds />
           </div>
         })
         ->Array.concat([
@@ -50,7 +49,7 @@ let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
               let initialState = Editing(Js.Json.null)
               let chartIds = None
               let setSpecs = spec => setSpecs(specs => specs->Map.Int.set(chartId, spec))
-              <ChartOrTextbox initialState data setSpecs chartIds />
+              <ChartOrTextbox initialState logs newLogs setSpecs chartIds />
             }
           </div>,
         ])
@@ -68,6 +67,6 @@ let _make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
 }
 
 @react.component
-let make = (~logs, ~specs, ~metadata) => {
-  _make(~logs, ~specs, ~metadata)
+let make = (~logs, ~newLogs, ~specs, ~metadata) => {
+  _make(~logs, ~newLogs, ~specs, ~metadata)
 }

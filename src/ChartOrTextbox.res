@@ -1,5 +1,6 @@
 open Belt
 open SpecEditor
+open Util
 
 @module external copy: string => bool = "copy-to-clipboard"
 
@@ -39,7 +40,7 @@ module CopyButton = {
 }
 
 @react.component
-let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds) => {
+let make = (~logs: jsonMap, ~newLogs: jsonMap, ~initialState: state, ~setSpecs, ~chartIds) => {
   let (state, setState) = React.useState(_ => initialState)
   let (numCopyDataPoints, setNumCopyDataPoints) = React.useState(_ => 10)
   let (setSpec, setSpecResult) = SetSpec.use()
@@ -47,7 +48,13 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
   let mainWindow = switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
-    let first10datapoints = data->Js.Array2.slice(~start=0, ~end_=numCopyDataPoints)->Js.Json.array
+    let (firstNDatapoints, _) =
+      Array.range(0, numCopyDataPoints)->Array.reduce((list{}, 0), ((datapoints, minKey), _) =>
+        logs
+        ->Map.Int.findFirstBy((k, _) => minKey <= k)
+        ->Option.mapWithDefault((datapoints, minKey), ((k, v)) => (list{v, ...datapoints}, k + 1))
+      )
+    //  data->Js.Array2.slice(~start=0, ~end_=numCopyDataPoints)->Js.Json.array
     let jsonToMap = json =>
       json->Js.Json.decodeObject->Option.map(dict => dict->Js.Dict.entries->Map.String.fromArray)
     let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
@@ -61,7 +68,10 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
           dataJson
           ->jsonToMap
           ->Option.map((dataMap: Map.String.t<Js.Json.t>) => {
-            let dataObject = dataMap->Map.String.set("values", first10datapoints)->mapToJson
+            let dataObject =
+              dataMap
+              ->Map.String.set("values", firstNDatapoints->List.toArray->Js.Json.array)
+              ->mapToJson
             specMap->Map.String.set("data", dataObject)->mapToJson
           })
         })
@@ -132,8 +142,7 @@ let make = (~data: array<Js.Json.t>, ~initialState: state, ~setSpecs, ~chartIds)
     })
 
     let buttons = list{buttons, copyButtons}->List.flatten->List.toArray
-
-    <> <Chart data spec /> <Buttons buttons /> </>
+    <> <Chart logs newLogs spec /> <Buttons buttons /> </>
 
   | Editing(initialSpec) => {
       let onSubmit = spec => {
