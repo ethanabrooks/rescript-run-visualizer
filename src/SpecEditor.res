@@ -7,13 +7,13 @@ type ajvArgs = {
 }
 type ajv
 type ajvRef
-@module("ajv-formats") external addFormats: ajv => unit = "addFormats"
-@module("ajv/lib/refs/json-schema-draft-06.json") external draft6Schema: ajvRef = "draft6Schema"
-@new @module external newAjv: ajvArgs => ajv = "Ajv"
-@send external addFormat: (ajv, string, unit => bool) => unit = "addFormat"
-@send external addMetaSchema: (ajv, ajvRef) => unit = "addMetaSchema"
-@send external addKeyword: (ajv, string) => unit = "addKeyword"
-@send external compile: (ajv, Js.Json.t, Js.Json.t) => bool = "compile"
+// @module("ajv-formats") external addFormats: ajv => unit = "addFormats"
+// @module("ajv/lib/refs/json-schema-draft-06.json") external draft6Schema: ajvRef = "draft6Schema"
+// @new @module external newAjv: ajvArgs => ajv = "Ajv"
+// @send external addFormat: (ajv, string, unit => bool) => unit = "addFormat"
+// @send external addMetaSchema: (ajv, ajvRef) => unit = "addMetaSchema"
+// @send external addKeyword: (ajv, string) => unit = "addKeyword"
+// @send external compile: (ajv, Js.Json.t, Js.Json.t) => bool = "compile"
 
 type state =
   | Rendering(Js.Json.t)
@@ -24,12 +24,12 @@ let make = (~initialSpec, ~onSubmit, ~onCancel) => {
   let (schema, setSchema) = React.useState(_ => None)
 
   // https://github.com/vega/vega-lite/blob/b61b13c2cbd4ecde0448544aff6cdaea721fd22a/examples/examples.test.ts
-  let ajv = newAjv({allowUnionTypes: true, strictTypes: false, strictTuples: false})
-  ajv->addFormat("color-hex", () => true)
-  // addFormats(ajv)
-  // ajv->addMetaSchema(draft6Schema)
-  ajv->addKeyword("defs")
-  ajv->addKeyword("refs")
+  // let ajv = newAjv({allowUnionTypes: true, strictTypes: false, strictTuples: false})
+  // ajv->addFormat("color-hex", () => true)
+  // // addFormats(ajv)
+  // // ajv->addMetaSchema(draft6Schema)
+  // ajv->addKeyword("defs")
+  // ajv->addKeyword("refs")
 
   React.useEffect1(() => {
     initialSpec
@@ -51,11 +51,11 @@ let make = (~initialSpec, ~onSubmit, ~onCancel) => {
   let valid = text => {
     switch (text->parse, schema) {
     | (Result.Error(_), _) => false
-    | (Result.Ok(parsed), Some(schema)) => {
-        let validate = ajv->compile(schema)
-        Js.log(validate(parsed))
-        true
-      }
+    // | (Result.Ok(parsed), Some(schema)) => {
+    //     let validate = ajv->compile(schema)
+    //     Js.log(validate(parsed))
+    //     true
+    //   }
 
     | _ => true
     }
