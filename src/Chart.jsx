@@ -8,7 +8,7 @@ export function make(data, newData, spec) {
         () => {
             if (view != null) {
                 var cs = null
-                for (d in newData) {
+                for (const d of newData) {
                     cs = view.changeset().insert(d)
                 }
                 if (cs != null) {
@@ -16,7 +16,7 @@ export function make(data, newData, spec) {
                 }
             }
         },
-        [data, view]
+        [newData, view]
     );
     return <Vega spec={spec} data={{ data }} onNewView={setView} />;
 

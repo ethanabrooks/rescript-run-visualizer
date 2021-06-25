@@ -1,6 +1,5 @@
 - switch wireguard to ipv4
 - deploy to rldl7
-- fix live chart updating
 - use jsoneditor
 - validate json before passing to Vega
 - fix buttons

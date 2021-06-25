@@ -29,7 +29,6 @@ let make = (
 
   React.useEffect2(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
-
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     let onError = error => setCurrentAndNewLogs(_ => error->Result.Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
@@ -53,7 +52,7 @@ let make = (
       }
     }
 
-    let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=true, ())
+    let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~archived, ())
     let notArchived = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
     let condition = Subscription.makeInputObjectrun_log_bool_exp(
