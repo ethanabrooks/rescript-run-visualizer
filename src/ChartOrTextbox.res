@@ -54,7 +54,6 @@ let make = (~logs: jsonMap, ~newLogs: jsonMap, ~initialState: state, ~setSpecs, 
         ->Map.Int.findFirstBy((k, _) => minKey <= k)
         ->Option.mapWithDefault((datapoints, minKey), ((k, v)) => (list{v, ...datapoints}, k + 1))
       )
-    //  data->Js.Array2.slice(~start=0, ~end_=numCopyDataPoints)->Js.Json.array
     let jsonToMap = json =>
       json->Js.Json.decodeObject->Option.map(dict => dict->Js.Dict.entries->Map.String.fromArray)
     let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
