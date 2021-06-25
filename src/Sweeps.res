@@ -85,8 +85,10 @@ let make = (~client, ~ids, ~archived) => {
       | _ => None
       },
     }
+    open Util
+    let makePath = archived => Sweeps({ids: ids, archived: !archived})
 
-    <ArchiveButton queryResult archiveResult onClick />
+    <ArchiveButton queryResult archiveResult onClick makePath />
   }
 
   let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>

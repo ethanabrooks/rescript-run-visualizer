@@ -3,7 +3,6 @@ type entry = {id: int, metadata: option<Js.Json.t>}
 
 @react.component
 let make = (~items: array<entry>, ~ids: Set.Int.t) => {
-  let {hash} = ReasonReactRouter.useUrl()
   let (text, textbox) = TextInput.useText(~initialText="name,parameters")
   let keywords = ","->Js.String.split(text)->Set.String.fromArray->Set.String.remove("")
   <div className="py-10 m-5 max-h-screen overflow-y-scroll overscroll-contain">
@@ -24,11 +23,13 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
 
         open Util
         let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
-        let newIds = newIds->Set.Int.toArray->Array.map(Int.toString)->Js.Array2.joinWith(",")
-        let href = switch hash->splitHash->List.fromArray {
-        | list{base, ..._} => `#${base}/${newIds}`
-        | _ => Js.Exn.raiseError(`Invalid hash: ${hash}`)
-        }
+        let url = ReasonReactRouter.useUrl()
+        let href = switch url->urlToPath {
+        | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
+        | Runs({archived}) => Runs({ids: newIds, archived: archived})
+        | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to MenuList.`)
+        }->pathToUrl
+        let href = `#${href}`
         <li key={key}>
           <div className>
             <a className="flex-shrink-0 flex items-center justify-center w-16" href>

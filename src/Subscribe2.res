@@ -1,4 +1,3 @@
-open Belt
 open Util
 
 module Subscription = %graphql(`
@@ -22,6 +21,7 @@ let make = (
   ~client: ApolloClient__Core_ApolloClient.t,
   ~makeCharts: (~logs: jsonMap, ~newLogs: jsonMap) => React.element,
 ) => {
+  open Belt
   let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok((
     logs,
     Map.Int.empty,

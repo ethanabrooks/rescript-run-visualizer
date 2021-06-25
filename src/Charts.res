@@ -1,6 +1,4 @@
-open Belt
 open Util
-open SpecEditor
 
 module ChartIdQuery = %graphql(`
   query queryChartIds {
@@ -12,6 +10,7 @@ module ChartIdQuery = %graphql(`
 
 let _make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
+  open Belt
   switch ChartIdQuery.use() {
   | {loading: true} => <> </>
   | {error: Some(_error)} => "Error loading ArchiveQuery data"->React.string
@@ -27,6 +26,7 @@ let _make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonAr
         map->Map.set(spec, ids)
       })
 
+      open SpecEditor
       <>
         {reverseSpecs
         ->Map.toArray

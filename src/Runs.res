@@ -1,4 +1,3 @@
-open Belt
 module RunSubscription = %graphql(`
   subscription($archived: Boolean!) {
       run(where: {archived: {_eq: $archived}}) {
@@ -26,6 +25,7 @@ module ArchiveQuery = %graphql(`
 
 @react.component
 let make = (~client, ~ids, ~archived) => {
+  open Belt
   let {loading, error, data} = RunSubscription.use({archived: archived})
   let error = error->Option.map(({message}) => message)
   let data =
@@ -72,12 +72,14 @@ let make = (~client, ~ids, ~archived) => {
       error: error,
       dataMessage: switch data {
       | Some({update_run: Some({affected_rows: runsArchived})}) =>
-        Some(`Archived  ${runsArchived->Int.toString} sweeps.`)
+        Some(`Archived  ${runsArchived->Int.toString} runs.`)
       | _ => None
       },
     }
 
-    <ArchiveButton queryResult archiveResult onClick />
+    open Util
+    let makePath = archived => Runs({ids: ids, archived: !archived})
+    <ArchiveButton queryResult archiveResult onClick makePath />
   }
   let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
 
