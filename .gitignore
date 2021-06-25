@@ -12,3 +12,4 @@
 /src/**/*.bs.js
 .idea
 .envrc
+dist/*
