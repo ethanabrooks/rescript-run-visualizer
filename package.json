@@ -11,7 +11,7 @@
     "dev:css": "postcss src/main.css -o dev/main.css",
     "prod": "concurrently 'yarn prod:bundle' 'yarn prod:css' 'yarn prod:static' 'yarn prod:serve'",
     "prod:bundle": "bsb -make-world && esbuild --bundle src/Index.bs.js --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:process.env.NODE_ENV=\\\"production\\\" --external:react --external:react-dom --minify --outfile=dist/main.js",
-    "prod:css": "NODE_ENV=production node-sass src/main.css dist/main.css",
+    "prod:css": "NODE_ENV=production postcss src/main.css -o dist/main.css",
     "prod:static": "rsync -av static/ dist/",
     "prod:serve": "node server.js dist"
   },
