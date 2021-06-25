@@ -1,5 +1,5 @@
 open Belt
-type archived = {
+type archiveResult = {
   called: bool,
   dataMessage: option<string>,
   error: option<ApolloClient__Errors_ApolloError.t>,
@@ -7,8 +7,8 @@ type archived = {
 
 module Inner = {
   @react.component
-  let make = (~archived: archived, ~onClick, ~isArchived: bool) =>
-    switch archived {
+  let make = (~archiveResult: archiveResult, ~onClick, ~isArchived: bool) =>
+    switch archiveResult {
     | {called: false} =>
       <button
         type_="button"
@@ -31,7 +31,7 @@ module ArchiveQuery = %graphql(`
 `)
 
 @react.component
-let make = (~archived: archived, ~onClick, ~condition) =>
+let make = (~archiveResult: archiveResult, ~onClick, ~condition) =>
   switch ArchiveQuery.use({condition: condition}) {
   | {loading: true} => <> </>
   | {error: Some(_error)} => "Error loading ArchiveQuery data"->React.string
@@ -48,7 +48,7 @@ let make = (~archived: archived, ~onClick, ~condition) =>
 
       areArchived
       ->Array.mapWithIndex((i, isArchived: bool) =>
-        <Inner key={i->Int.toString} archived onClick isArchived />
+        <Inner key={i->Int.toString} archiveResult onClick isArchived />
       )
       ->React.array
     }

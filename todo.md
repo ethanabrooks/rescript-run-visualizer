@@ -3,3 +3,4 @@
 - use jsoneditor
 - validate json before passing to Vega
 - fix buttons
+- fix archive button (currently it displays mutation result even after switching URL)

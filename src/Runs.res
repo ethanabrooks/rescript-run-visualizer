@@ -1,7 +1,7 @@
 open Belt
 module RunSubscription = %graphql(`
-  subscription {
-      run(where: {archived: {_eq: false}}) {
+  subscription($archived: Boolean!) {
+      run(where: {archived: {_eq: $archived}}) {
           id
           metadata
       }
@@ -9,16 +9,16 @@ module RunSubscription = %graphql(`
 `)
 
 module SetArchived = %graphql(`
-  mutation set_archived($ids: [Int!], $bool: Boolean!) {
-    update_run(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
+  mutation set_archived($ids: [Int!], $archived: Boolean!) {
+    update_run(_set: {archived: $archived}, where: {id: {_in: $ids}}) {
       affected_rows
     }
   }
 `)
 
 @react.component
-let make = (~client, ~ids) => {
-  let {loading, error, data} = RunSubscription.use()
+let make = (~client, ~ids, ~archived) => {
+  let {loading, error, data} = RunSubscription.use({archived: archived})
   let error = error->Option.map(({message}) => message)
   let data =
     data->Option.map(({run}) =>
@@ -48,7 +48,7 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let archived: ArchiveRunsButton.archived = {
+  let archiveResult: ArchiveRunsButton.archiveResult = {
     called: called,
     error: error,
     dataMessage: switch data {
@@ -57,7 +57,7 @@ let make = (~client, ~ids) => {
     | _ => None
     },
   }
-  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
+  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})->ignore
   let condition = {
     open ArchiveRunsButton
     let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
@@ -66,7 +66,8 @@ let make = (~client, ~ids) => {
   }
   let display =
     <>
-      <Subscribe1 condition1 condition2 client /> <ArchiveRunsButton archived onClick condition />
+      <Subscribe1 condition1 condition2 client />
+      <ArchiveRunsButton archiveResult onClick condition />
     </>
   <ListAndDisplay queryResult ids display />
 }

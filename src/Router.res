@@ -1,6 +1,10 @@
 open Belt
 
-type path = Sweeps(Set.Int.t) | Runs(Set.Int.t) | Redirect | NotFound(string)
+type path =
+  | Sweeps({ids: Set.Int.t, archived: bool})
+  | Runs({ids: Set.Int.t, archived: bool})
+  | Redirect
+  | NotFound(string)
 
 let processIds = (ids: string) =>
   ids
@@ -15,15 +19,37 @@ let processIds = (ids: string) =>
   )
   ->List.toArray
   ->Set.Int.fromArray
-let urlToPath = (url: ReasonReactRouter.url) =>
-  switch url.hash->Util.splitHash->List.fromArray {
+
+let urlToPath = (url: ReasonReactRouter.url) => {
+  let hashParts = url.hash->Util.splitHash->List.fromArray
+
+  let ids = switch hashParts {
+  | list{_, "archived", ids}
+  | list{_, ids} =>
+    ids->processIds
+  | _ => Set.Int.empty
+  }
+
+  let archived = switch hashParts {
+  | list{_, "archived"} => true
+  | _ => false
+  }
+
+  switch hashParts {
   | list{""} => Redirect
-  | list{"runs"} => Runs(Set.Int.empty)
-  | list{"runs", runIds} => Runs(runIds->processIds)
-  | list{"sweeps"} => Sweeps(Set.Int.empty)
-  | list{"sweeps", sweepIds} => Sweeps(sweepIds->processIds)
+  | list{"runs", ..._} =>
+    Runs({
+      ids: ids,
+      archived: archived,
+    })
+  | list{"sweeps", ..._} =>
+    Sweeps({
+      ids: ids,
+      archived: archived,
+    })
   | _ => NotFound(url.hash)
   }
+}
 
 @react.component
 let make = (~client) => {
@@ -64,8 +90,8 @@ let make = (~client) => {
         </div>
       </div>
       {switch path {
-      | Sweeps(ids) => <Sweeps ids client />
-      | Runs(ids) => <Runs ids client />
+      | Sweeps({ids, archived}) => <Sweeps ids archived client />
+      | Runs({ids, archived}) => <Runs ids archived client />
       | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
       | Redirect => <p> {React.string("Redirecting...")} </p>
       }}

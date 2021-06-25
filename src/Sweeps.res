@@ -1,8 +1,8 @@
 open Belt
 
 module SweepSubscription = %graphql(`
-  subscription {
-      sweep(where: {archived: {_eq: false}}) {
+  subscription($archived: Boolean!) {
+      sweep(where: {archived: {_eq: $archived}}) {
           id
           metadata
       }
@@ -10,19 +10,19 @@ module SweepSubscription = %graphql(`
 `)
 
 module SetArchived = %graphql(`
-  mutation set_archived($ids: [Int!], $bool: Boolean!) {
-    update_sweep(_set: {archived: $bool}, where: {id: {_in: $ids}}) {
+  mutation set_archived($ids: [Int!], $archived: Boolean!) {
+    update_sweep(_set: {archived: $archived}, where: {id: {_in: $ids}}) {
       affected_rows
     }
-    update_run(_set: {archived: $bool}, where: {sweep: {id: {_in: $ids}}}) {
+    update_run(_set: {archived: $archived}, where: {sweep: {id: {_in: $ids}}}) {
       affected_rows
     }
   }
 `)
 
 @react.component
-let make = (~client, ~ids) => {
-  let {loading, error, data} = SweepSubscription.use()
+let make = (~client, ~ids, ~archived) => {
+  let {loading, error, data} = SweepSubscription.use({archived: archived})
   let error = error->Option.map(({message}) => message)
   let data =
     data->Option.map(({sweep}) =>
@@ -52,7 +52,7 @@ let make = (~client, ~ids) => {
     condition
   }
 
-  let archived: ArchiveSweepsButton.archived = {
+  let archiveResult: ArchiveSweepsButton.archiveResult = {
     called: called,
     error: error,
     dataMessage: switch data {
@@ -61,7 +61,7 @@ let make = (~client, ~ids) => {
     | _ => None
     },
   }
-  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, bool: !archived})->ignore
+  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})->ignore
   let condition = {
     open ArchiveSweepsButton
     let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
@@ -70,7 +70,8 @@ let make = (~client, ~ids) => {
   }
   let display =
     <>
-      <Subscribe1 condition1 condition2 client /> <ArchiveSweepsButton archived onClick condition />
+      <Subscribe1 condition1 condition2 client />
+      <ArchiveSweepsButton archiveResult onClick condition />
     </>
 
   <ListAndDisplay queryResult ids display />
