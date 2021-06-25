@@ -4,15 +4,16 @@ type archiveResult = {
   dataMessage: option<string>,
   error: option<ApolloClient__Errors_ApolloError.t>,
 }
+type queryResult = {loading: bool, error: option<string>, data: option<array<bool>>}
 
-module Inner = {
+module Button = {
   @react.component
   let make = (~archiveResult: archiveResult, ~onClick, ~isArchived: bool) =>
     switch archiveResult {
     | {called: false} =>
       <button
         type_="button"
-        onClick={_ => isArchived->onClick}
+        onClick={_ => isArchived->onClick->ignore}
         className="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:text-sm">
         {(isArchived ? "Restore" : "Archive")->React.string}
       </button>
@@ -22,33 +23,25 @@ module Inner = {
     }
 }
 
-module ArchiveQuery = %graphql(`
-  query queryArchived($condition: sweep_bool_exp!) {
-    sweep(where: $condition) {
-      archived
-    }
-  }
-`)
-
 @react.component
-let make = (~archiveResult: archiveResult, ~onClick, ~condition) =>
-  switch ArchiveQuery.use({condition: condition}) {
+let make = (~queryResult: queryResult, ~archiveResult: archiveResult, ~onClick) =>
+  switch queryResult {
   | {loading: true} => <> </>
   | {error: Some(_error)} => "Error loading ArchiveQuery data"->React.string
-  | {data: Some({sweep})} =>
-    switch sweep {
+  | {data: Some(areArchived)} =>
+    switch areArchived {
     | [] => <> </>
-    | _ =>
+    | areArchived =>
       let areArchived =
-        sweep->Array.every(({archived}) => archived)
+        areArchived->Array.every(archived => archived)
           ? [true]
-          : sweep->Array.every(({archived}) => !archived)
+          : areArchived->Array.every(archived => !archived)
           ? [false]
           : [true, false]
 
       areArchived
       ->Array.mapWithIndex((i, isArchived: bool) =>
-        <Inner key={i->Int.toString} archiveResult onClick isArchived />
+        <Button key={i->Int.toString} archiveResult onClick isArchived />
       )
       ->React.array
     }

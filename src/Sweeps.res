@@ -20,6 +20,14 @@ module SetArchived = %graphql(`
   }
 `)
 
+module ArchiveQuery = %graphql(`
+  query queryArchived($condition: sweep_bool_exp!) {
+    sweep(where: $condition) {
+      archived
+    }
+  }
+`)
+
 @react.component
 let make = (~client, ~ids, ~archived) => {
   let {loading, error, data} = SweepSubscription.use({archived: archived})
@@ -29,11 +37,6 @@ let make = (~client, ~ids, ~archived) => {
       sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
-
-  let (
-    archive,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
-  ) = SetArchived.use()
 
   let _in = ids->Set.Int.toArray
 
@@ -52,27 +55,41 @@ let make = (~client, ~ids, ~archived) => {
     condition
   }
 
-  let archiveResult: ArchiveSweepsButton.archiveResult = {
-    called: called,
-    error: error,
-    dataMessage: switch data {
-    | Some({update_sweep: Some({affected_rows: sweepsDeleted})}) =>
-      Some(sweepsDeleted == 0 ? "" : `Archived ${sweepsDeleted->Int.toString} sweeps.`)
-    | _ => None
-    },
-  }
-  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})->ignore
-  let condition = {
-    open ArchiveSweepsButton
+  let archiveButton = {
     let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
     let condition = ArchiveQuery.makeInputObjectsweep_bool_exp(~id, ())
-    condition
+    let {error, loading, data} = ArchiveQuery.use({condition: condition})
+    let queryResult: ArchiveButton.queryResult = {
+      error: error->Option.map(({message}) => message),
+      loading: loading,
+      data: data->Option.map(({sweep}) => sweep->Array.map(({archived}) => archived)),
+    }
+    let (
+      archive,
+      {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
+    ) = SetArchived.use()
+
+    let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})
+
+    let archiveResult: ArchiveButton.archiveResult = {
+      called: called,
+      error: error,
+      dataMessage: switch data {
+      | Some({
+          update_run: Some({affected_rows: runsArchived}),
+          update_sweep: Some({affected_rows: sweepsArchived}),
+        }) =>
+        Some(
+          `Archived ${sweepsArchived->Int.toString} sweeps and ${runsArchived->Int.toString} runs.`,
+        )
+      | _ => None
+      },
+    }
+
+    <ArchiveButton queryResult archiveResult onClick />
   }
-  let display =
-    <>
-      <Subscribe1 condition1 condition2 client />
-      <ArchiveSweepsButton archiveResult onClick condition />
-    </>
+
+  let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
 
   <ListAndDisplay queryResult ids display />
 }

@@ -16,6 +16,14 @@ module SetArchived = %graphql(`
   }
 `)
 
+module ArchiveQuery = %graphql(`
+  query queryArchived($condition: run_bool_exp!) {
+    run(where: $condition) {
+      archived
+    }
+  }
+`)
+
 @react.component
 let make = (~client, ~ids, ~archived) => {
   let {loading, error, data} = RunSubscription.use({archived: archived})
@@ -25,11 +33,6 @@ let make = (~client, ~ids, ~archived) => {
       run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
-
-  let (
-    archive,
-    {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
-  ) = SetArchived.use()
 
   let _in = ids->Set.Int.toArray
 
@@ -48,26 +51,35 @@ let make = (~client, ~ids, ~archived) => {
     condition
   }
 
-  let archiveResult: ArchiveRunsButton.archiveResult = {
-    called: called,
-    error: error,
-    dataMessage: switch data {
-    | Some({update_run: Some({affected_rows: runsDeleted})}) =>
-      Some(runsDeleted == 0 ? "" : `Archived  ${runsDeleted->Int.toString} rows.`)
-    | _ => None
-    },
-  }
-  let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})->ignore
-  let condition = {
-    open ArchiveRunsButton
+  let archiveButton = {
     let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
     let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~id, ())
-    condition
+    let {error, loading, data} = ArchiveQuery.use({condition: condition})
+    let queryResult: ArchiveButton.queryResult = {
+      error: error->Option.map(({message}) => message),
+      loading: loading,
+      data: data->Option.map(({run}) => run->Array.map(({archived}) => archived)),
+    }
+    let (
+      archive,
+      {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
+    ) = SetArchived.use()
+
+    let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})
+
+    let archiveResult: ArchiveButton.archiveResult = {
+      called: called,
+      error: error,
+      dataMessage: switch data {
+      | Some({update_run: Some({affected_rows: runsArchived})}) =>
+        Some(`Archived  ${runsArchived->Int.toString} sweeps.`)
+      | _ => None
+      },
+    }
+
+    <ArchiveButton queryResult archiveResult onClick />
   }
-  let display =
-    <>
-      <Subscribe1 condition1 condition2 client />
-      <ArchiveRunsButton archiveResult onClick condition />
-    </>
+  let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
+
   <ListAndDisplay queryResult ids display />
 }
