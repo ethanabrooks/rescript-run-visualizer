@@ -11,5 +11,5 @@
 /release.tzst
 /src/**/*.bs.js
 .idea
-.envrc
 dist/*
+.env
