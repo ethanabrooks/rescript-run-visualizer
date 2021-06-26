@@ -8,7 +8,8 @@ module ChartIdQuery = %graphql(`
   }
 `)
 
-let _make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
+@react.component
+let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   open Belt
   switch ChartIdQuery.use() {
@@ -64,9 +65,4 @@ let _make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonAr
   | {data: Some({chart})} =>
     Js.Exn.raiseError(`Somehow query returned ${chart->Array.length->Int.toString} chart IDs`)
   }
-}
-
-@react.component
-let make = (~logs, ~newLogs, ~specs, ~metadata) => {
-  _make(~logs, ~newLogs, ~specs, ~metadata)
 }

@@ -108,7 +108,7 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata}) => {
-      let makeCharts = Charts._make(~metadata, ~specs)
+      let makeCharts = (~logs, ~newLogs) => <Charts metadata specs logs newLogs />
       <Subscribe2 logs condition2 client makeCharts />
     }
   }

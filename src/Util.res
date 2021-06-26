@@ -60,14 +60,14 @@ let urlToPath = (url: ReasonReactRouter.url) => {
   let hashParts = url.hash->splitHash->List.fromArray
 
   let ids = switch hashParts {
-  | list{_, "archived", ids}
+  | list{_, _, ids}
   | list{_, ids} =>
     ids->processIds
   | _ => Set.Int.empty
   }
 
   let archived = switch hashParts {
-  | list{_, "archived"} => true
+  | list{_, "archived", ..._} => true
   | _ => false
   }
 

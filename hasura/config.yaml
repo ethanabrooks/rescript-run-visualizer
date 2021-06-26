@@ -1,5 +1,5 @@
 version: 3
-endpoint: http://[fd94:639b:be65:3b79:5b86:c962:47a2:1a07]:8080
+endpoint: http://rldl12.eecs.umich.edu:1200
 metadata_directory: metadata
 actions:
   kind: synchronous

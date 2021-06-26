@@ -4,6 +4,7 @@ type entry = {id: int, metadata: option<Js.Json.t>}
 @react.component
 let make = (~items: array<entry>, ~ids: Set.Int.t) => {
   let (text, textbox) = TextInput.useText(~initialText="name,parameters")
+  let url = ReasonReactRouter.useUrl()
   let keywords = ","->Js.String.split(text)->Set.String.fromArray->Set.String.remove("")
   <div className="py-10 m-5 max-h-screen overflow-y-scroll overscroll-contain">
     {textbox}
@@ -20,10 +21,8 @@ let make = (~items: array<entry>, ~ids: Set.Int.t) => {
           ${selected ? "bg-indigo-50 border-indigo-200 z-10" : "border-gray-200"}
           ${"relative border p-4 flex focus:outline-none"}
         `
-
         open Util
         let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
-        let url = ReasonReactRouter.useUrl()
         let href = switch url->urlToPath {
         | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
         | Runs({archived}) => Runs({ids: newIds, archived: archived})

@@ -1,6 +1,9 @@
 module RunSubscription = %graphql(`
   subscription($archived: Boolean!) {
-      run(where: {archived: {_eq: $archived}}) {
+      run(where: {_and: [
+          {archived: {_eq: $archived}}
+          {sweep_id: {_is_null: true}}
+        ]}) {
           id
           metadata
       }
@@ -15,8 +18,8 @@ module SetArchived = %graphql(`
   }
 `)
 
-module ArchiveQuery = %graphql(`
-  query queryArchived($condition: run_bool_exp!) {
+module ArchiveSubscription = %graphql(`
+  subscription queryArchived($condition: run_bool_exp!) {
     run(where: $condition) {
       archived
     }
@@ -26,35 +29,28 @@ module ArchiveQuery = %graphql(`
 @react.component
 let make = (~client, ~ids, ~archived) => {
   open Belt
-  let {loading, error, data} = RunSubscription.use({archived: archived})
-  let error = error->Option.map(({message}) => message)
-  let data =
-    data->Option.map(({run}) =>
-      run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
-    )
-  let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
-
-  let _in = ids->Set.Int.toArray
+  let idsSet = ids
+  let ids = ids->Set.Int.toArray
 
   let condition1 = {
     open Subscribe1
-    let id = Subscription.makeInputObjectInt_comparison_exp(~_in, ())
+    let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
     let condition = Subscription.makeInputObjectrun_bool_exp(~id, ())
     condition
   }
 
   let condition2 = {
     open Subscribe2
-    let id = Subscription.makeInputObjectInt_comparison_exp(~_in, ())
+    let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
     condition
   }
 
   let archiveButton = {
-    let id = ArchiveQuery.makeInputObjectInt_comparison_exp(~_in, ())
-    let condition = ArchiveQuery.makeInputObjectrun_bool_exp(~id, ())
-    let {error, loading, data} = ArchiveQuery.use({condition: condition})
+    let id = ArchiveSubscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+    let condition = ArchiveSubscription.makeInputObjectrun_bool_exp(~id, ())
+    let {error, loading, data} = ArchiveSubscription.use({condition: condition})
     let queryResult: ArchiveButton.queryResult = {
       error: error->Option.map(({message}) => message),
       loading: loading,
@@ -65,7 +61,7 @@ let make = (~client, ~ids, ~archived) => {
       {called, error, data}: ApolloClient__React_Types.MutationResult.t<SetArchived.t>,
     ) = SetArchived.use()
 
-    let onClick = archived => archive({ids: ids->Set.Int.toArray->Some, archived: !archived})
+    let onClick = archived => archive({ids: ids->Some, archived: !archived})
 
     let archiveResult: ArchiveButton.archiveResult = {
       called: called,
@@ -77,11 +73,18 @@ let make = (~client, ~ids, ~archived) => {
       },
     }
 
-    open Util
-    let makePath = archived => Runs({ids: ids, archived: !archived})
-    <ArchiveButton queryResult archiveResult onClick makePath />
+    <ArchiveButton queryResult archiveResult onClick />
   }
   let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
 
+  let variables: RunSubscription.t_variables = {archived: archived}
+  let {loading, error, data} = RunSubscription.use(variables)
+  let error = error->Option.map(({message}) => message)
+  let data =
+    data->Option.map(({run}) =>
+      run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
+    )
+  let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
+  let ids = idsSet
   <ListAndDisplay queryResult ids display />
 }
