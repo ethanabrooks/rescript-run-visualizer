@@ -86,5 +86,6 @@ let make = (~client, ~ids, ~archived) => {
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
   let ids = idsSet
-  <ListAndDisplay queryResult ids display />
+  let defaultListFilters = "name,parameters"
+  <ListAndDisplay queryResult ids display defaultListFilters />
 }
