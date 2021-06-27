@@ -89,6 +89,6 @@ let make = (~client, ~ids, ~archived) => {
       sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
-  let defaultListFilters = "name,config"
+  let defaultListFilters = "name"
   <ListAndDisplay queryResult ids display defaultListFilters />
 }
