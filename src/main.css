@@ -7,15 +7,12 @@
     @apply inline-flex; 
     @apply items-center;
     @apply m-1;
-    @apply px-3;
     @apply py-2;
     @apply border;
     @apply border-gray-300;
     @apply shadow-sm;
     @apply text-sm;
-    @apply leading-4;
     @apply font-medium;
-    @apply rounded-md;
     @apply bg-white;
     @apply text-gray-700;
 }
