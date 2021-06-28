@@ -4,14 +4,6 @@ open Util
 
 @module external copy: string => bool = "copy-to-clipboard"
 
-module SetSpec = %graphql(`
-  mutation set_spec($chartIds: [Int!], $spec: jsonb!) {
-    update_chart(_set: {spec: $spec}, where: {id: {_in: $chartIds}}) {
-      affected_rows
-    }
-  }
-`)
-
 module SetArchived = %graphql(`
   mutation set_archived($chartIds: [Int!]) {
     update_chart(_set: {archived: true}, where: {id: {_in: $chartIds}}) {
@@ -41,12 +33,18 @@ module CopyButton = {
 }
 
 @react.component
-let make = (~logs: jsonMap, ~newLogs: jsonMap, ~initialState: state, ~setSpecs, ~chartIds) => {
+let make = (
+  ~logs: jsonMap,
+  ~newLogs: jsonMap,
+  ~initialState: state,
+  ~setSpecs,
+  ~runIds,
+  ~chartIds,
+) => {
   let (state, setState) = React.useState(_ => initialState)
   let (numCopyDataPoints, setNumCopyDataPoints) = React.useState(_ => 30)
-  let (setSpec, setSpecResult) = SetSpec.use()
   let (archiveChart, archiveChartResult) = SetArchived.use()
-  let mainWindow = switch state {
+  switch state {
   | Rendering(spec) =>
     let specString = spec->Js.Json.stringifyWithSpace(2)
     let (firstNDatapoints, _) =
@@ -141,27 +139,15 @@ let make = (~logs: jsonMap, ~newLogs: jsonMap, ~initialState: state, ~setSpecs, 
     let buttons = list{buttons, copyButtons}->List.flatten->List.toArray
     <> <Chart logs newLogs spec /> <Buttons buttons /> </>
 
-  | Editing(initialSpec) => {
-      let onSubmit = spec => {
-        chartIds
-        ->Option.map(Set.Int.toArray)
-        ->Option.map(a => a->Some)
-        ->Option.mapWithDefault((), (chartIds: option<array<int>>) =>
-          setSpec({spec: spec, chartIds: chartIds})->ignore
-        )
-        spec->setSpecs->ignore
-        setState(_ => Rendering(spec))
-      }
+  | Editing(initialSpec) =>
+    let onCancel = _ => setState(_ => Rendering(initialSpec))
 
-      let onCancel = _ => setState(_ => Rendering(initialSpec))
-      <SpecEditor initialSpec onSubmit onCancel />
+    let onClick = spec => {
+      spec->setSpecs->ignore
+      setState(_ => Rendering(spec))
     }
+    let submitButton = parseResult => <SubmitButton chartIds runIds onClick parseResult />
+
+    <SpecEditor initialSpec submitButton onCancel />
   }
-  let setSpecResult = switch setSpecResult {
-  | {error: Some({message})} => <ErrorPage message />
-  | {data: Some({update_chart: Some({affected_rows})})} =>
-    <p> {`Updated ${affected_rows->Int.toString} chart.`->React.string} </p>
-  | {error: None} => <> </>
-  }
-  <> {setSpecResult} {mainWindow} </>
 }

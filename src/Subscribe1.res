@@ -4,6 +4,7 @@ open Util
 module Subscription = %graphql(`
   subscription subscription($condition: run_bool_exp!) {
     run(where: $condition) {
+      id
       metadata
       run_logs {
         id
@@ -29,6 +30,7 @@ type queryResult = {
   metadata: array<Js.Json.t>,
   specs: specs,
   logs: jsonMap,
+  runIds: Set.Int.t,
 }
 
 type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
@@ -49,7 +51,7 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
           // combine values from multiple runs returned from query
           let newState =
             run
-            ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs}) => {
+            ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs, id}) => {
               let metadataMap = metadata->Option.flatMap(objToMap)
 
               // collect possibly multiple metadata into array
@@ -74,16 +76,16 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
 
               // combine values from this run with values from previous runs
               acc
-              ->Option.mapWithDefault({metadata: metadata, specs: specs, logs: logs}, ({
-                metadata: m,
-                specs: s,
-                logs: l,
-              }) => {
-                let metadata: array<Js.Json.t> = m->Array.concat(metadata)
-                let specs = s->Map.Int.merge(specs, merge)
-                let logs = l->Map.Int.merge(logs, merge)
-                {metadata: metadata, specs: specs, logs: logs}
-              })
+              ->Option.mapWithDefault(
+                {metadata: metadata, specs: specs, logs: logs, runIds: Set.Int.empty},
+                ({metadata: m, specs: s, logs: l, runIds: r}) => {
+                  let metadata: array<Js.Json.t> = m->Array.concat(metadata)
+                  let specs = s->Map.Int.merge(specs, merge)
+                  let logs = l->Map.Int.merge(logs, merge)
+                  let runIds = r->Set.Int.add(id)
+                  {metadata: metadata, specs: specs, logs: logs, runIds: runIds}
+                },
+              )
               ->Some
             })
             ->Option.mapWithDefault(NoData, data => Data(data))
@@ -107,8 +109,8 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logs, specs, metadata}) => {
-      let makeCharts = (~logs, ~newLogs) => <Charts metadata specs logs newLogs />
+  | Data({logs, specs, metadata, runIds}) => {
+      let makeCharts = (~logs, ~newLogs) => <Charts metadata specs logs newLogs runIds />
       <Subscribe2 logs condition2 client makeCharts />
     }
   }

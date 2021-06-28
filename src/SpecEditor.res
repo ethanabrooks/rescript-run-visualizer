@@ -20,7 +20,7 @@ type state =
   | Editing(Js.Json.t)
 
 @react.component
-let make = (~initialSpec, ~onSubmit, ~onCancel) => {
+let make = (~initialSpec, ~submitButton, ~onCancel) => {
   let (schema, setSchema) = React.useState(_ => None)
 
   // https://github.com/vega/vega-lite/blob/b61b13c2cbd4ecde0448544aff6cdaea721fd22a/examples/examples.test.ts
@@ -63,13 +63,13 @@ let make = (~initialSpec, ~onSubmit, ~onCancel) => {
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
   let parseResult = text->parse
-  let submitButton = switch parseResult {
-  | Result.Error(_) => <Button text={"Submit"} onClick={_ => ()} disabled={true} />
-  | Result.Ok(spec) => <Button text={"Submit"} onClick={_ => spec->onSubmit} disabled={false} />
-  }
+  // let submitButton = switch parseResult {
+  // | Result.Error(_) => <Button text={"Submit"} onClick={_ => ()} disabled={true} />
+  // | Result.Ok(spec) => <Button text={"Submit"} onClick={_ => spec->onSubmit} disabled={false} />
+  // }
   let cancelButton =
     <Button text={"Cancel"} onClick={onCancel} disabled={parseResult->Result.isError} />
-  let buttons = [submitButton, cancelButton]
+  let buttons = [parseResult->submitButton, cancelButton]
 
   <div className="sm:gap-4 sm:items-start">
     <label className="text-gray-700"> {"Edit Vega Spec"->React.string} </label>

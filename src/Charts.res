@@ -9,7 +9,7 @@ module ChartIdQuery = %graphql(`
 `)
 
 @react.component
-let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray) => {
+let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runIds) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   open Belt
   switch ChartIdQuery.use() {
@@ -40,7 +40,7 @@ let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArr
           let chartIds = chartIds->Some
 
           <div key={i->Int.toString} className="py-5">
-            <ChartOrTextbox initialState logs newLogs setSpecs chartIds />
+            <ChartOrTextbox initialState logs newLogs setSpecs chartIds runIds />
           </div>
         })
         ->Array.concat([
@@ -50,7 +50,7 @@ let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArr
               let initialState = Editing(Js.Json.null)
               let chartIds = None
               let setSpecs = spec => setSpecs(specs => specs->Map.Int.set(chartId, spec))
-              <ChartOrTextbox initialState logs newLogs setSpecs chartIds />
+              <ChartOrTextbox initialState logs newLogs setSpecs chartIds runIds />
             }
           </div>,
         ])
