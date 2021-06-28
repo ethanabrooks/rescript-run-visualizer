@@ -52,7 +52,11 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
           let newState =
             run
             ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs, id}) => {
-              let metadataMap = metadata->Option.flatMap(objToMap)
+              let parameters =
+                metadata
+                ->Option.flatMap(objToMap)
+                ->Option.flatMap(o => o->Map.String.get("parameters")) // To Do: do not hard-code this somehow
+                ->Option.flatMap(objToMap)
 
               // collect possibly multiple metadata into array
               let metadata = metadata->Option.mapWithDefault([], m => [m])
@@ -67,9 +71,9 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
                 ->Map.Int.fromArray
                 // add metadata to each log
                 ->Map.Int.map(log =>
-                  switch (metadataMap, log->objToMap) {
-                  | (Some(metadataMap), Some(logMap)) =>
-                    metadataMap->Map.String.merge(logMap, merge)->mapToObj
+                  switch (parameters, log->objToMap) {
+                  | (Some(parameters), Some(logMap)) =>
+                    parameters->Map.String.merge(logMap, merge)->mapToObj
                   | _ => log
                   }
                 )
