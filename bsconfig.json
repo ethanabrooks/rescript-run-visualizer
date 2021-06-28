@@ -25,6 +25,7 @@
     "rescript-apollo-client",
     "reason-react",
     "bs-fetch",
+    "bs-webapi",
     "decco"
   ],
   "ppx-flags": [

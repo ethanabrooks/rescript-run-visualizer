@@ -74,15 +74,16 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
                   }
                 )
 
+              let runIds = Set.Int.empty->Set.Int.add(id)
               // combine values from this run with values from previous runs
               acc
               ->Option.mapWithDefault(
-                {metadata: metadata, specs: specs, logs: logs, runIds: Set.Int.empty},
+                {metadata: metadata, specs: specs, logs: logs, runIds: runIds},
                 ({metadata: m, specs: s, logs: l, runIds: r}) => {
                   let metadata: array<Js.Json.t> = m->Array.concat(metadata)
                   let specs = s->Map.Int.merge(specs, merge)
                   let logs = l->Map.Int.merge(logs, merge)
-                  let runIds = r->Set.Int.add(id)
+                  let runIds = r->Set.Int.union(runIds)
                   {metadata: metadata, specs: specs, logs: logs, runIds: runIds}
                 },
               )
