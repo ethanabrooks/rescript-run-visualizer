@@ -9,7 +9,7 @@ module ChartIdQuery = %graphql(`
 `)
 
 @react.component
-let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArray, ~runIds) => {
+let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds) => {
   let (specs: specs, setSpecs) = React.useState(_ => specs)
   open Belt
   switch ChartIdQuery.use() {
@@ -56,6 +56,7 @@ let make = (~logs: jsonMap, ~newLogs: jsonMap, ~specs: specs, ~metadata: jsonArr
         ])
         ->React.array}
         {metadata
+        ->Map.Int.valuesToArray
         ->Array.mapWithIndex((i, m) =>
           <pre key={i->Int.toString} className="p-4"> {m->Util.yaml->React.string} </pre>
         )

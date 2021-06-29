@@ -21,13 +21,8 @@ module Subscription = %graphql(`
 
 @val external max_logs: string = "NODE_MAX_LOGS"
 
-let objToMap = (obj: Js.Json.t) =>
-  obj->Js.Json.decodeObject->Option.map(obj => obj->Js.Dict.entries->Map.String.fromArray)
-let mapToObj = (map: Map.String.t<'a>) =>
-  map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
-
 type queryResult = {
-  metadata: array<Js.Json.t>,
+  metadata: Map.Int.t<Js.Json.t>,
   specs: specs,
   logs: jsonMap,
   runIds: Set.Int.t,
@@ -52,14 +47,9 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
           let newState =
             run
             ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs, id}) => {
-              let parameters =
-                metadata
-                ->Option.flatMap(objToMap)
-                ->Option.flatMap(o => o->Map.String.get("parameters")) // To Do: do not hard-code this somehow
-                ->Option.flatMap(objToMap)
-
               // collect possibly multiple metadata into array
-              let metadata = metadata->Option.mapWithDefault([], m => [m])
+              let metadataMap =
+                metadata->Option.mapWithDefault(Map.Int.empty, Map.Int.empty->Map.Int.set(id))
 
               // combine multiple charts from run
               let specs: specs = charts->Array.map(({id, spec}) => (id, spec))->Map.Int.fromArray
@@ -71,20 +61,16 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
                 ->Map.Int.fromArray
                 // add metadata to each log
                 ->Map.Int.map(log =>
-                  switch (parameters, log->objToMap) {
-                  | (Some(parameters), Some(logMap)) =>
-                    parameters->Map.String.merge(logMap, merge)->mapToObj
-                  | _ => log
-                  }
+                  metadata->Option.mapWithDefault(log, log->Subscribe2.addParametersToLog)
                 )
 
               let runIds = Set.Int.empty->Set.Int.add(id)
               // combine values from this run with values from previous runs
               acc
               ->Option.mapWithDefault(
-                {metadata: metadata, specs: specs, logs: logs, runIds: runIds},
+                {metadata: metadataMap, specs: specs, logs: logs, runIds: runIds},
                 ({metadata: m, specs: s, logs: l, runIds: r}) => {
-                  let metadata: array<Js.Json.t> = m->Array.concat(metadata)
+                  let metadata = m->Map.Int.merge(metadataMap, merge)
                   let specs = s->Map.Int.merge(specs, merge)
                   let logs = l->Map.Int.merge(logs, merge)
                   let runIds = r->Set.Int.union(runIds)
@@ -116,7 +102,7 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
   | Error({message}) => <ErrorPage message />
   | Data({logs, specs, metadata, runIds}) => {
       let makeCharts = (~logs, ~newLogs) => <Charts metadata specs logs newLogs runIds />
-      <Subscribe2 logs condition2 client makeCharts />
+      <Subscribe2 logs condition2 client makeCharts metadata />
     }
   }
 }

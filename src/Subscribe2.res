@@ -1,4 +1,5 @@
 open Util
+open Belt
 
 module Subscription = %graphql(`
   subscription logs($condition: run_log_bool_exp!) {
@@ -14,14 +15,24 @@ module ErrorPage = {
   let make = (~message: string) => <p> {message->React.string} </p>
 }
 
+let addParametersToLog = (log, metadata) =>
+  metadata
+  ->jsonToMap
+  ->Option.flatMap(o => o->Map.String.get("parameters")) // To Do: do not hard-code this somehow
+  ->Option.flatMap(jsonToMap)
+  ->Option.flatMap(parameters =>
+    log->jsonToMap->Option.map(logMap => parameters->Map.String.merge(logMap, merge)->mapToJson)
+  )
+  ->Option.getWithDefault(log)
+
 @react.component
 let make = (
   ~logs: jsonMap,
   ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
+  ~metadata: jsonMap,
   ~makeCharts: (~logs: jsonMap, ~newLogs: jsonMap) => React.element,
 ) => {
-  open Belt
   let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok((
     logs,
     Map.Int.empty,
@@ -45,6 +56,12 @@ let make = (
               ->Array.map(({id, log}) => (id, log))
               ->Array.keep(((id, _)) => !(oldLogs->Map.Int.has(id)))
               ->Map.Int.fromArray
+              ->Map.Int.mapWithKey((runId, log) =>
+                metadata
+                ->Map.Int.get(runId)
+                ->Option.map(log->addParametersToLog)
+                ->Option.getWithDefault(log)
+              )
             let oldLogs = oldLogs->Map.Int.merge(newLogs, Util.merge)
             Result.Ok((oldLogs, newLogs))
           })
