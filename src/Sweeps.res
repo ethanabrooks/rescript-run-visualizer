@@ -1,9 +1,9 @@
 module SweepSubscription = %graphql(`
-  subscription($archived: Boolean!) {
-      sweep(where: {archived: {_eq: $archived}}) {
-          id
-          metadata
-      }
+  subscription search_sweeps($path: _text = null, $pattern: String = "%", $obj: jsonb = null, $archived: Boolean!) {
+    filter_sweeps(args: {object: $obj, path: $path, pattern: $pattern}, where: {archived: {_eq: $archived}}) {
+      id
+      metadata
+    }
   }
 `)
 module SetArchived = %graphql(`
@@ -82,11 +82,16 @@ let make = (~client, ~ids, ~archived) => {
   let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
   let ids = idsSet
 
-  let {loading, error, data} = SweepSubscription.use({archived: archived})
+  let {loading, error, data} = SweepSubscription.use({
+    archived: archived,
+    obj: Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some,
+    pattern: "%breakout%"->Some,
+    path: "{name}"->Js.Json.string->Some,
+  })
   let error = error->Option.map(({message}) => message)
   let data =
-    data->Option.map(({sweep}) =>
-      sweep->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
+    data->Option.map(({filter_sweeps}) =>
+      filter_sweeps->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
   let defaultListFilters = "name"
