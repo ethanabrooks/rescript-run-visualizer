@@ -1,4 +1,6 @@
 open Belt
+open Routes
+
 type entry = {id: int, metadata: option<Js.Json.t>}
 @val external document: 'a = "document"
 
@@ -24,11 +26,11 @@ let make = (~items: array<entry>, ~ids: Set.Int.t, ~defaultListFilters) => {
         `
         open Util
         let newIds = Set.Int.empty->Set.Int.add(id)
-        let href = switch url->urlToPath {
+        let href = switch url->urlToRoute {
         | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
         | Runs({archived}) => Runs({ids: newIds, archived: archived})
         | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to MenuList.`)
-        }->pathToUrl
+        }->routeToUrl
         let href = `#${href}`
         <li key={key}>
           <div className>
@@ -40,11 +42,11 @@ let make = (~items: array<entry>, ~ids: Set.Int.t, ~defaultListFilters) => {
                 checked={ids->Set.Int.has(id)}
                 onChange={_ => {
                   let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
-                  let href = switch url->urlToPath {
+                  let href = switch url->urlToRoute {
                   | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
                   | Runs({archived}) => Runs({ids: newIds, archived: archived})
                   | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to MenuList.`)
-                  }->pathToUrl
+                  }->routeToUrl
 
                   ReasonReactRouter.replace(`#${href}`)
                 }}
