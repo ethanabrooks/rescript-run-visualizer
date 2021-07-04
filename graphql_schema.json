@@ -3056,12 +3056,12 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "filter_run_metadata_contains_args",
+        "name": "filter_runs_args",
         "description": null,
         "fields": null,
         "inputFields": [
           {
-            "name": "path",
+            "name": "object",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -3069,18 +3069,7 @@
               "ofType": null
             },
             "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "filter_run_metadata_like_args",
-        "description": null,
-        "fields": null,
-        "inputFields": [
+          },
           {
             "name": "path",
             "description": null,
@@ -3108,12 +3097,12 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "filter_sweep_metadata_contains_args",
+        "name": "filter_sweeps_args",
         "description": null,
         "fields": null,
         "inputFields": [
           {
-            "name": "path",
+            "name": "object",
             "description": null,
             "type": {
               "kind": "SCALAR",
@@ -3121,18 +3110,7 @@
               "ofType": null
             },
             "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "filter_sweep_metadata_like_args",
-        "description": null,
-        "fields": null,
-        "inputFields": [
+          },
           {
             "name": "path",
             "description": null,
@@ -6482,18 +6460,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_contains",
-            "description": "execute function \"filter_run_metadata_contains\" which returns \"run\"",
+            "name": "filter_runs",
+            "description": "execute function \"filter_runs\" which returns \"run\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_contains\"",
+                "description": "input parameters for function \"filter_runs\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_contains_args",
+                    "name": "filter_runs_args",
                     "ofType": null
                   }
                 },
@@ -6587,18 +6565,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_contains_aggregate",
-            "description": "execute function \"filter_run_metadata_contains\" and query aggregates on result of table type \"run\"",
+            "name": "filter_runs_aggregate",
+            "description": "execute function \"filter_runs\" and query aggregates on result of table type \"run\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_contains\"",
+                "description": "input parameters for function \"filter_runs\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_contains_args",
+                    "name": "filter_runs_args",
                     "ofType": null
                   }
                 },
@@ -6684,220 +6662,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_like",
-            "description": "execute function \"filter_run_metadata_like\" which returns \"run\"",
+            "name": "filter_sweeps",
+            "description": "execute function \"filter_sweeps\" which returns \"sweep\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_like\"",
+                "description": "input parameters for function \"filter_sweeps\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "run_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "run_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "run_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "run",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_run_metadata_like_aggregate",
-            "description": "execute function \"filter_run_metadata_like\" and query aggregates on result of table type \"run\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "run_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "run_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "run_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "run_aggregate",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_contains",
-            "description": "execute function \"filter_sweep_metadata_contains\" which returns \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_contains\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_contains_args",
+                    "name": "filter_sweeps_args",
                     "ofType": null
                   }
                 },
@@ -6991,220 +6767,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_sweep_metadata_contains_aggregate",
-            "description": "execute function \"filter_sweep_metadata_contains\" and query aggregates on result of table type \"sweep\"",
+            "name": "filter_sweeps_aggregate",
+            "description": "execute function \"filter_sweeps\" and query aggregates on result of table type \"sweep\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_contains\"",
+                "description": "input parameters for function \"filter_sweeps\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_contains_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "sweep_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "sweep_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "sweep_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "sweep_aggregate",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_like",
-            "description": "execute function \"filter_sweep_metadata_like\" which returns \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "sweep_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "sweep_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "sweep_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "sweep",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_like_aggregate",
-            "description": "execute function \"filter_sweep_metadata_like\" and query aggregates on result of table type \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_like_args",
+                    "name": "filter_sweeps_args",
                     "ofType": null
                   }
                 },
@@ -12228,18 +11802,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_contains",
-            "description": "execute function \"filter_run_metadata_contains\" which returns \"run\"",
+            "name": "filter_runs",
+            "description": "execute function \"filter_runs\" which returns \"run\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_contains\"",
+                "description": "input parameters for function \"filter_runs\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_contains_args",
+                    "name": "filter_runs_args",
                     "ofType": null
                   }
                 },
@@ -12333,18 +11907,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_contains_aggregate",
-            "description": "execute function \"filter_run_metadata_contains\" and query aggregates on result of table type \"run\"",
+            "name": "filter_runs_aggregate",
+            "description": "execute function \"filter_runs\" and query aggregates on result of table type \"run\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_contains\"",
+                "description": "input parameters for function \"filter_runs\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_contains_args",
+                    "name": "filter_runs_args",
                     "ofType": null
                   }
                 },
@@ -12430,220 +12004,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_run_metadata_like",
-            "description": "execute function \"filter_run_metadata_like\" which returns \"run\"",
+            "name": "filter_sweeps",
+            "description": "execute function \"filter_sweeps\" which returns \"sweep\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_like\"",
+                "description": "input parameters for function \"filter_sweeps\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "run_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "run_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "run_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "run",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_run_metadata_like_aggregate",
-            "description": "execute function \"filter_run_metadata_like\" and query aggregates on result of table type \"run\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_run_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_run_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "run_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "run_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "run_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "run_aggregate",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_contains",
-            "description": "execute function \"filter_sweep_metadata_contains\" which returns \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_contains\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_contains_args",
+                    "name": "filter_sweeps_args",
                     "ofType": null
                   }
                 },
@@ -12737,220 +12109,18 @@
             "deprecationReason": null
           },
           {
-            "name": "filter_sweep_metadata_contains_aggregate",
-            "description": "execute function \"filter_sweep_metadata_contains\" and query aggregates on result of table type \"sweep\"",
+            "name": "filter_sweeps_aggregate",
+            "description": "execute function \"filter_sweeps\" and query aggregates on result of table type \"sweep\"",
             "args": [
               {
                 "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_contains\"",
+                "description": "input parameters for function \"filter_sweeps\"",
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_contains_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "sweep_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "sweep_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "sweep_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "sweep_aggregate",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_like",
-            "description": "execute function \"filter_sweep_metadata_like\" which returns \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_like_args",
-                    "ofType": null
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "distinct_on",
-                "description": "distinct select on columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "ENUM",
-                      "name": "sweep_select_column",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "limit",
-                "description": "limit the number of rows returned",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "offset",
-                "description": "skip the first n rows. Use only with order_by",
-                "type": {
-                  "kind": "SCALAR",
-                  "name": "Int",
-                  "ofType": null
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "order_by",
-                "description": "sort the rows by one or more columns",
-                "type": {
-                  "kind": "LIST",
-                  "name": null,
-                  "ofType": {
-                    "kind": "NON_NULL",
-                    "name": null,
-                    "ofType": {
-                      "kind": "INPUT_OBJECT",
-                      "name": "sweep_order_by",
-                      "ofType": null
-                    }
-                  }
-                },
-                "defaultValue": null
-              },
-              {
-                "name": "where",
-                "description": "filter the rows returned",
-                "type": {
-                  "kind": "INPUT_OBJECT",
-                  "name": "sweep_bool_exp",
-                  "ofType": null
-                },
-                "defaultValue": null
-              }
-            ],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "LIST",
-                "name": null,
-                "ofType": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "OBJECT",
-                    "name": "sweep",
-                    "ofType": null
-                  }
-                }
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "filter_sweep_metadata_like_aggregate",
-            "description": "execute function \"filter_sweep_metadata_like\" and query aggregates on result of table type \"sweep\"",
-            "args": [
-              {
-                "name": "args",
-                "description": "input parameters for function \"filter_sweep_metadata_like\"",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "INPUT_OBJECT",
-                    "name": "filter_sweep_metadata_like_args",
+                    "name": "filter_sweeps_args",
                     "ofType": null
                   }
                 },
