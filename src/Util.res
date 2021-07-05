@@ -34,3 +34,17 @@ let merge = (_, old, new) =>
   | (None, Some(x)) =>
     Some(x)
   }
+
+let mapError = (res: Result.t<'o, 'e>, f: 'e => 'f): Result.t<'o, 'f> =>
+  switch res {
+  | Ok(ok) => ok->Ok
+  | Error(e) => e->f->Error
+  }
+
+let optionToResult = option => option->Option.mapWithDefault(Error(None), x => x->Ok)
+let resultToOption = result => result->Result.mapWithDefault(None, x => x->Some)
+
+let parseJson = string =>
+  try string->Js.Json.parseExn->Result.Ok catch {
+  | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
+  }

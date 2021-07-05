@@ -1,6 +1,12 @@
 module SweepSubscription = %graphql(`
-  subscription search_sweeps($path: _text = null, $pattern: String = "%", $obj: jsonb = null, $archived: Boolean!) {
-    filter_sweeps(args: {object: $obj, path: $path, pattern: $pattern}, where: {archived: {_eq: $archived}}) {
+  subscription search_sweeps(
+    $path: _text = null,
+    $pattern: String = "%",
+    $obj: jsonb = null,
+    $archived: Boolean! 
+  ) {
+    filter_sweeps(args: {object: $obj, path: $path, pattern: $pattern}, 
+    where: {archived: {_eq: $archived}}) {
       id
       metadata
     }
@@ -26,7 +32,7 @@ module ArchiveQuery = %graphql(`
 `)
 
 @react.component
-let make = (~client, ~ids, ~archived) => {
+let make = (~client, ~ids, ~archived, ~obj, ~pattern, ~path) => {
   open Belt
   let idsSet = ids
   let ids = ids->Set.Int.toArray
@@ -84,9 +90,14 @@ let make = (~client, ~ids, ~archived) => {
 
   let {loading, error, data} = SweepSubscription.use({
     archived: archived,
-    obj: Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some,
-    pattern: "%breakout%"->Some,
-    path: "{name}"->Js.Json.string->Some,
+    obj: obj, // Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some,
+    pattern: pattern, //"%breakout%"->Some,
+    path: path
+    // ->Option.map(path => `{${path->Js.Array2.joinWith(",")}}`)
+    ->Option.map(Js.Array.joinWith(","))
+    ->Option.map(path => `"${path}"`)
+    ->Option.map(Js.Json.string),
+    // "{name}"->Js.Json.string->Some,
   })
   let error = error->Option.map(({message}) => message)
   let data =

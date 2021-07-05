@@ -1,0 +1,3 @@
+function:
+  name: my_function
+  schema: public

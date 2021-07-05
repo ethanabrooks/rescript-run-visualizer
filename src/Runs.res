@@ -1,12 +1,15 @@
 module RunSubscription = %graphql(`
-  subscription($archived: Boolean!) {
-      run(where: {_and: [
-          {archived: {_eq: $archived}}
-          {sweep_id: {_is_null: true}}
-        ]}) {
-          id
-          metadata
-      }
+  subscription search_runs(
+    $path: _text = null,
+    $pattern: String = "%",
+    $obj: jsonb = null,
+    $archived: Boolean! 
+  ) {
+    filter_runs(args: {object: $obj, path: $path, pattern: $pattern}, 
+    where: {archived: {_eq: $archived}}) {
+      id
+      metadata
+    }
   }
 `)
 
@@ -27,7 +30,7 @@ module ArchiveSubscription = %graphql(`
 `)
 
 @react.component
-let make = (~client, ~ids, ~archived) => {
+let make = (~client, ~ids, ~archived, ~obj, ~pattern, ~path) => {
   open Belt
   let idsSet = ids
   let ids = ids->Set.Int.toArray
@@ -77,12 +80,22 @@ let make = (~client, ~ids, ~archived) => {
   }
   let display = <> <Subscribe1 condition1 condition2 client /> {archiveButton} </>
 
-  let variables: RunSubscription.t_variables = {archived: archived}
-  let {loading, error, data} = RunSubscription.use(variables)
+  let {loading, error, data} = RunSubscription.use({
+    archived: archived,
+    obj: obj, // Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some,
+    pattern: pattern, //"%breakout%"->Some,
+    path: path
+    // ->Option.map(path => `{${path->Js.Array2.joinWith(",")}}`)
+    ->Option.map(Js.Array.joinWith(","))
+    ->Option.map(path => `"${path}"`)
+    ->Option.map(Js.Json.string),
+    // "{name}"->Js.Json.string->Some,
+  })
+
   let error = error->Option.map(({message}) => message)
   let data =
-    data->Option.map(({run}) =>
-      run->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
+    data->Option.map(({filter_runs}) =>
+      filter_runs->Array.map(({id, metadata}): MenuList.entry => {id: id, metadata: metadata})
     )
   let queryResult: ListAndDisplay.queryResult = {loading: loading, error: error, data: data}
   let ids = idsSet

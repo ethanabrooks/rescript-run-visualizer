@@ -1,10 +1,47 @@
 open Belt
+open Util
+
+@decco
+type granularity = Sweep | Run
+
+@decco
+type valid = {
+  granularity: granularity,
+  @decco.default(Set.Int.empty) ids: @decco.codec(Decco.Codecs.magic) Set.Int.t,
+  @decco.default(false) archived: bool,
+  @decco.default(None) obj: option<Js.Json.t>,
+  @decco.default(None) pattern: option<string>,
+  @decco.default(None) path: option<array<string>>,
+}
 
 type route =
-  | Sweeps({ids: Set.Int.t, archived: bool})
-  | Runs({ids: Set.Int.t, archived: bool})
+  | Valid({
+      granularity: granularity,
+      ids: Set.Int.t,
+      archived: bool,
+      obj: option<Js.Json.t>,
+      pattern: option<string>,
+      path: option<array<string>>,
+    })
   | Redirect
   | NotFound(string)
+
+let makeRoute = (
+  ~granularity,
+  ~ids=Set.Int.empty,
+  ~archived=false,
+  ~obj=None,
+  ~pattern=None,
+  ~path=None,
+  (),
+) => Valid({
+  granularity: granularity,
+  ids: ids,
+  archived: archived,
+  obj: obj,
+  pattern: pattern,
+  path: path,
+})
 
 let processIds = (ids: string) =>
   ids
@@ -20,46 +57,46 @@ let processIds = (ids: string) =>
   ->List.toArray
   ->Set.Int.fromArray
 
-let splitHash = Js.String.split("/")
-let urlToRoute = (url: ReasonReactRouter.url) => {
-  let hashParts = url.hash->splitHash->List.fromArray
-
-  let ids = switch hashParts {
-  | list{_, _, ids}
-  | list{_, ids} =>
-    ids->processIds
-  | _ => Set.Int.empty
+let hashToRoute = (hash: string) =>
+  switch hash {
+  | "" => Redirect
+  | _ =>
+    hash
+    ->Js.Global.decodeURI
+    ->parseJson
+    ->Result.flatMap(res => res->valid_decode->mapError(({message}) => message->Some))
+    ->Result.flatMap(valid =>
+      Valid({
+        granularity: valid.granularity,
+        ids: valid.ids,
+        archived: valid.archived,
+        obj: valid.obj,
+        pattern: valid.pattern,
+        path: valid.path,
+      })->Ok
+    )
+    ->Result.getWithDefault(NotFound(hash))
   }
 
-  let archived = switch hashParts {
-  | list{_, "archived", ..._} => true
-  | _ => false
-  }
-
-  switch hashParts {
-  | list{""} => Redirect
-  | list{"runs", ..._} =>
-    Runs({
-      ids: ids,
-      archived: archived,
-    })
-  | list{"sweeps", ..._} =>
-    Sweeps({
-      ids: ids,
-      archived: archived,
-    })
-  | _ => NotFound(url.hash)
-  }
-}
-
-let routeToUrl = (route: route) => {
-  let idSetToString = set => set->Set.Int.toArray->Js.Array2.joinWith(",")
-  let completeUrl = (base, ids, archived) =>
-    `${base}/${archived ? "archived/" : ""}${ids->idSetToString}`
+let routeToHash = (route: route): string =>
   switch route {
-  | Sweeps({ids, archived}) => "sweeps"->completeUrl(ids, archived)
-  | Runs({ids, archived}) => "runs"->completeUrl(ids, archived)
+  | Valid({granularity, ids, archived, obj, pattern, path}) =>
+    {
+      granularity: granularity,
+      ids: ids,
+      archived: archived,
+      obj: obj,
+      pattern: pattern,
+      path: path,
+    }
+    ->valid_encode
+    ->Js.Json.stringify
+    ->Js.Global.encodeURI
+
   | Redirect => ""
   | NotFound(hash) => hash
   }
-}
+
+let hashToHref = hash => `#${hash}`
+let routeToHref = route => route->routeToHash->hashToHref
+let urlToRoute = (url: ReasonReactRouter.url) => url.hash->hashToRoute

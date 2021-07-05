@@ -1,5 +1,5 @@
-open Belt
 open Routes
+open Belt
 
 type entry = {id: int, metadata: option<Js.Json.t>}
 @val external document: 'a = "document"
@@ -27,11 +27,9 @@ let make = (~items: array<entry>, ~ids: Set.Int.t, ~defaultListFilters) => {
         open Util
         let newIds = Set.Int.empty->Set.Int.add(id)
         let href = switch url->urlToRoute {
-        | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
-        | Runs({archived}) => Runs({ids: newIds, archived: archived})
+        | Valid(valid) => Valid({...valid, ids: newIds})
         | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to MenuList.`)
-        }->routeToUrl
-        let href = `#${href}`
+        }->routeToHref
         <li key={key}>
           <div className>
             <div className="flex items-center h-5 p-4">
@@ -42,13 +40,12 @@ let make = (~items: array<entry>, ~ids: Set.Int.t, ~defaultListFilters) => {
                 checked={ids->Set.Int.has(id)}
                 onChange={_ => {
                   let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
-                  let href = switch url->urlToRoute {
-                  | Sweeps({archived}) => Sweeps({ids: newIds, archived: archived})
-                  | Runs({archived}) => Runs({ids: newIds, archived: archived})
+                  let href = switch url.hash->hashToRoute {
+                  | Valid(valid) => Valid({...valid, ids: newIds})
                   | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to MenuList.`)
-                  }->routeToUrl
+                  }->routeToHref
 
-                  ReasonReactRouter.replace(`#${href}`)
+                  ReasonReactRouter.replace(href)
                 }}
                 className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
               />

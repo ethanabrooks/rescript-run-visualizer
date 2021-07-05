@@ -44,12 +44,8 @@ let make = (~initialSpec, ~submitButton, ~onCancel) => {
   }, [initialSpec])
 
   let initialText = initialSpec->Js.Json.stringifyWithSpace(2)
-  let parse = text =>
-    try text->Js.Json.parseExn->Result.Ok catch {
-    | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
-    }
   let valid = text => {
-    switch (text->parse, schema) {
+    switch (text->Util.parseJson, schema) {
     | (Result.Error(_), _) => false
     // | (Result.Ok(parsed), Some(schema)) => {
     //     let validate = ajv->compile(schema)
@@ -62,7 +58,7 @@ let make = (~initialSpec, ~submitButton, ~onCancel) => {
   }
   let (text, textbox) = TextBox.useText(~valid, ~initialText)
 
-  let parseResult = text->parse
+  let parseResult = text->Util.parseJson
   // let submitButton = switch parseResult {
   // | Result.Error(_) => <Button text={"Submit"} onClick={_ => ()} disabled={true} />
   // | Result.Ok(spec) => <Button text={"Submit"} onClick={_ => spec->onSubmit} disabled={false} />

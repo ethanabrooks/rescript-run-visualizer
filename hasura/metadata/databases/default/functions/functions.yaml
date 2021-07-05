@@ -1,2 +1,3 @@
 - "!include public_filter_runs.yaml"
 - "!include public_filter_sweeps.yaml"
+- "!include public_my_function.yaml"
