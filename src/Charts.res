@@ -55,13 +55,10 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
       ),
       (map, id, spec) => {
         let ids =
-          map
-          ->Map.get(spec)
-          ->Option.mapWithDefault(Set.Int.empty, ({ids}) =>
-            ids->Option.getWithDefault(Set.Int.empty)->Set.Int.add(id)
-          )
+          map->Map.get(spec)->Option.flatMap(({ids}) => ids)->Option.getWithDefault(Set.Int.empty)
+        let ids = ids->Set.Int.add(id)->Some
         let order = map->Map.size
-        map->Map.set(spec, {ids: ids->Some, rendering: true, order: order, dirty: false})
+        map->Map.set(spec, {ids: ids, rendering: true, order: order, dirty: false})
       },
     )
 
