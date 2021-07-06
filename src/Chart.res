@@ -1,20 +1,31 @@
 open Belt
-@module("./Chart.jsx")
-external innerMake: (
-  ~data: array<Js.Json.t>,
-  ~newData: array<Js.Json.t>,
-  ~spec: Js.Json.t,
-) => React.element = "make"
+module Inner = {
+  @module("./Chart.jsx")
+  external make: (
+    ~initialData: array<Js.Json.t>,
+    ~data: array<Js.Json.t>,
+    ~spec: Js.Json.t,
+  ) => React.element = "make"
+
+  @react.component
+  let make = (~initialData, ~data, ~spec) => make(~initialData, ~data, ~spec)
+}
 
 @react.component
-let make = (~logs, ~newLogs, ~spec) => {
+let make = (~logs, ~spec) => {
+  let {current, new}: Util.currentAndNewLogs = logs
+  let toArray = data => data->Map.Int.toArray->Array.map(((_, v)) => v)
   let (initialData, setInitialData) = React.useState(_ => None)
-  let mapToArray = l => l->Map.Int.toArray->Array.map(((_, v)) => v)
-  let newData = newLogs->mapToArray
+  let data = new->toArray
   React.useEffect1(() => {
-    setInitialData(_ => logs->mapToArray->Some)
+    switch initialData {
+    | None => setInitialData(_ => current->toArray->Some)
+    | _ => ()
+    }
     None
   }, [logs])
-  let data = initialData->Option.getWithDefault([])
-  innerMake(~data, ~newData, ~spec)
+  switch initialData {
+  | None => <> </>
+  | Some(initialData) => <Inner initialData data spec />
+  }
 }

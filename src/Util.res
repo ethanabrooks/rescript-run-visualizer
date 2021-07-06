@@ -1,5 +1,7 @@
 open Belt
 
+@module external copy: string => bool = "copy-to-clipboard"
+
 @module("js-yaml") external yaml: Js.Json.t => string = "dump"
 
 module JsonComparator = Belt.Id.MakeComparable({
@@ -26,6 +28,8 @@ type jsonMap = Map.Int.t<Js.Json.t>
 type jsonArray = array<Js.Json.t>
 type specs = jsonMap
 type parseResult = Result.t<Js.Json.t, option<string>>
+type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t)
+type currentAndNewLogs = {current: jsonMap, new: jsonMap}
 
 let merge = (_, old, new) =>
   switch (old, new) {

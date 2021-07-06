@@ -25,18 +25,16 @@ let addParametersToLog = (log, metadata) =>
   )
   ->Option.getWithDefault(log)
 
-@react.component
-let make = (
+let useLogs = (
   ~logs: jsonMap,
   ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
   ~metadata: jsonMap,
-  ~makeCharts: (~logs: jsonMap, ~newLogs: jsonMap) => React.element,
 ) => {
-  let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok((
-    logs,
-    Map.Int.empty,
-  )))
+  let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok({
+    current: logs,
+    new: Map.Int.empty,
+  }))
 
   React.useEffect2(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
@@ -50,11 +48,11 @@ let make = (
       | {data} =>
         ()
         setCurrentAndNewLogs(logs =>
-          logs->Result.mapWithDefault(logs, ((oldLogs, _)) => {
-            let newLogs =
+          logs->Result.mapWithDefault(logs, ({current}) => {
+            let new =
               data.run_log
               ->Array.map(({id, log}) => (id, log))
-              ->Array.keep(((id, _)) => !(oldLogs->Map.Int.has(id)))
+              ->Array.keep(((id, _)) => !(current->Map.Int.has(id)))
               ->Map.Int.fromArray
               ->Map.Int.mapWithKey((runId, log) =>
                 metadata
@@ -62,8 +60,8 @@ let make = (
                 ->Option.map(log->addParametersToLog)
                 ->Option.getWithDefault(log)
               )
-            let oldLogs = oldLogs->Map.Int.merge(newLogs, Util.merge)
-            Result.Ok((oldLogs, newLogs))
+            let current = current->Map.Int.merge(new, Util.merge)
+            Result.Ok({current: current, new: new})
           })
         )
       }
@@ -85,8 +83,5 @@ let make = (
     Some(unsubscribe)
   }, (client, condition2))
 
-  switch currentAndNewLogs {
-  | Error({message}) => <ErrorPage message />
-  | Ok((_, newLogs)) => makeCharts(~logs, ~newLogs)
-  }
+  currentAndNewLogs
 }
