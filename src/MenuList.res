@@ -6,11 +6,11 @@ type entry = {id: int, metadata: option<Js.Json.t>}
 
 @react.component
 let make = (~items: array<entry>, ~ids: Set.Int.t, ~defaultListFilters) => {
-  let (text, textbox) = TextInput.useText(~initialText=defaultListFilters)
   let url = ReasonReactRouter.useUrl()
+  let (text, setText) = React.useState(_ => defaultListFilters)
   let keywords = ","->Js.String.split(text)->Set.String.fromArray->Set.String.remove("")
   <div className="py-10 m-5 max-h-screen overflow-y-scroll overscroll-contain">
-    {textbox}
+    <TextInput initialText={defaultListFilters} dispatch={text => setText(_ => text)} />
     <ul className="bg-white rounded-lg -escape-y-px">
       {items
       ->List.fromArray
