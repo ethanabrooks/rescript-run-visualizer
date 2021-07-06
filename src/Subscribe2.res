@@ -6,6 +6,9 @@ module Subscription = %graphql(`
     run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
       id
       log
+      run {
+        id
+      }
     }
   }
 `)
@@ -51,15 +54,16 @@ let useLogs = (
           logs->Result.mapWithDefault(logs, ({old}) => {
             let new =
               data.run_log
-              ->Array.map(({id, log}) => (id, log))
-              ->Array.keep(((id, _)) => !(old->Map.Int.has(id)))
+              ->Array.keep(({id}) => !(old->Map.Int.has(id)))
+              ->Array.map(({id, log, run}) => {
+                let log =
+                  metadata
+                  ->Map.Int.get(run.id)
+                  ->Option.map(log->addParametersToLog)
+                  ->Option.getWithDefault(log)
+                (id, log)
+              })
               ->Map.Int.fromArray
-              ->Map.Int.mapWithKey((runId, log) =>
-                metadata
-                ->Map.Int.get(runId)
-                ->Option.map(log->addParametersToLog)
-                ->Option.getWithDefault(log)
-              )
             let old = old->Map.Int.merge(new, Util.merge)
             Result.Ok({old: old, new: new})
           })
