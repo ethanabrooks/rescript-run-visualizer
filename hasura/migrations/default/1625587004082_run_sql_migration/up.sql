@@ -1,0 +1,1 @@
+drop function sweep_logs_less_than_step;

@@ -46,18 +46,18 @@ let useSyncCharts = (~specs, ~runIds) => {
 }
 
 @react.component
-let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client, ~condition2) => {
+let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client, ~granularity) => {
   let reverse = specs =>
     specs->Map.Int.reduce(
       Map.make(~id=module(JsonComparator))->Map.set(
         Js.Json.null,
-        {rendering: false, ids: None, order: -1, dirty: false},
+        {rendering: false, ids: None, order: specs->Map.Int.size, dirty: false},
       ),
       (map, id, spec) => {
         let ids =
           map->Map.get(spec)->Option.flatMap(({ids}) => ids)->Option.getWithDefault(Set.Int.empty)
         let ids = ids->Set.Int.add(id)->Some
-        let order = map->Map.size
+        let order = map->Map.size - 1
         map->Map.set(spec, {ids: ids, rendering: true, order: order, dirty: false})
       },
     )
@@ -74,7 +74,7 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
         specs
         ->Map.get(spec)
         ->Option.getWithDefault({rendering: true, ids: None, order: specs->Map.size, dirty: true})
-      specs->Map.set(spec, specState)
+      specs->Map.set(spec, {...specState, rendering: true})
     }
   , specs->reverse)
 
@@ -84,7 +84,7 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
   }, [initialSpecs])
 
   switch (
-    Subscribe2.useLogs(~client, ~condition2, ~logs, ~metadata),
+    Subscribe2.useLogs(~client, ~logs, ~metadata, ~granularity, ~runIds),
     useSyncCharts(~specs, ~runIds),
   ) {
   | (Error({message}), (_, _))
@@ -95,7 +95,7 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
       {specs
       ->Map.toArray
       ->List.fromArray
-      ->List.sort(((_, {order: order1}), (_, {order: order2})) => order2 - order1)
+      ->List.sort(((_, {order: order1}), (_, {order: order2})) => order1 - order2)
       ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
         let key = i->Int.toString
         if rendering {

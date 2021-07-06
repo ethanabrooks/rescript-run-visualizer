@@ -30,9 +30,10 @@ let addParametersToLog = (log, metadata) =>
 
 let useLogs = (
   ~logs: jsonMap,
-  ~condition2,
   ~client: ApolloClient__Core_ApolloClient.t,
   ~metadata: jsonMap,
+  ~runIds,
+  ~granularity,
 ) => {
   let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok({
     old: logs,
@@ -49,7 +50,6 @@ let useLogs = (
         unsubscribe()
         error->onError
       | {data} =>
-        ()
         setCurrentAndNewLogs(logs =>
           logs->Result.mapWithDefault(logs, ({old}) => {
             let new =
@@ -71,13 +71,28 @@ let useLogs = (
       }
     }
 
+    let condition = {
+      open Routes
+      let ids = runIds->Set.Int.toArray
+
+      switch granularity {
+      | Run => {
+          let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
+          Subscription.makeInputObjectrun_log_bool_exp(~run, ())
+        }
+      | Sweep => {
+          let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let run = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
+          Subscription.makeInputObjectrun_log_bool_exp(~run, ())
+        }
+      }
+    }
+
     let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~archived, ())
     let notArchived = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-    let condition = Subscription.makeInputObjectrun_log_bool_exp(
-      ~_and=[condition2, notArchived],
-      (),
-    )
+    let condition = Subscription.makeInputObjectrun_log_bool_exp(~_and=[condition, notArchived], ())
     subscription :=
       client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
         ~onNext,
@@ -85,7 +100,7 @@ let useLogs = (
         (),
       )->Some
     Some(unsubscribe)
-  }, (client, condition2))
+  }, (runIds, granularity))
 
   currentAndNewLogs
 }

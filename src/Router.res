@@ -40,12 +40,11 @@ let make = (~client) => {
         </div>
       </div>
       {switch route {
-      | Valid({granularity: Sweep, ids, archived, obj, pattern, path}) =>
-        <Sweeps ids archived client obj pattern path />
-      | Valid({granularity: Run, ids, archived, obj, pattern, path}) =>
-        <Runs ids archived client obj pattern path />
-      // | Valid(valid) => <Sweeps ids archived client />
-      // | Runs({ids, archived}) => <Runs ids archived client />
+      | Valid({granularity, ids, archived, obj, pattern, path}) =>
+        // let obj = Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some
+        // let pattern = "%breakout%"->Some
+        // let path = ["name"]->Some
+        <ListAndDisplay client granularity ids archived obj pattern path />
       | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
       | Redirect => <p> {React.string("Redirecting...")} </p>
       }}

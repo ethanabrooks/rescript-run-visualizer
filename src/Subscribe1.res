@@ -30,13 +30,13 @@ type queryResult = {
 
 type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
 
-@react.component
-let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t) => {
+let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granularity) => {
   let (state, setState) = React.useState(() => Waiting)
 
-  React.useEffect3(() => {
+  React.useEffect2(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
+
     let onError = error => setState(_ => error->Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
@@ -87,19 +87,27 @@ let make = (~condition1, ~condition2, ~client: ApolloClient__Core_ApolloClient.t
       }
     }
 
+    let condition = {
+      open Routes
+      let ids = ids->Set.Int.toArray
+      switch granularity {
+      | Run =>
+        let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+        Subscription.makeInputObjectrun_bool_exp(~id, ())
+      | Sweep =>
+        let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+        Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
+      }
+    }
+
     subscription :=
-      client.subscribe(~subscription=module(Subscription), {condition: condition1}).subscribe(
+      client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
         ~onNext,
         ~onError,
         (),
       )->Some
-    Some(unsubscribe)
-  }, (client, condition1, setState))
+    Some(_ => unsubscribe())
+  }, (ids, granularity))
 
-  switch state {
-  | Waiting => <p> {"Waiting for data..."->React.string} </p>
-  | NoData => <p> {"No data."->React.string} </p>
-  | Error({message}) => <ErrorPage message />
-  | Data({logs, specs, metadata, runIds}) => <Charts logs specs metadata runIds client condition2 />
-  }
+  state
 }
