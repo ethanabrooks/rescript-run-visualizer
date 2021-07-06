@@ -32,7 +32,7 @@ let useLogs = (
   ~metadata: jsonMap,
 ) => {
   let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok({
-    current: logs,
+    old: logs,
     new: Map.Int.empty,
   }))
 
@@ -48,11 +48,11 @@ let useLogs = (
       | {data} =>
         ()
         setCurrentAndNewLogs(logs =>
-          logs->Result.mapWithDefault(logs, ({current}) => {
+          logs->Result.mapWithDefault(logs, ({old}) => {
             let new =
               data.run_log
               ->Array.map(({id, log}) => (id, log))
-              ->Array.keep(((id, _)) => !(current->Map.Int.has(id)))
+              ->Array.keep(((id, _)) => !(old->Map.Int.has(id)))
               ->Map.Int.fromArray
               ->Map.Int.mapWithKey((runId, log) =>
                 metadata
@@ -60,8 +60,8 @@ let useLogs = (
                 ->Option.map(log->addParametersToLog)
                 ->Option.getWithDefault(log)
               )
-            let current = current->Map.Int.merge(new, Util.merge)
-            Result.Ok({current: current, new: new})
+            let old = old->Map.Int.merge(new, Util.merge)
+            Result.Ok({old: old, new: new})
           })
         )
       }

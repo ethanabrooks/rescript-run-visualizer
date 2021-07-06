@@ -6,7 +6,7 @@ module RunSubscription = %graphql(`
     $archived: Boolean! 
   ) {
     filter_runs(args: {object: $obj, path: $path, pattern: $pattern}, 
-    where: {archived: {_eq: $archived}}) {
+    where: {_and: [{archived: {_eq: $archived}}, {sweep_id: {_is_null: true}}]}) {
       id
       metadata
     }

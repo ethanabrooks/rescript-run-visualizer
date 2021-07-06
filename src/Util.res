@@ -28,8 +28,8 @@ type jsonMap = Map.Int.t<Js.Json.t>
 type jsonArray = array<Js.Json.t>
 type specs = jsonMap
 type parseResult = Result.t<Js.Json.t, option<string>>
-type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t)
-type currentAndNewLogs = {current: jsonMap, new: jsonMap}
+type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Set(specs)
+type oldAndNewLogs = {old: jsonMap, new: jsonMap}
 
 let merge = (_, old, new) =>
   switch (old, new) {

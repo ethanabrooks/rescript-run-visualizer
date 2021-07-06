@@ -47,25 +47,28 @@ let useSyncCharts = (~specs, ~runIds) => {
 
 @react.component
 let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client, ~condition2) => {
-  let reverseSpecs = specs->Map.Int.reduce(
-    Map.make(~id=module(JsonComparator))->Map.set(
-      Js.Json.null,
-      {rendering: false, ids: None, order: -1, dirty: false},
-    ),
-    (map, id, spec) => {
-      let ids =
-        map
-        ->Map.get(spec)
-        ->Option.mapWithDefault(Set.Int.empty, ({ids}) =>
-          ids->Option.getWithDefault(Set.Int.empty)->Set.Int.add(id)
-        )
-      let order = map->Map.size
-      map->Map.set(spec, {ids: ids->Some, rendering: true, order: order, dirty: false})
-    },
-  )
+  let reverse = specs =>
+    specs->Map.Int.reduce(
+      Map.make(~id=module(JsonComparator))->Map.set(
+        Js.Json.null,
+        {rendering: false, ids: None, order: -1, dirty: false},
+      ),
+      (map, id, spec) => {
+        let ids =
+          map
+          ->Map.get(spec)
+          ->Option.mapWithDefault(Set.Int.empty, ({ids}) =>
+            ids->Option.getWithDefault(Set.Int.empty)->Set.Int.add(id)
+          )
+        let order = map->Map.size
+        map->Map.set(spec, {ids: ids->Some, rendering: true, order: order, dirty: false})
+      },
+    )
 
+  let initialSpecs = specs
   let (specs, dispatch) = React.useReducer((specs, action) =>
     switch action {
+    | Set(specs) => specs->reverse
     | ToggleRender(spec) =>
       let {rendering, ids, order} = specs->Map.getExn(spec)
       specs->Map.set(spec, {rendering: !rendering, ids: ids, order: order, dirty: false})
@@ -76,7 +79,12 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
         ->Option.getWithDefault({rendering: true, ids: None, order: specs->Map.size, dirty: true})
       specs->Map.set(spec, specState)
     }
-  , reverseSpecs)
+  , specs->reverse)
+
+  React.useEffect1(() => {
+    dispatch(Set(initialSpecs))
+    None
+  }, [initialSpecs])
 
   switch (
     Subscribe2.useLogs(~client, ~condition2, ~logs, ~metadata),
@@ -86,28 +94,29 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
   | (_, ({error: Some({message})}, _))
   | (_, (_, {error: Some({message})})) =>
     <ErrorPage message />
-  | (Ok(logs), _) => <>
+  | (Ok({new}), _) => <>
       {specs
       ->Map.toArray
       ->List.fromArray
-      ->List.sort(((_, {order: order1}), (_, {order: order2})) => order1 - order2)
+      ->List.sort(((_, {order: order1}), (_, {order: order2})) => order2 - order1)
       ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
         let key = i->Int.toString
-        let initialSpec = spec
         if rendering {
+          let logs = {old: logs, new: new}
           <ChartWithButtons key spec chartIds dispatch logs />
         } else {
+          let initialSpec = spec
           <SpecEditor key initialSpec dispatch />
         }
       })
       ->List.toArray
       ->React.array}
-      //     {metadata
-      //     ->Map.Int.valuesToArray
-      //     ->Array.mapWithIndex((i, m) =>
-      //       <pre key={i->Int.toString} className="p-4"> {m->Util.yaml->React.string} </pre>
-      //     )
-      //     ->React.array}
+      {metadata
+      ->Map.Int.valuesToArray
+      ->Array.mapWithIndex((i, m) =>
+        <pre key={i->Int.toString} className="p-4"> {m->Util.yaml->React.string} </pre>
+      )
+      ->React.array}
     </>
   }
 }
