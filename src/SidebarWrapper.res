@@ -110,7 +110,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
 
   let textAreaClassName = "h-10 border p-4 shadow-sm block w-full sm:text-sm border-gray-300"
 
-  <div className="pb-10 w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
+  <div className="pb-10 resize-x m-5 max-h-screen overflow-y-scroll overscroll-contain">
     <div className="pb-5">
       <label className="text-sm font-sm text-gray-700">
         {"Filter metadata keywords"->React.string}
