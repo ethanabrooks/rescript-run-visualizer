@@ -16,7 +16,7 @@ export function make(data, newData, spec) {
                 }
             }
         },
-        [data, view]
+        [newData, view]
     );
     return <Vega spec={spec} data={{ data }} onNewView={setView} />;
 

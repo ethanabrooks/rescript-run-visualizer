@@ -61,9 +61,9 @@ let make = (~items, ~ids) => {
           {if ids->Set.Int.has(id) {
             metadata->Option.mapWithDefault(<> </>, metadata => {
               <div className="mt-1">
-                <p className="line-clamp-2 text-sm text-gray-600">
-                  <pre className="p-4 font-extralight"> {metadata->yaml->React.string} </pre>
-                </p>
+                <pre className="line-clamp-2 text-sm text-gray-600 p-4 font-extralight">
+                  {metadata->yaml->React.string}
+                </pre>
               </div>
             })
           } else {

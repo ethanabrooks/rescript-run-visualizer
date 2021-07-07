@@ -41,6 +41,7 @@ let useLogs = (
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     let onError = error => setCurrentAndNewLogs(_ => error->Error)
+
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} =>
@@ -62,29 +63,16 @@ let useLogs = (
               })
               ->Map.Int.fromArray
             let old = old->Map.Int.merge(new, Util.merge)
-            Result.Ok({old: old, new: new})
+            Ok({old: old, new: new})
           })
         )
       }
     }
 
-    let condition = {
-      open Routes
-      let ids = runIds->Set.Int.toArray
-
-      switch granularity {
-      | Run => {
-          let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
-          let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
-          Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-        }
-      | Sweep => {
-          let sweep_id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
-          let run = Subscription.makeInputObjectrun_bool_exp(~sweep_id, ())
-          Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-        }
-      }
-    }
+    let ids = runIds->Set.Int.toArray
+    let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
+    let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
+    let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
 
     let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~archived, ())
@@ -96,7 +84,7 @@ let useLogs = (
         ~onError,
         (),
       )->Some
-    Some(unsubscribe)
+    Some(_ => unsubscribe())
   }, (runIds, granularity))
 
   currentAndNewLogs
