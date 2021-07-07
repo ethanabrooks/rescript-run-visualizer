@@ -39,7 +39,6 @@ type filterPathLikeArgs = {path: option<string>, pattern: option<string>}
 
 @react.component
 let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~pattern, ~path) => {
-  let (metadataDisplayKeywords, setMetadataDisplayKeywords) = React.useState(_ => "name")
   let (filterContainsObj, setFilterContainsObj) = React.useState(_ =>
     obj->Option.map(j => j->Js.Json.stringifyWithSpace(2))
   )
@@ -48,8 +47,6 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
     pattern: pattern,
   })
 
-  let keywords =
-    ","->Js.String.split(metadataDisplayKeywords)->Set.String.fromArray->Set.String.remove("")
   let newObj =
     filterContainsObj->Option.map(parseJson)->Option.map(resultToOption)->Option.getWithDefault(obj)
   let pathArray = path->Option.map(Js.String.split(","))
@@ -111,17 +108,6 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
   let textAreaClassName = "h-10 border p-4 shadow-sm block w-full sm:text-sm border-gray-300"
 
   <div className="pb-10 resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
-    <div className="pb-5">
-      <label className="text-sm font-sm text-gray-700">
-        {"Filter metadata keywords"->React.string}
-      </label>
-      <input
-        type_={"text"}
-        onChange={evt => setMetadataDisplayKeywords(_ => ReactEvent.Form.target(evt)["value"])}
-        className={`${textAreaClassName} rounded-md`}
-        value={metadataDisplayKeywords}
-      />
-    </div>
     <div className="pb-5 -space-y-px">
       <label className="text-sm font-sm text-gray-700">
         <a href>
@@ -180,7 +166,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
     | {error: Some(message)} => `Error loading data: ${message}`->React.string
     | {data: None, error: None, loading: false} =>
       "You might think this is impossible, but depending on the situation it might not be!"->React.string
-    | {data: Some(items)} => <Sidebar items ids keywords />
+    | {data: Some(items)} => <Sidebar items ids />
     }}
   </div>
 }
