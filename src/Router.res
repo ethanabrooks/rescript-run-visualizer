@@ -44,7 +44,16 @@ let make = (~client) => {
         // let obj = Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some
         // let pattern = "%breakout%"->Some
         // let path = ["name"]->Some
-        <ListAndDisplay client granularity ids archived obj pattern path />
+        <div className={"flex flex-row"}>
+          <SidebarWrapper ids granularity archived obj pattern path />
+          <div
+            className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
+            <div
+              className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
+              <ChartsSubscriptionWrapper client granularity ids /> <ArchiveButton granularity ids />
+            </div>
+          </div>
+        </div>
       | NotFound(url) => <p> {React.string(`URL "${url}" not found`)} </p>
       | Redirect => <p> {React.string("Redirecting...")} </p>
       }}
