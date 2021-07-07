@@ -35,15 +35,17 @@ let useLogs = (
   ~runIds,
   ~granularity,
 ) => {
-  let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ => Result.Ok({
-    old: logs,
-    new: Map.Int.empty,
-  }))
+  let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ =>
+    {
+      old: logs,
+      new: Map.Int.empty,
+    }->Ok
+  )
 
   React.useEffect2(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
-    let onError = error => setCurrentAndNewLogs(_ => error->Result.Error)
+    let onError = error => setCurrentAndNewLogs(_ => error->Error)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} =>

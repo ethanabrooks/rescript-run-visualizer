@@ -2,8 +2,8 @@ open Routes
 @react.component
 let make = (~client) => {
   let route = ReasonReactRouter.useUrl().hash->hashToRoute
-  let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-default"
-  let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer"
+  let activeClassName = "border-indigo-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+  let inactiveClassName = "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
   let sweeps = makeRoute(~granularity=Sweep, ())->routeToHref
   let runs = makeRoute(~granularity=Run, ())->routeToHref
 
@@ -42,7 +42,7 @@ let make = (~client) => {
       {switch route {
       | Valid({granularity, ids, archived, obj, pattern, path}) =>
         <div className={"flex flex-row"}>
-          <SidebarWrapper ids granularity archived obj pattern path />
+          <SidebarWrapper ids granularity archived obj pattern path client />
           <div
             className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
             <div

@@ -84,7 +84,7 @@ let make = (~logs: jsonMap, ~specs: specs, ~metadata: jsonMap, ~runIds, ~client,
   }, [initialSpecs])
 
   switch (
-    Subscribe2.useLogs(~client, ~logs, ~metadata, ~granularity, ~runIds),
+    LogsSubscription.useLogs(~client, ~logs, ~metadata, ~granularity, ~runIds),
     useSyncCharts(~specs, ~runIds),
   ) {
   | (Error({message}), (_, _))

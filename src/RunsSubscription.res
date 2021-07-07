@@ -61,7 +61,7 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
                 ->Map.Int.fromArray
                 // add metadata to each log
                 ->Map.Int.map(log =>
-                  metadata->Option.mapWithDefault(log, log->Subscribe2.addParametersToLog)
+                  metadata->Option.mapWithDefault(log, log->LogsSubscription.addParametersToLog)
                 )
 
               let runIds = Set.Int.empty->Set.Int.add(id)
