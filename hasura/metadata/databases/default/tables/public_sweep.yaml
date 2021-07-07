@@ -16,6 +16,12 @@ array_relationships:
       table:
         name: run
         schema: public
+computed_fields:
+- definition:
+    function:
+      name: sweep_metadata_path
+      schema: public
+  name: metadata_path
 insert_permissions:
 - permission:
     backend_only: false
