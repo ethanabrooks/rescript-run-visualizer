@@ -44,7 +44,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
     obj->Option.map(j => j->Js.Json.stringifyWithSpace(2))
   )
   let ({path, pattern}, setFilterPathLike) = React.useState(_ => {
-    path: path->Option.map(path => `{${path->Js.Array2.joinWith(",")}}`),
+    path: path->Option.map(path => path->Js.Array2.joinWith(",")),
     pattern: pattern,
   })
 
@@ -110,7 +110,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
 
   let textAreaClassName = "h-10 border p-4 shadow-sm block w-full sm:text-sm border-gray-300"
 
-  <div className="pb-10 resize-x m-5 max-h-screen overflow-y-scroll overscroll-contain">
+  <div className="pb-10 resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
     <div className="pb-5">
       <label className="text-sm font-sm text-gray-700">
         {"Filter metadata keywords"->React.string}
@@ -129,9 +129,9 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived, ~obj: option<Js.Json.t>, ~
             let metadataContainsString = `metadata @> ${obj
               ->Option.map(Js.Json.stringify)
               ->Option.getWithDefault("obj")}`
-            let pathLikeString = `metadata#>>${path->Option.getWithDefault(
+            let pathLikeString = `metadata#>>'{${path->Option.getWithDefault(
                 "path",
-              )} like ${pattern->Option.getWithDefault("pattern")}`
+              )}}' like '${pattern->Option.getWithDefault("pattern")}'`
             let filterString = switch (obj, path, pattern) {
             | (Some(_), None, None) => metadataContainsString
             | (Some(_), _, _)

@@ -41,9 +41,6 @@ let make = (~client) => {
       </div>
       {switch route {
       | Valid({granularity, ids, archived, obj, pattern, path}) =>
-        // let obj = Js.Json.parseExn("{\"config\": {\"seed\": [0]}}")->Some
-        // let pattern = "%breakout%"->Some
-        // let path = ["name"]->Some
         <div className={"flex flex-row"}>
           <SidebarWrapper ids granularity archived obj pattern path />
           <div
