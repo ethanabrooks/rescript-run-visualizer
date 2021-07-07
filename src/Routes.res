@@ -43,20 +43,6 @@ let makeRoute = (
   path: path,
 })
 
-let processIds = (ids: string) =>
-  ids
-  ->Js.String2.split(",")
-  ->List.fromArray
-  ->List.map(Int.fromString)
-  ->List.reduce(list{}, (list, option) =>
-    switch option {
-    | None => list
-    | Some(int) => list{int, ...list}
-    }
-  )
-  ->List.toArray
-  ->Set.Int.fromArray
-
 let hashToRoute = (hash: string) =>
   switch hash {
   | "" => Redirect

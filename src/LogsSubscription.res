@@ -13,11 +13,6 @@ module Subscription = %graphql(`
   }
 `)
 
-module ErrorPage = {
-  @react.component
-  let make = (~message: string) => <p> {message->React.string} </p>
-}
-
 let addParametersToLog = (log, metadata) =>
   metadata
   ->jsonToMap

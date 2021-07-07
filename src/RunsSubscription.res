@@ -19,8 +19,6 @@ module Subscription = %graphql(`
   }
 `)
 
-@val external max_logs: string = "NODE_MAX_LOGS"
-
 type queryResult = {
   metadata: Map.Int.t<Js.Json.t>,
   specs: specs,

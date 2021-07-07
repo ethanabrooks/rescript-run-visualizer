@@ -1,8 +1,6 @@
 open Routes
 open Belt
 
-@val external document: 'a = "document"
-
 module RunSubscription = %graphql(`
   subscription search_runs(
     $path: _text = null,

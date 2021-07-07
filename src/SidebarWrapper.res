@@ -48,14 +48,7 @@ let make = (
     ~client,
   )
 
-  let route = Valid({
-    granularity: granularity,
-    ids: ids,
-    archived: archived,
-    obj: obj,
-    pattern: pattern,
-    path: pathArray,
-  })
+  let route = makeRoute(~granularity, ~ids, ~archived, ~obj, ~pattern, ~path, ())
   let href = route->routeToHref
   let textAreaClassName = "h-10 border p-4 shadow-sm block w-full sm:text-sm border-gray-300"
 

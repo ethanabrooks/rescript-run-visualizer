@@ -1,12 +1,12 @@
 open Belt
 
-type ajvArgs = {
-  allowUnionTypes: bool,
-  strictTypes: bool,
-  strictTuples: bool,
-}
-type ajv
-type ajvRef
+// type ajvArgs = {
+//   allowUnionTypes: bool,
+//   strictTypes: bool,
+//   strictTuples: bool,
+// }
+// type ajv
+// type ajvRef
 // @module("ajv-formats") external addFormats: ajv => unit = "addFormats"
 // @module("ajv/lib/refs/json-schema-draft-06.json") external draft6Schema: ajvRef = "draft6Schema"
 // @new @module external newAjv: ajvArgs => ajv = "Ajv"
@@ -14,10 +14,6 @@ type ajvRef
 // @send external addMetaSchema: (ajv, ajvRef) => unit = "addMetaSchema"
 // @send external addKeyword: (ajv, string) => unit = "addKeyword"
 // @send external compile: (ajv, Js.Json.t, Js.Json.t) => bool = "compile"
-
-type state =
-  | Rendering(Js.Json.t)
-  | Editing(Js.Json.t)
 
 @react.component
 let make = (~initialSpec, ~dispatch) => {
