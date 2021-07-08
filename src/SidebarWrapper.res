@@ -1,109 +1,129 @@
 open Routes
 open Belt
 
-type filterArgs = {
-  obj: option<string>,
-  path: option<string>,
-  pattern: option<string>,
+type whereResults = Predicate.t<Belt.Result.t<Hasura.metadata, option<string>>>
+
+let whereToTexts = (where: Hasura.where) =>
+  where->Predicate.map((Contains(json)) => json->Js.Json.stringify)
+
+let whereOptionToTexts = (where: option<Hasura.where>) =>
+  where->Option.getWithDefault(Just(Contains(Js.Dict.empty()->Js.Json.object_)))->whereToTexts
+
+let textsToResults = (texts: Predicate.t<string>): whereResults =>
+  texts
+  ->Predicate.map(text => text->Util.parseJson)
+  ->Predicate.map(res =>
+    res->Result.map((metadata: Js.Json.t): Hasura.metadata => Contains(metadata))
+  )
+
+let rec textsToTextSetters = (texts: Predicate.t<string>): Predicate.t<
+  string => Predicate.t<string>,
+> => {
+  let setArray = (a, i, x) => a->Array.mapWithIndex((j, y) => i == j ? x : y)
+  switch texts {
+  | And(a) =>
+    a
+    ->Array.mapWithIndex((i, _texts) =>
+      _texts
+      ->textsToTextSetters
+      ->Predicate.map((set, text) => a->setArray(i, text->set)->Predicate.And)
+    )
+    ->Predicate.And
+  | Or(a) =>
+    a
+    ->Array.mapWithIndex((i, _texts) =>
+      _texts
+      ->textsToTextSetters
+      ->Predicate.map((set, text) => a->setArray(i, text->set)->Predicate.Or)
+    )
+    ->Predicate.Or
+  | Just(_) => Just(t => t->Just)
+  }
 }
 
-let makeFilterArgs = (~obj, ~path, ~pattern) => {
-  obj: obj->Option.map(j => j->Js.Json.stringifyWithSpace(2)),
-  path: path->Option.map(path => path->Js.Array2.joinWith(",")),
-  pattern: pattern,
+let rec componentsPredicateToComponent = (
+  components: Predicate.t<React.element>,
+): React.element => {
+  switch components {
+  | Just(x) => x
+  | And(a) =>
+    <div>
+      <label className="text-sm font-sm text-gray-700"> {"And"->React.string} </label>
+      <div> {a->Array.map(componentsPredicateToComponent)->React.array} </div>
+    </div>
+  | Or(a) =>
+    <div>
+      <label className="text-sm font-sm text-gray-700"> {"Or"->React.string} </label>
+      <div> {a->Array.map(componentsPredicateToComponent)->React.array} </div>
+    </div>
+  }
+}
+
+let rec resultsToWhere = (whereResults: whereResults): option<Hasura.where> =>
+  switch whereResults {
+  | And(a) => a->Array.keepMap(resultsToWhere)->And->Some
+  | Or(a) => a->Array.keepMap(resultsToWhere)->Or->Some
+  | Just(metadata) => metadata->Util.resultToOption->Option.map(x => x->Predicate.Just)
+  }
+
+let rec whereToLabel = (where: Hasura.where) => {
+  let f = a =>
+    Array.zip(a, a->Array.map(whereToLabel))->Array.map(((where, label)) =>
+      switch where {
+      | Just(_) => label
+      | _ => `(${label})`
+      }
+    )
+  switch where {
+  | Just(Contains(x)) => `metadata @> ${x->Js.Json.stringify}`
+  | And(a) => a->f->Js.Array2.joinWith(" AND ")
+  | Or(a) => a->f->Js.Array2.joinWith(" OR ")
+  }
 }
 
 @react.component
 let make = (
   ~ids: Set.Int.t,
   ~granularity,
-  ~archived,
-  ~obj: option<Js.Json.t>,
-  ~pattern,
-  ~path: option<array<string>>,
+  ~archived: bool,
+  ~where: option<Hasura.where>,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
-  let initialObj = obj
-  let initialPath = path
-  let initialPattern = pattern
+  let initialWhere = where
+  let (whereTexts, setWhereTexts) = React.useState(_ => initialWhere->whereOptionToTexts)
 
-  let ({obj: objString, path: pathString, pattern}, setFilterArgs) = React.useState(_ =>
-    makeFilterArgs(~obj, ~path, ~pattern)
-  )
-
-  React.useEffect3(() => {
-    setFilterArgs(_ => makeFilterArgs(~obj=initialObj, ~path=initialPath, ~pattern=initialPattern))
+  React.useEffect1(() => {
+    setWhereTexts(_ => initialWhere->whereOptionToTexts)
     None
-  }, (initialObj, initialPath, initialPattern))
+  }, [initialWhere])
 
-  let objJson = objString->Option.map(Util.parseJson)
-  let pathArray = pathString->Option.map(Js.String.split(","))
-
+  let whereResults = whereTexts->textsToResults
+  let where = whereResults->resultsToWhere
   let queryResult = SidebarItemsSubscription.useSidebarItems(
     ~granularity,
     ~archived,
-    ~obj,
-    ~pattern,
-    ~path=pathArray,
+    ~where,
     ~client,
   )
 
-  let route = makeRoute(~granularity, ~ids, ~archived, ~obj, ~pattern, ~path, ())
+  let route = makeRoute(~granularity, ~ids, ~archived, ~where, ())
   let href = route->routeToHref
-  let textAreaClassName = "h-10 border p-4 shadow-sm block w-full sm:text-sm border-gray-300"
+  let components = Predicate.zip(whereTexts, whereTexts->textsToTextSetters)->Predicate.map(((
+    text,
+    setter,
+  )) => {
+    let setText = text => setWhereTexts(_ => text->setter)
+    <MetadataFilter text setText />
+  })
 
   <div className="pb-10 resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
     <div className="pb-5 -space-y-px">
-      <label className="text-sm font-sm text-gray-700">
-        <a href>
-          {
-            let metadataContainsString = `metadata @> ${obj
-              ->Option.map(Js.Json.stringify)
-              ->Option.getWithDefault("obj")}`
-            let pathLikeString = `metadata#>>'{${pathString->Option.getWithDefault(
-                "path",
-              )}}' like '${pattern->Option.getWithDefault("pattern")}'`
-            let filterString = switch (obj, path, pattern) {
-            | (Some(_), None, None) => metadataContainsString
-            | (Some(_), _, _)
-            | (None, None, None) =>
-              `${metadataContainsString} and ${pathLikeString}`
-            | (None, _, _) => pathLikeString
-            }
-            `Filter by ${filterString}`->React.string
-          }
-        </a>
-      </label>
-      <input
-        type_={"text"}
-        placeholder={objString->Option.getWithDefault("obj")}
-        onChange={evt =>
-          setFilterArgs(args => {...args, obj: ReactEvent.Form.target(evt)["value"]})}
-        className={`${textAreaClassName}
-            rounded-t-md
-        ${objJson->Option.mapWithDefault(false, Result.isError)
-            ? " text-red-600 "
-            : " focus:ring-indigo-500 "}`}
-        value={objString->Option.getWithDefault("")}
-      />
-      <div className="flex flex-row -space-x-px">
-        <input
-          type_={"text"}
-          placeholder={pathString->Option.getWithDefault("path")}
-          onChange={evt =>
-            setFilterArgs(args => {...args, path: ReactEvent.Form.target(evt)["value"]->Some})}
-          className={`${textAreaClassName} rounded-bl-md`}
-          value={pathString->Option.getWithDefault("")}
-        />
-        <input
-          type_={"text"}
-          placeholder={pattern->Option.getWithDefault("pattern")}
-          onChange={evt =>
-            setFilterArgs(args => {...args, pattern: ReactEvent.Form.target(evt)["value"]->Some})}
-          className={`${textAreaClassName} rounded-br-md`}
-          value={pattern->Option.getWithDefault("")}
-        />
-      </div>
+      {where->Option.mapWithDefault(<> </>, where =>
+        <label className="text-sm font-sm text-gray-700">
+          <a href> {`Filter by ${where->whereToLabel}`->React.string} </a>
+        </label>
+      )}
+      {components->componentsPredicateToComponent}
     </div>
     {queryResult->Option.mapWithDefault(<p> {"Loading..."->React.string} </p>, queryResult =>
       switch queryResult {

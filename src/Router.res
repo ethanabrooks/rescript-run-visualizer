@@ -40,9 +40,9 @@ let make = (~client) => {
         </div>
       </div>
       {switch route {
-      | Valid({granularity, ids, archived, obj, pattern, path}) =>
+      | Valid({granularity, ids, archived, where}) =>
         <div className={"flex flex-row"}>
-          <SidebarWrapper ids granularity archived obj pattern path client />
+          <SidebarWrapper ids granularity archived where client />
           <div
             className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
             <div

@@ -39,6 +39,7 @@ let merge = (_, old, new) =>
     Some(x)
   }
 
+let resultToOption = result => result->Result.mapWithDefault(None, x => x->Some)
 let mapError = (res: Result.t<'o, 'e>, f: 'e => 'f): Result.t<'o, 'f> =>
   switch res {
   | Ok(ok) => ok->Ok

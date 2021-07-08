@@ -2,14 +2,8 @@ open Routes
 open Belt
 
 module RunSubscription = %graphql(`
-  subscription search_runs(
-    $path: _text = null,
-    $pattern: String = "%",
-    $obj: jsonb = null,
-    $archived: Boolean! 
-  ) {
-    filter_runs(args: {object: $obj, path: $path, pattern: $pattern}, 
-    where: {_and: [{archived: {_eq: $archived}}, {sweep_id: {_is_null: true}}]}) {
+  subscription search_runs($archived: Boolean!, $condition: run_bool_exp = {}) {
+    run(where: {_and: [{archived: {_eq: $archived}, sweep_id: {_is_null: true}}, $condition]}) {
       id
       metadata
     }
@@ -17,14 +11,8 @@ module RunSubscription = %graphql(`
 `)
 
 module SweepSubscription = %graphql(`
-  subscription search_sweeps(
-    $path: _text = null,
-    $pattern: String = "%",
-    $obj: jsonb = null,
-    $archived: Boolean! 
-  ) {
-    filter_sweeps(args: {object: $obj, path: $path, pattern: $pattern}, 
-    where: {archived: {_eq: $archived}}) {
+  subscription search_sweeps($archived: Boolean!, $condition: sweep_bool_exp = {}) {
+    sweep(where: {_and: [{archived: {_eq: $archived}}, $condition]}) {
       id
       metadata
     }
@@ -38,46 +26,50 @@ type state = {
 
 let useSidebarItems = (
   ~granularity,
-  ~archived,
-  ~obj: option<Js.Json.t>,
-  ~pattern,
-  ~path,
+  ~archived: bool,
+  ~where: option<Hasura.where>,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
   let (state, setState) = React.useState(_ => None)
+  let whereJson = where->Option.map(Hasura.where_encode)
+  let whereText = whereJson->Option.mapWithDefault("", Js.Json.stringify)
 
-  let path =
-    path
-    ->Option.map(Js.Array.filter(t => t != ""))
-    ->Option.map(Js.Array.joinWith(","))
-    ->Option.map(path => `{${path}}`)
-    ->Option.map(Js.Json.string)
-
-  React.useEffect4(() => {
+  React.useEffect2(() => {
     let onError = error => setState(_ => {error: error->Some, data: None}->Some)
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     switch granularity {
     | Run =>
+      let rec makeRunBoolExp = (where: Hasura.where): RunSubscription.t_variables_run_bool_exp =>
+        switch where {
+        | And(_and) =>
+          let _and = _and->Array.map(makeRunBoolExp)
+          RunSubscription.makeInputObjectrun_bool_exp(~_and, ())
+        | Or(_or) =>
+          let _or = _or->Array.map(makeRunBoolExp)
+          RunSubscription.makeInputObjectrun_bool_exp(~_or, ())
+        | Just(Contains(path)) =>
+          let _contains = path
+          let metadata = RunSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
+          RunSubscription.makeInputObjectrun_bool_exp(~metadata, ())
+        }
       subscription :=
         client.subscribe(
           ~subscription=module(RunSubscription),
           {
             archived: archived,
-            obj: obj,
-            pattern: pattern,
-            path: path,
+            condition: where->Option.map(makeRunBoolExp),
           },
         ).subscribe(
           ~onNext=(
-            {error, data: {filter_runs}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
+            {error, data: {run}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
               RunSubscription.t,
             >,
           ) =>
             setState(_ =>
               {
                 error: error,
-                data: filter_runs
+                data: run
                 ->Array.map(({id, metadata}): Sidebar.entry => {
                   id: id,
                   metadata: metadata,
@@ -90,25 +82,38 @@ let useSidebarItems = (
         )->Some
 
     | Sweep =>
+      let rec makeSweepBoolExp = (
+        where: Hasura.where,
+      ): SweepSubscription.t_variables_sweep_bool_exp =>
+        switch where {
+        | And(_and) =>
+          let _and = _and->Array.map(makeSweepBoolExp)
+          SweepSubscription.makeInputObjectsweep_bool_exp(~_and, ())
+        | Or(_or) =>
+          let _or = _or->Array.map(makeSweepBoolExp)
+          SweepSubscription.makeInputObjectsweep_bool_exp(~_or, ())
+        | Just(Contains(path)) =>
+          let _contains = path
+          let metadata = SweepSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
+          SweepSubscription.makeInputObjectsweep_bool_exp(~metadata, ())
+        }
       subscription :=
         client.subscribe(
           ~subscription=module(SweepSubscription),
           {
             archived: archived,
-            obj: obj,
-            pattern: pattern,
-            path: path,
+            condition: where->Option.map(makeSweepBoolExp),
           },
         ).subscribe(
           ~onNext=(
-            {error, data: {filter_sweeps}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
+            {error, data: {sweep}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
               SweepSubscription.t,
             >,
           ) =>
             setState(_ =>
               {
                 error: error,
-                data: filter_sweeps
+                data: sweep
                 ->Array.map(({id, metadata}): Sidebar.entry => {
                   id: id,
                   metadata: metadata,
@@ -121,7 +126,7 @@ let useSidebarItems = (
         )->Some
     }
     Some(_ => unsubscribe())
-  }, (archived, obj, pattern, path))
+  }, (archived, whereText))
 
   state->Option.map(state =>
     switch state {
