@@ -34,7 +34,7 @@ let useSidebarItems = (
   let whereJson = where->Option.map(Hasura.where_encode)
   let whereText = whereJson->Option.mapWithDefault("", Js.Json.stringify)
 
-  React.useEffect2(() => {
+  React.useEffect3(() => {
     let onError = error => setState(_ => {error: error->Some, data: None}->Some)
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
@@ -126,7 +126,7 @@ let useSidebarItems = (
         )->Some
     }
     Some(_ => unsubscribe())
-  }, (archived, whereText))
+  }, (archived, granularity, whereText))
 
   state->Option.map(state =>
     switch state {
