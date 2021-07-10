@@ -104,7 +104,7 @@ let make = (
                   {switch pred {
                   | Just(text) =>
                     let res = text->textToResult
-                    <div className="flex items-center">
+                    <div className="flex items-center -space-x-px">
                       {element}
                       {_and
                         ? <button
@@ -169,7 +169,7 @@ let make = (
         | Just(text, res) =>
           let setText = text => setWhereTexts(_ => text->Just)
           let textArray: array<Predicate.t<string>> = [whereTexts]
-          <div className="flex items-center pt-5">
+          <div className="flex items-center pt-5 -space-x-px">
             <MetadataFilter text setText />
             <button
               type_="button"
