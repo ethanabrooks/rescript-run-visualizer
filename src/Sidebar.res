@@ -20,8 +20,7 @@ let make = (~items, ~ids) => {
         }->routeToHref
         <li key={id->Int.toString} className="relative bg-white py-5 px-4 hover:bg-gray-50">
           <div className="flex space-x-3">
-            <div
-              className="p-4 space-y-10 place-items-center justify-items-center justify-center place-content-center items-center content-center">
+            <div className="p-4 space-y-10 flex items-center justify-center">
               <input
                 id="candidates"
                 name="candidates"

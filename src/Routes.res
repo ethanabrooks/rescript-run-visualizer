@@ -51,10 +51,6 @@ module Hasura = {
     | Or_(array<Js.Json.t>)
     | Just_(metadata)
 
-  // let metadata_encode = (Contains(json): metadata): Js.Json.t => {_contains: json}->_contains_encode
-  // let metadata_decode = (json: Js.Json.t): Result.t<metadata, Decco.decodeError> =>
-  //   json->_contains_decode->Result.map(({_contains}) => Contains(_contains))
-
   let rec where_encode = (where: where): Js.Json.t =>
     switch where {
     | And(array) => And_(array->Array.map(where_encode))->_where_encode
