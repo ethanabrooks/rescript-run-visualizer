@@ -66,8 +66,17 @@ let make = (
     ~client,
   )
 
-  let route = makeRoute(~granularity, ~ids, ~archived, ~where, ())
-  let href = route->routeToHref
+  let textsToHref = texts => {
+    let where = texts->Predicate.map(textToResult)->resultsToWhere
+    let route = makeRoute(~granularity, ~ids, ~archived, ~where, ())
+    route->routeToHref
+  }
+  let href = whereTexts->textsToHref
+
+  let setWhereTextsAndUrl = texts => {
+    setWhereTexts(_ => texts)
+    texts->textsToHref->ReasonReactRouter.push
+  }
 
   let rec textsToComponents = (
     texts: Predicate.t<string>,
@@ -101,9 +110,10 @@ let make = (
                         ? <button
                             type_="button"
                             onClick={_ =>
-                              setWhereTexts(_ =>
-                                array->Util.setArray(i, Or([pred, ""->Just]))->And
-                              )}
+                              array
+                              ->Util.setArray(i, Or([pred, ""->Just]))
+                              ->And
+                              ->setWhereTextsAndUrl}
                             disabled={res->Result.isError}
                             className={buttonClass}>
                             {"Or"->React.string}
@@ -111,9 +121,10 @@ let make = (
                         : <button
                             type_="button"
                             onClick={_ =>
-                              setWhereTexts(_ =>
-                                array->Util.setArray(i, And([pred, ""->Just]))->Or
-                              )}
+                              array
+                              ->Util.setArray(i, And([pred, ""->Just]))
+                              ->Or
+                              ->setWhereTextsAndUrl}
                             disabled={res->Result.isError}
                             className={buttonClass}>
                             {"And"->React.string}
@@ -148,8 +159,8 @@ let make = (
   | Sweep => "sweep"
   }
 
-  <div className="pb-10 resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
-    <div className="pb-5 -space-y-px">
+  <div className="resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
+    <div className="-space-y-px">
       <label className={filterTextClass}>
         <a href> {`SELECT * FROM ${table} WHERE`->React.string} </a>
       </label>
@@ -162,14 +173,14 @@ let make = (
             <MetadataFilter text setText />
             <button
               type_="button"
-              onClick={_ => setWhereTexts(_ => textArray->And)}
+              onClick={_ => textArray->And->setWhereTextsAndUrl}
               disabled={res->Result.isError}
               className={buttonClass}>
               {"And"->React.string}
             </button>
             <button
               type_="button"
-              onClick={_ => setWhereTexts(_ => textArray->Or)}
+              onClick={_ => textArray->Or->setWhereTextsAndUrl}
               disabled={res->Result.isError}
               className={`${buttonClass} rounded-r-md`}>
               {"Or"->React.string}

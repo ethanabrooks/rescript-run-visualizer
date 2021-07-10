@@ -6,7 +6,7 @@ type entry = {id: int, metadata: option<Js.Json.t>}
 let make = (~items, ~ids) => {
   let url = ReasonReactRouter.useUrl()
 
-  <div className="flow-root mt-6">
+  <div className="flow-root py-10">
     <ul className="divide-y divide-gray-200">
       {items
       ->List.fromArray
