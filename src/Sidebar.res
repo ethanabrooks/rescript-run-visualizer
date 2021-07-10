@@ -42,19 +42,20 @@ let make = (~items, ~ids) => {
             <h3
               className="flex-shrink-0 flex items-center justify-center font-medium text-gray-900 truncate">
               <a href>
-                {metadata
-                ->Option.mapWithDefault("No metadata", metadata => {
-                  metadata
-                  ->jsonToMap
-                  ->Option.mapWithDefault("Ill-formatted metadata", map =>
-                    map
-                    ->Map.String.get("name")
-                    ->Option.mapWithDefault("No name field in metadata", name =>
-                      name->Js.Json.decodeString->Option.getWithDefault(name->Js.Json.stringify)
-                    )
-                  )
-                })
-                ->React.string}
+                {`${id->Int.toString}. ${metadata->Option.mapWithDefault(
+                    "No metadata",
+                    metadata => {
+                      metadata
+                      ->jsonToMap
+                      ->Option.mapWithDefault("Ill-formatted metadata", map =>
+                        map
+                        ->Map.String.get("name")
+                        ->Option.mapWithDefault("No name field in metadata", name =>
+                          name->Js.Json.decodeString->Option.getWithDefault(name->Js.Json.stringify)
+                        )
+                      )
+                    },
+                  )}`->React.string}
               </a>
             </h3>
           </div>

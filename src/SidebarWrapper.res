@@ -1,63 +1,14 @@
 open Routes
+open MetadataFilter
 open Belt
 
 type whereResults = Predicate.t<Belt.Result.t<Hasura.metadata, option<string>>>
 
-let whereToTexts = (where: Hasura.where) =>
+let whereToTexts = (where: Hasura.where): Predicate.t<string> =>
   where->Predicate.map((Contains(json)) => json->Js.Json.stringify)
 
-let whereOptionToTexts = (where: option<Hasura.where>) =>
-  where->Option.getWithDefault(Just(Contains(Js.Dict.empty()->Js.Json.object_)))->whereToTexts
-
-let textsToResults = (texts: Predicate.t<string>): whereResults =>
-  texts
-  ->Predicate.map(text => text->Util.parseJson)
-  ->Predicate.map(res =>
-    res->Result.map((metadata: Js.Json.t): Hasura.metadata => Contains(metadata))
-  )
-
-let rec textsToTextSetters = (texts: Predicate.t<string>): Predicate.t<
-  string => Predicate.t<string>,
-> => {
-  let setArray = (a, i, x) => a->Array.mapWithIndex((j, y) => i == j ? x : y)
-  switch texts {
-  | And(a) =>
-    a
-    ->Array.mapWithIndex((i, _texts) =>
-      _texts
-      ->textsToTextSetters
-      ->Predicate.map((set, text) => a->setArray(i, text->set)->Predicate.And)
-    )
-    ->Predicate.And
-  | Or(a) =>
-    a
-    ->Array.mapWithIndex((i, _texts) =>
-      _texts
-      ->textsToTextSetters
-      ->Predicate.map((set, text) => a->setArray(i, text->set)->Predicate.Or)
-    )
-    ->Predicate.Or
-  | Just(_) => Just(t => t->Just)
-  }
-}
-
-let rec componentsPredicateToComponent = (
-  components: Predicate.t<React.element>,
-): React.element => {
-  switch components {
-  | Just(x) => x
-  | And(a) =>
-    <div>
-      <label className="text-sm font-sm text-gray-700"> {"And"->React.string} </label>
-      <div> {a->Array.map(componentsPredicateToComponent)->React.array} </div>
-    </div>
-  | Or(a) =>
-    <div>
-      <label className="text-sm font-sm text-gray-700"> {"Or"->React.string} </label>
-      <div> {a->Array.map(componentsPredicateToComponent)->React.array} </div>
-    </div>
-  }
-}
+let whereOptionToTexts = (where: option<Hasura.where>): Predicate.t<string> =>
+  where->Option.mapWithDefault(Predicate.Just(""), whereToTexts)
 
 let rec resultsToWhere = (whereResults: whereResults): option<Hasura.where> =>
   switch whereResults {
@@ -66,20 +17,29 @@ let rec resultsToWhere = (whereResults: whereResults): option<Hasura.where> =>
   | Just(metadata) => metadata->Util.resultToOption->Option.map(x => x->Predicate.Just)
   }
 
-let rec whereToLabel = (where: Hasura.where) => {
+let removeDummies = (texts: Predicate.t<string>) => {
   let f = a =>
-    Array.zip(a, a->Array.map(whereToLabel))->Array.map(((where, label)) =>
-      switch where {
-      | Just(_) => label
-      | _ => `(${label})`
+    a->Array.keepMap(p =>
+      switch p {
+      | Predicate.Just("") => None
+      | _ => p->Some
       }
     )
-  switch where {
-  | Just(Contains(x)) => `metadata @> ${x->Js.Json.stringify}`
-  | And(a) => a->f->Js.Array2.joinWith(" AND ")
-  | Or(a) => a->f->Js.Array2.joinWith(" OR ")
+  switch texts {
+  | Just(_) => texts
+  | And(a) => a->f->And
+  | Or(a) => a->f->Or
   }
 }
+
+let addDummies = (texts: Predicate.t<string>) =>
+  switch texts {
+  | Just(_) => texts
+  | And(a) => [a->Array.concat([""->Just])->And, ""->Just]->Or
+  | Or(a) => [a->Array.concat([""->Just])->Or, ""->Just]->And
+  }
+
+let buttonClass = "w-20 h-10 border border-gray-300 text-sm bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-default px-2 items-center justify-center"
 
 @react.component
 let make = (
@@ -97,7 +57,7 @@ let make = (
     None
   }, [initialWhere])
 
-  let whereResults = whereTexts->textsToResults
+  let whereResults = whereTexts->Predicate.map(textToResult)
   let where = whereResults->resultsToWhere
   let queryResult = SidebarItemsSubscription.useSidebarItems(
     ~granularity,
@@ -108,22 +68,116 @@ let make = (
 
   let route = makeRoute(~granularity, ~ids, ~archived, ~where, ())
   let href = route->routeToHref
-  let components = Predicate.zip(whereTexts, whereTexts->textsToTextSetters)->Predicate.map(((
-    text,
-    setter,
-  )) => {
-    let setText = text => setWhereTexts(_ => text->setter)
-    <MetadataFilter text setText />
-  })
+
+  let rec textsToComponents = (
+    texts: Predicate.t<string>,
+    addText: Predicate.t<string> => Predicate.t<string>,
+  ): React.element => {
+    let buttonClass = `${buttonClass} rounded-r-md`
+    let elements = (array: array<Predicate.t<string>>, _and: bool) =>
+      <div className="flex-col">
+        <div> {"("->React.string} </div>
+        <div className="flex">
+          <div className="w-10" /> // indent
+          <ul>
+            {array
+            ->Array.mapWithIndex((i, p) => {
+              let addText = (pred: Predicate.t<string>): Predicate.t<string> => {
+                let a = array->Util.setArray(i, pred)
+                _and ? a->And : a->Or
+              }
+              p->textsToComponents(addText)
+            })
+            ->Array.zip(array)
+            ->Array.mapWithIndex((i, (element, pred)) =>
+              <div key={i->Int.toString}>
+                <li>
+                  {switch pred {
+                  | Just(text) =>
+                    let res = text->textToResult
+                    <div className="flex items-center">
+                      {element}
+                      {_and
+                        ? <button
+                            type_="button"
+                            onClick={_ =>
+                              setWhereTexts(_ =>
+                                array->Util.setArray(i, Or([pred, ""->Just]))->And
+                              )}
+                            disabled={res->Result.isError}
+                            className={buttonClass}>
+                            {"Or"->React.string}
+                          </button>
+                        : <button
+                            type_="button"
+                            onClick={_ =>
+                              setWhereTexts(_ =>
+                                array->Util.setArray(i, And([pred, ""->Just]))->Or
+                              )}
+                            disabled={res->Result.isError}
+                            className={buttonClass}>
+                            {"And"->React.string}
+                          </button>}
+                    </div>
+                  | _ => element
+                  }}
+                </li>
+                {i == array->Array.length - 1
+                  ? <> </>
+                  : <div className={"flex items-start"}>
+                      <p className={filterTextClass}> {(_and ? "AND" : "OR")->React.string} </p>
+                    </div>}
+              </div>
+            )
+            ->React.array}
+          </ul>
+        </div>
+        <div> {")"->React.string} </div>
+      </div>
+
+    switch texts {
+    | Just(text) =>
+      let setText = (text: string) => setWhereTexts(_ => text->Just->addText)
+      <MetadataFilter text setText />
+    | And(a) => a->elements(true)
+    | Or(a) => a->elements(false)
+    }
+  }
+  let table = switch granularity {
+  | Run => "run"
+  | Sweep => "sweep"
+  }
 
   <div className="pb-10 resize-x w-1/3 m-5 max-h-screen overflow-y-scroll overscroll-contain">
     <div className="pb-5 -space-y-px">
-      {where->Option.mapWithDefault(<> </>, where =>
-        <label className="text-sm font-sm text-gray-700">
-          <a href> {`Filter by ${where->whereToLabel}`->React.string} </a>
-        </label>
-      )}
-      {components->componentsPredicateToComponent}
+      <label className={filterTextClass}>
+        <a href> {`SELECT * FROM ${table} WHERE`->React.string} </a>
+      </label>
+      <ul className="list-inside">
+        {switch Predicate.zip(whereTexts, whereResults) {
+        | Just(text, res) =>
+          let setText = text => setWhereTexts(_ => text->Just)
+          let textArray: array<Predicate.t<string>> = [whereTexts]
+          <div className="flex items-center pt-5">
+            <MetadataFilter text setText />
+            <button
+              type_="button"
+              onClick={_ => setWhereTexts(_ => textArray->And)}
+              disabled={res->Result.isError}
+              className={buttonClass}>
+              {"And"->React.string}
+            </button>
+            <button
+              type_="button"
+              onClick={_ => setWhereTexts(_ => textArray->Or)}
+              disabled={res->Result.isError}
+              className={`${buttonClass} rounded-r-md`}>
+              {"Or"->React.string}
+            </button>
+          </div>
+        | _ => whereTexts->removeDummies->addDummies->textsToComponents(x => x)
+        }}
+      </ul>
     </div>
     {queryResult->Option.mapWithDefault(<p> {"Loading..."->React.string} </p>, queryResult =>
       switch queryResult {

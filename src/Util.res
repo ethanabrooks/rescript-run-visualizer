@@ -50,3 +50,13 @@ let parseJson = string =>
   try string->Js.Json.parseExn->Result.Ok catch {
   | Js.Exn.Error(e) => Result.Error(e->Js.Exn.message)
   }
+
+let setArray = (a, i, x) => a->Array.mapWithIndex((j, y) => i == j ? x : y)
+
+let joinWith = (a, x) =>
+  a->Array.reduce([], (a, y) =>
+    switch a {
+    | [] => [y]
+    | _ => a->Array.concat([x, y])
+    }
+  )
