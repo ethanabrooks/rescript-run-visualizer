@@ -1,7 +1,9 @@
 version: "3.6"
 services:
   run-visualizer:
-    build: .
+    build:
+      network: host
+      context: .
     ports:
       - "8081:80"
     restart: always
