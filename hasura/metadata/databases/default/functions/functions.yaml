@@ -1,3 +1,4 @@
 - "!include public_filter_runs.yaml"
 - "!include public_filter_sweeps.yaml"
 - "!include public_logs_less_than_step.yaml"
+- "!include public_non_sweep_run.yaml"

@@ -3,7 +3,7 @@ open Belt
 
 module RunSubscription = %graphql(`
   subscription search_runs($archived: Boolean!, $condition: run_bool_exp = {}) {
-    run(where: {_and: [{archived: {_eq: $archived}, sweep_id: {_is_null: true}}, $condition]}) {
+    non_sweep_run(where: {_and: [{archived: {_eq: $archived}}, $condition]}) {
       id
       metadata
     }
@@ -62,14 +62,14 @@ let useSidebarItems = (
           },
         ).subscribe(
           ~onNext=(
-            {error, data: {run}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
+            {error, data: {non_sweep_run}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
               RunSubscription.t,
             >,
           ) =>
             setState(_ =>
               {
                 error: error,
-                data: run
+                data: non_sweep_run
                 ->Array.map(({id, metadata}): Sidebar.entry => {
                   id: id,
                   metadata: metadata,
