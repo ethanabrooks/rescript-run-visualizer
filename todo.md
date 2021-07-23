@@ -1,6 +1,6 @@
-- switch wireguard to ipv4
-- deploy to rldl7
 - use jsoneditor
 - validate json before passing to Vega
-- fix buttons
-- fix archive button (currently it displays mutation result even after switching URL)
+- fix archive button for newly added charts
+- add select all button
+- keep filters on top of menu
+- skip every nth run_log of count exceeds limit
