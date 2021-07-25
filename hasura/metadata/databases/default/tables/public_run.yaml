@@ -13,6 +13,13 @@ array_relationships:
       table:
         name: chart
         schema: public
+- name: run_blobs
+  using:
+    foreign_key_constraint_on:
+      column: run_id
+      table:
+        name: run_blob
+        schema: public
 - name: run_logs
   using:
     foreign_key_constraint_on:
