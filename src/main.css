@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+.max-height-80vh {
+    max-height: 80vh
+}
 
 .button {
     @apply inline-flex; 

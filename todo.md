@@ -2,5 +2,4 @@
 - validate json before passing to Vega
 - fix archive button for newly added charts
 - add select all button
-- keep filters on top of menu
 - skip every nth run_log of count exceeds limit
