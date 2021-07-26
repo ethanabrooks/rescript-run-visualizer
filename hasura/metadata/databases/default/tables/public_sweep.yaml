@@ -1,6 +1,10 @@
 table:
   name: sweep
   schema: public
+configuration:
+  custom_column_names:
+    remaining_runs: remaining_runs
+  custom_root_fields: {}
 array_relationships:
 - name: parameter_choices
   using:
@@ -17,6 +21,11 @@ array_relationships:
         name: run
         schema: public
 computed_fields:
+- definition:
+    function:
+      name: has_logs
+      schema: public
+  name: has_logs
 - definition:
     function:
       name: sweep_metadata_path
