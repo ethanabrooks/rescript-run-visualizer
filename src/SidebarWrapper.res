@@ -159,7 +159,7 @@ let make = (
   | Sweep => "sweep"
   }
 
-  <div className="resize-x w-1/2 m-5">
+  <div className="w-1/2 m-5">
     <div className="-space-y-px">
       <label className={filterTextClass}>
         <a href> {`SELECT * FROM ${table} WHERE`->React.string} </a>
