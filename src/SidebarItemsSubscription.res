@@ -97,6 +97,7 @@ let useSidebarItems = (
           let metadata = SweepSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
           SweepSubscription.makeInputObjectsweep_bool_exp(~metadata, ())
         }
+      Js.log(where->Option.map(makeSweepBoolExp))
       subscription :=
         client.subscribe(
           ~subscription=module(SweepSubscription),
