@@ -5,6 +5,12 @@ object_relationships:
 - name: run
   using:
     foreign_key_constraint_on: run_id
+computed_fields:
+- definition:
+    function:
+      name: bytea_to_text
+      schema: public
+  name: text
 insert_permissions:
 - permission:
     backend_only: false

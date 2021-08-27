@@ -9,6 +9,7 @@ let make = (~spec, ~data) => {
       ->Map.Int.findFirstBy((k, _) => minKey <= k)
       ->Option.mapWithDefault((datapoints, minKey), ((k, v)) => (list{v, ...datapoints}, k + 1))
     )
+  Js.log(firstNDatapoints->List.toArray)
   let jsonToMap = json =>
     json->Js.Json.decodeObject->Option.map(dict => dict->Js.Dict.entries->Map.String.fromArray)
   let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
