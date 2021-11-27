@@ -2,8 +2,12 @@ open Routes
 open Belt
 
 module RunSubscription = %graphql(`
-  subscription search_runs($archived: Boolean!, $condition: run_bool_exp = {}) {
-    non_sweep_run(where: {_and: [{archived: {_eq: $archived}}, $condition]}) {
+  subscription search_runs($archived: Boolean!, $limit: Int!, $condition: run_bool_exp = {}) {
+    non_sweep_run(
+      limit: $limit, 
+      order_by: [{id: desc}],
+      where: {_and: [{archived: {_eq: $archived}}, $condition]}
+    ) {
       id
       metadata
     }
@@ -11,13 +15,19 @@ module RunSubscription = %graphql(`
 `)
 
 module SweepSubscription = %graphql(`
-  subscription search_sweeps($archived: Boolean!, $condition: sweep_bool_exp = {}) {
-    sweep(where: {_and: [{archived: {_eq: $archived}}, $condition]}) {
+  subscription search_sweeps($archived: Boolean!, $limit: Int!, $condition: sweep_bool_exp = {}) {
+    sweep(
+      limit: $limit, 
+      order_by: [{id: desc}],
+      where: {_and: [{archived: {_eq: $archived}}, $condition]}
+    ) {
       id
       metadata
     }
   }
 `)
+
+@val external maxSweeps: string = "NODE_MAX_SWEEPS"
 
 type state = {
   error: option<ApolloClient__Core_ApolloClient.ApolloError.t>,
@@ -38,6 +48,7 @@ let useSidebarItems = (
     let onError = error => setState(_ => {error: error->Some, data: None}->Some)
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
+    let limit = maxSweeps->Int.fromString->Option.getExn // TODO: better handling of None
     switch granularity {
     | Run =>
       let rec makeRunBoolExp = (where: Hasura.where): RunSubscription.t_variables_run_bool_exp =>
@@ -57,6 +68,7 @@ let useSidebarItems = (
         client.subscribe(
           ~subscription=module(RunSubscription),
           {
+            limit: limit,
             archived: archived,
             condition: where->Option.map(makeRunBoolExp),
           },
@@ -65,7 +77,7 @@ let useSidebarItems = (
             {error, data: {non_sweep_run}}: ApolloClient__Core_ApolloClient.FetchResult.t__ok<
               RunSubscription.t,
             >,
-          ) =>
+          ) => {
             setState(_ =>
               {
                 error: error,
@@ -76,7 +88,8 @@ let useSidebarItems = (
                 })
                 ->Some,
               }->Some
-            ),
+            )
+          },
           ~onError,
           (),
         )->Some
@@ -97,11 +110,11 @@ let useSidebarItems = (
           let metadata = SweepSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
           SweepSubscription.makeInputObjectsweep_bool_exp(~metadata, ())
         }
-      Js.log(where->Option.map(makeSweepBoolExp))
       subscription :=
         client.subscribe(
           ~subscription=module(SweepSubscription),
           {
+            limit: limit,
             archived: archived,
             condition: where->Option.map(makeSweepBoolExp),
           },

@@ -7,7 +7,7 @@
     "format": "prettier -w **/*.css **/*.html **/*.json **/*.scss src/**/*.js *.js",
     "dev": "concurrently 'node server.js dev' 'yarn dev:build' 'yarn dev:bundle' 'yarn dev:css'",
     "dev:build": "bsb -make-world -w -ws _",
-    "dev:bundle": "esbuild --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:process.env.NODE_ENV=\\\"production\\\"  --serve=localhost:8001 --bundle src/Index.bs.js --external:react --external:react-dom",
+    "dev:bundle": "esbuild --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:NODE_MAX_SWEEPS=\\\"$NODE_MAX_SWEEPS\\\" --define:process.env.NODE_ENV=\\\"production\\\"  --serve=localhost:8001 --bundle src/Index.bs.js --external:react --external:react-dom",
     "dev:css": "postcss src/main.css -o dev/main.css",
     "prod": "concurrently 'yarn prod:bundle' 'yarn prod:css' 'yarn prod:static' 'yarn prod:serve'",
     "prod:build": "concurrently 'yarn prod:bundle' 'yarn prod:css'",
