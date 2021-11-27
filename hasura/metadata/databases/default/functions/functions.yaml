@@ -1,4 +1,6 @@
 - "!include public_empty_sweeps.yaml"
+- "!include public_every_nth_run_log.yaml"
+- "!include public_except_every_nth_run_log.yaml"
 - "!include public_filter_runs.yaml"
 - "!include public_filter_sweeps.yaml"
 - "!include public_logs_less_than_step.yaml"

@@ -1,9 +1,21 @@
 open Util
 open Belt
 
-module Subscription = %graphql(`
+module EveryNthSubscription = %graphql(`
   subscription logs($condition: run_log_bool_exp!) {
-    run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
+    every_nth_run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
+      id
+      log
+      run {
+        id
+      }
+    }
+  }
+`)
+
+module ExceptEveryNthSubscription = %graphql(`
+  subscription logs($condition: run_log_bool_exp!) {
+    except_every_nth_run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
       id
       log
       run {

@@ -4,27 +4,28 @@ open Util
 @val external maxLogs: string = "NODE_MAX_LOGS"
 
 module Subscription = %graphql(`
-  subscription subscription($condition: run_bool_exp!) {
-    run(where: $condition) {
+  subscription InitialSubscription($condition: run_bool_exp!) {
+  run(where: $condition) {
+    id
+    metadata
+    charts {
       id
-      metadata
-      run_logs {
-        id
-        log
-      }
-      charts {
-        id
-        spec
-        archived
+      spec
+      archived
+    }
+    run_logs_aggregate {
+      aggregate {
+        count
       }
     }
   }
+}
 `)
 
 type queryResult = {
   metadata: Map.Int.t<Js.Json.t>,
   specs: Map.Int.t<Js.Json.t>,
-  logs: jsonMap,
+  logCount: int,
   runIds: Set.Int.t,
 }
 
@@ -46,7 +47,10 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
           // combine values from multiple runs returned from query
           let newState =
             run
-            ->Array.reduce((None: option<queryResult>), (acc, {metadata, charts, run_logs, id}) => {
+            ->Array.reduce((None: option<queryResult>), (
+              acc,
+              {metadata, charts, run_logs_aggregate: {aggregate: count}, id},
+            ) => {
               // collect possibly multiple metadata into array
               let metadataMap =
                 metadata->Option.mapWithDefault(Map.Int.empty, Map.Int.empty->Map.Int.set(id))
@@ -55,27 +59,19 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
               let specs: Map.Int.t<Js.Json.t> =
                 charts->Array.map(({id, spec}) => (id, spec))->Map.Int.fromArray
 
-              // combine multiple logs from run
-              let logs =
-                run_logs
-                ->Array.map(({id, log}) => (id, log))
-                ->Map.Int.fromArray
-                // add metadata to each log
-                ->Map.Int.map(log =>
-                  metadata->Option.mapWithDefault(log, log->LogsSubscription.addParametersToLog)
-                )
+              let logCount = count->Option.mapWithDefault(0, ({count}) => count)
 
               let runIds = Set.Int.empty->Set.Int.add(id)
               // combine values from this run with values from previous runs
               acc
               ->Option.mapWithDefault(
-                {metadata: metadataMap, specs: specs, logs: logs, runIds: runIds},
-                ({metadata: m, specs: s, logs: l, runIds: r}) => {
+                {metadata: metadataMap, specs: specs, logCount: logCount, runIds: runIds},
+                ({metadata: m, specs: s, logCount: l, runIds: r}) => {
                   let metadata = m->Map.Int.merge(metadataMap, merge)
                   let specs = s->Map.Int.merge(specs, merge)
-                  let logs = l->Map.Int.merge(logs, merge)
+                  let logCount = l + logCount
                   let runIds = r->Set.Int.union(runIds)
-                  {metadata: metadata, specs: specs, logs: logs, runIds: runIds}
+                  {metadata: metadata, specs: specs, logCount: logCount, runIds: runIds}
                 },
               )
               ->Some

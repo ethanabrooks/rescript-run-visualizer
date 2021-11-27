@@ -37,7 +37,7 @@ let reverse = specs =>
 let make = (~client, ~granularity, ~ids) => {
   module Charts = {
     @react.component
-    let make = (~logs: jsonMap, ~specs: Map.Int.t<Js.Json.t>, ~metadata: jsonMap, ~runIds) => {
+    let make = (~logCount: int, ~specs: Map.Int.t<Js.Json.t>, ~metadata: jsonMap, ~runIds) => {
       let (specs, dispatch) = React.useReducer((specs, action) =>
         switch action {
         | Set(specs) => specs->reverse
@@ -59,7 +59,7 @@ let make = (~client, ~granularity, ~ids) => {
       , specs->reverse)
 
       switch (
-        LogsSubscription.useLogs(~client, ~logs, ~metadata, ~granularity, ~runIds),
+        LogsSubscription.useLogs(~client, ~logCount, ~metadata, ~granularity, ~runIds),
         useSyncCharts(~specs, ~runIds),
       ) {
       | (Error({message}), (_, _))
@@ -92,10 +92,10 @@ let make = (~client, ~granularity, ~ids) => {
     }
   }
 
-  switch RunsSubscription.useSubscription(~client, ~granularity, ~ids) {
+  switch InitialSubscription.useSubscription(~client, ~granularity, ~ids) {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logs, specs, metadata, runIds}) => <Charts logs specs metadata runIds />
+  | Data({logCount, specs, metadata, runIds}) => <Charts logs specs metadata runIds />
   }
 }
