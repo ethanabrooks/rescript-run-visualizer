@@ -73,6 +73,8 @@ let useLogs = (
     let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
+    // Js.log(condition->Subscription.serializeInputObjectrun_log_bool_exp)
+    // Js.log(runIds)
 
     let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~archived, ())

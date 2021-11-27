@@ -1,5 +1,4 @@
 @val external graphqlEndpoint: string = "NODE_GRAPHQL_ENDPOINT"
-@val external maxSweeps: string = "NODE_MAX_SWEEPS"
 
 let headers = {"Authorization": "There are a bunch of ways to get a token in here"}
 
@@ -18,6 +17,7 @@ let wsLink = {
   )
 }
 
+// client enables us to make queries to Hasura
 let client: ApolloClient__Core_ApolloClient.t = {
   open ApolloClient
   make(

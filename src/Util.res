@@ -26,9 +26,8 @@ let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.objec
 type jsonSet = Set.t<Js.Json.t, JsonComparator.identity>
 type jsonMap = Map.Int.t<Js.Json.t>
 type jsonArray = array<Js.Json.t>
-type specs = jsonMap
 type parseResult = Result.t<Js.Json.t, option<string>>
-type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Set(specs)
+type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Set(jsonMap)
 type oldAndNewLogs = {old: jsonMap, new: jsonMap}
 
 let merge = (_, old, new) =>
