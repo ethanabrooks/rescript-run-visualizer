@@ -57,11 +57,15 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
 
               // combine multiple charts from run
               let specs: Map.Int.t<Js.Json.t> =
-                charts->Array.map(({id, spec}) => (id, spec))->Map.Int.fromArray
+                charts
+                ->Array.keep(({archived}) => !archived)
+                ->Array.map(({id, spec}) => (id, spec))
+                ->Map.Int.fromArray
 
               let logCount = count->Option.mapWithDefault(0, ({count}) => count)
 
               let runIds = Set.Int.empty->Set.Int.add(id)
+
               // combine values from this run with values from previous runs
               acc
               ->Option.mapWithDefault(
