@@ -27,15 +27,7 @@ let make = (
   ~where: option<Hasura.where>,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
-  let initialWhere = where
-  let (whereTexts, setWhereTexts) = React.useState(_ => initialWhere->whereOptionToTexts)
-
-  React.useEffect1(() => {
-    setWhereTexts(_ => initialWhere->whereOptionToTexts)
-    None
-  }, [initialWhere])
-
-  let whereResults = whereTexts->Predicate.map(textToResult)
+  let whereResults = where->whereOptionToTexts->Predicate.map(textToResult)
   let where = whereResults->resultsToWhere
   let queryResult = SidebarItemsSubscription.useSidebarItems(
     ~granularity,
