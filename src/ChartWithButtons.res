@@ -11,9 +11,7 @@ module SetArchived = %graphql(`
 @react.component
 let make = (~spec, ~chartIds, ~dispatch, ~logs) => {
   let (archiveChart, archiveChartResult) = SetArchived.use()
-  let specString = spec->Js.Json.stringifyWithSpace(2)
   let chartIds = chartIds->Option.map(Set.Int.toArray)
-  let {old}: Util.oldAndNewLogs = logs
 
   let archiveChartButton = switch archiveChartResult {
   | {error: Some({message})} => <ErrorPage message />
@@ -25,16 +23,11 @@ let make = (~spec, ~chartIds, ~dispatch, ~logs) => {
     />
   }
 
-  let data = old
   let buttons = [
     <Button
       text={"Edit chart"} onClick={_ => dispatch(Util.ToggleRender(spec))} disabled={false}
     />,
     archiveChartButton,
-    <CopyButton
-      text={"Copy spec"} copyString=specString className={Button.className} disabled={false}
-    />,
-    <CopyWithDataButton spec data />,
   ]
 
   <> <Chart logs spec /> <Buttons buttons /> </>

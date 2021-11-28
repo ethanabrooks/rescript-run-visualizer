@@ -58,15 +58,14 @@ let make = (~client, ~granularity, ~ids) => {
         }
       , specs->reverse)
 
-      switch (
-        LogsSubscription.useLogs(~client, ~logCount, ~metadata, ~granularity, ~runIds),
-        useSyncCharts(~specs, ~runIds),
-      ) {
-      | (Error({message}), (_, _))
+      switch (LogsSubscription.useLogs(~logCount, ~runIds), useSyncCharts(~specs, ~runIds)) {
+      | (Error(message), (_, _))
       | (_, ({error: Some({message})}, _))
       | (_, (_, {error: Some({message})})) =>
         <ErrorPage message />
-      | (Ok({new}), _) => <>
+      | (Loading, _) => <LoadingPage />
+      | (Stuck, _) => <ErrorPage message={"Stuck."} />
+      | (Data(logs), _) => <>
           {specs
           ->Map.toArray
           ->List.fromArray
@@ -74,7 +73,6 @@ let make = (~client, ~granularity, ~ids) => {
           ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
             let key = i->Int.toString
             if rendering {
-              let logs: Util.oldAndNewLogs = {old: logs, new: new}
               <ChartWithButtons key spec chartIds dispatch logs />
             } else {
               let initialSpec = spec
@@ -96,6 +94,6 @@ let make = (~client, ~granularity, ~ids) => {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logCount, specs, metadata, runIds}) => <Charts logs specs metadata runIds />
+  | Data({logCount, specs, metadata, runIds}) => <Charts logCount specs metadata runIds />
   }
 }

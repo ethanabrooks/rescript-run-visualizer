@@ -1,0 +1,11 @@
+-- Could not auto-generate a down migration.
+-- Please write an appropriate down migration for the SQL below:
+-- CREATE OR REPLACE FUNCTION public.except_every_nth_run_log(n integer)
+--  RETURNS SETOF run_log
+--  LANGUAGE sql
+--  STABLE
+-- AS $function$
+--     SELECT *
+--     FROM run_log
+--     WHERE run_log.id % n != 0
+-- $function$;

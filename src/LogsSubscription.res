@@ -1,29 +1,36 @@
 open Util
 open Belt
 
-module EveryNthSubscription = %graphql(`
-  subscription logs($condition: run_log_bool_exp!) {
-    every_nth_run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
+@val external maxLogs: string = "NODE_MAX_LOGS"
+
+module EveryQuery = %graphql(`
+  query logs($condition: run_log_bool_exp!) {
+    run_log(where: $condition) {
       id
       log
-      run {
-        id
-      }
     }
   }
 `)
 
-module ExceptEveryNthSubscription = %graphql(`
-  subscription logs($condition: run_log_bool_exp!) {
-    except_every_nth_run_log(where: $condition, limit: 1, order_by: [{id: desc}]) {
+module EveryNthQuery = %graphql(`
+  query logs($condition: run_log_bool_exp!, $n: Int!) {
+    every_nth_run_log(args: {n: $n}, where: $condition) {
       id
       log
-      run {
-        id
-      }
     }
   }
 `)
+
+module ExceptEveryNthQuery = %graphql(`
+  query logs($condition: run_log_bool_exp!, $n: Int!) {
+    except_every_nth_run_log(args: {n: $n}, where: $condition) {
+      id
+      log
+    }
+  }
+`)
+
+type queryResult = Loading | Error(string) | Stuck | Data(jsonMap)
 
 let addParametersToLog = (log, metadata) =>
   metadata
@@ -35,71 +42,46 @@ let addParametersToLog = (log, metadata) =>
   )
   ->Option.getWithDefault(log)
 
-let useLogs = (
-  ~logs: jsonMap,
-  ~client: ApolloClient__Core_ApolloClient.t,
-  ~metadata: jsonMap,
-  ~runIds,
-  ~granularity,
-) => {
-  let (currentAndNewLogs, setCurrentAndNewLogs) = React.useState(_ =>
-    {
-      old: logs,
-      new: Map.Int.empty,
-    }->Ok
-  )
-
-  React.useEffect2(() => {
-    let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
-    let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
-    let onError = error => setCurrentAndNewLogs(_ => error->Error)
-
-    let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
-      switch value {
-      | {error: Some(error)} =>
-        unsubscribe()
-        error->onError
-      | {data} =>
-        setCurrentAndNewLogs(logs =>
-          logs->Result.mapWithDefault(logs, ({old}) => {
-            let new =
-              data.run_log
-              ->Array.keep(({id}) => !(old->Map.Int.has(id)))
-              ->Array.map(({id, log, run}) => {
-                let log =
-                  metadata
-                  ->Map.Int.get(run.id)
-                  ->Option.map(log->addParametersToLog)
-                  ->Option.getWithDefault(log)
-                (id, log)
-              })
-              ->Map.Int.fromArray
-            let old = old->Map.Int.merge(new, Util.merge)
-            Ok({old: old, new: new})
-          })
-        )
+let useLogs = (~logCount: int, ~runIds) => {
+  let ids = runIds->Set.Int.toArray
+  let toData = x => x->Map.Int.fromArray->Data
+  maxLogs
+  ->Int.fromString
+  ->Option.mapWithDefault(Error(`Invalid value for NODE_MAX_LOGS: ${maxLogs}`), maxLogs =>
+    if logCount < maxLogs {
+      let id = EveryQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+      let run = EveryQuery.makeInputObjectrun_bool_exp(~id, ())
+      let condition = EveryQuery.makeInputObjectrun_log_bool_exp(~run, ())
+      switch EveryQuery.use({condition: condition}) {
+      | {loading: true} => Loading
+      | {error: Some(error)} => Error(error.message)
+      | {data: None, error: None, loading: false} => Stuck
+      | {data: Some({run_log})} => run_log->Array.map(({id, log}) => (id, log))->toData
+      }
+    } else if logCount < 2 * maxLogs {
+      let n: int = logCount / (logCount - maxLogs)
+      let id = ExceptEveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+      let run = ExceptEveryNthQuery.makeInputObjectrun_bool_exp(~id, ())
+      let condition = ExceptEveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+      switch ExceptEveryNthQuery.use({condition: condition, n: n}) {
+      | {loading: true} => Loading
+      | {error: Some(error)} => Error(error.message)
+      | {data: None, error: None, loading: false} => Stuck
+      | {data: Some({except_every_nth_run_log})} =>
+        except_every_nth_run_log->Array.map(({id, log}) => (id, log))->toData
+      }
+    } else {
+      let n: int = logCount / maxLogs
+      let id = EveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+      let run = EveryNthQuery.makeInputObjectrun_bool_exp(~id, ())
+      let condition = EveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+      switch EveryNthQuery.use({condition: condition, n: n}) {
+      | {loading: true} => Loading
+      | {error: Some(error)} => Error(error.message)
+      | {data: None, error: None, loading: false} => Stuck
+      | {data: Some({every_nth_run_log})} =>
+        every_nth_run_log->Array.map(({id, log}) => (id, log))->toData
       }
     }
-
-    let ids = runIds->Set.Int.toArray
-    let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
-    let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
-    let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-    // Js.log(condition->Subscription.serializeInputObjectrun_log_bool_exp)
-    // Js.log(runIds)
-
-    let archived = Subscription.makeInputObjectBoolean_comparison_exp(~_eq=false, ())
-    let run = Subscription.makeInputObjectrun_bool_exp(~archived, ())
-    let notArchived = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-    let condition = Subscription.makeInputObjectrun_log_bool_exp(~_and=[condition, notArchived], ())
-    subscription :=
-      client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
-        ~onNext,
-        ~onError,
-        (),
-      )->Some
-    Some(_ => unsubscribe())
-  }, (runIds, granularity))
-
-  currentAndNewLogs
+  )
 }
