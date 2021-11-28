@@ -1,65 +1,19 @@
 open Belt
 
-// type ajvArgs = {
-//   allowUnionTypes: bool,
-//   strictTypes: bool,
-//   strictTuples: bool,
-// }
-// type ajv
-// type ajvRef
-// @module("ajv-formats") external addFormats: ajv => unit = "addFormats"
-// @module("ajv/lib/refs/json-schema-draft-06.json") external draft6Schema: ajvRef = "draft6Schema"
-// @new @module external newAjv: ajvArgs => ajv = "Ajv"
-// @send external addFormat: (ajv, string, unit => bool) => unit = "addFormat"
-// @send external addMetaSchema: (ajv, ajvRef) => unit = "addMetaSchema"
-// @send external addKeyword: (ajv, string) => unit = "addKeyword"
-// @send external compile: (ajv, Js.Json.t, Js.Json.t) => bool = "compile"
-
 @react.component
-let make = (~initialSpec, ~dispatch) => {
-  let (schema, setSchema) = React.useState(_ => None)
+let make = (~initialSpec: Js.Json.t, ~dispatch) => {
   let (text, setText) = React.useState(_ => initialSpec->Js.Json.stringifyWithSpace(2))
 
-  // https://github.com/vega/vega-lite/blob/b61b13c2cbd4ecde0448544aff6cdaea721fd22a/examples/examples.test.ts
-  // let ajv = newAjv({allowUnionTypes: true, strictTypes: false, strictTuples: false})
-  // ajv->addFormat("color-hex", () => true)
-  // // addFormats(ajv)
-  // // ajv->addMetaSchema(draft6Schema)
-  // ajv->addKeyword("defs")
-  // ajv->addKeyword("refs")
-
-  React.useEffect1(() => {
-    initialSpec
-    ->Js.Json.decodeObject
-    ->Option.flatMap(object => object->Js.Dict.get("$schema")->Option.flatMap(Js.Json.decodeString))
-    ->Option.mapWithDefault((), url =>
-      (Fetch.fetch(url)
-      |> Js.Promise.then_(Fetch.Response.json)
-      |> Js.Promise.then_(value => setSchema(_ => Some(value)) |> Js.Promise.resolve))->ignore
-    )
-    None
-  }, [initialSpec])
-
   let spec = text->Util.parseJson
-  let valid = switch (spec, schema) {
-  | (Result.Error(_), _) => false
-  // | (Result.Ok(parsed), Some(schema)) => {
-  //     let validate = ajv->compile(schema)
-  //     Js.log(validate(parsed))
-  //     true
-  //   }
+  let valid = spec->Result.isOk
 
-  | _ => true
-  }
-
-  // let submitButton = switch parseResult {
-  // | Result.Error(_) => <Button text={"Submit"} onClick={_ => ()} disabled={true} />
-  // | Result.Ok(spec) => <Button text={"Submit"} onClick={_ => spec->onSubmit} disabled={false} />
-  // }
   let buttons = [
     <Button
       text={"Submit"}
-      onClick={_ => dispatch(Util.Submit(spec->Result.getExn))}
+      onClick={_ => {
+        dispatch(Util.Submit(spec->Result.getExn))
+        setText(_ => "")
+      }}
       disabled={spec->Result.isError}
     />,
     <Button

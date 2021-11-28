@@ -20,6 +20,7 @@
     "@headlessui/react": "^1.0.0",
     "@heroicons/react": "^1.0.1",
     "@reasonml-community/graphql-ppx": "^1.2.0",
+    "@rescript-react-native/clipboard": "^1.5.2",
     "@ryyppy/rescript-promise": "^2.1.0",
     "ajv": "^8.6.0",
     "ajv-formats": "^2.1.0",

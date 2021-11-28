@@ -12,7 +12,7 @@ let make = (~client) => {
             className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
             <div
               className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
-              <Charts client granularity ids /> <ArchiveButton granularity ids /> // This defines the charts display
+              <Display client granularity ids /> <ArchiveButton granularity ids /> // This defines the charts display
             </div>
           </div>
         </div>

@@ -9,9 +9,9 @@ module SetArchived = %graphql(`
 `)
 
 @react.component
-let make = (~spec, ~chartIds, ~dispatch) => {
+let make = (~spec, ~chartIds: Set.Int.t, ~dispatch) => {
   let (archiveChart, archiveChartResult) = SetArchived.use()
-  let chartIds = chartIds->Option.map(Set.Int.toArray)
+  let chartIds = chartIds->Set.Int.toArray->Some
 
   let archiveChartButton = switch archiveChartResult {
   | {error: Some({message})} => <ErrorPage message />
@@ -19,7 +19,12 @@ let make = (~spec, ~chartIds, ~dispatch) => {
     <p> {`Updated ${affected_rows->Int.toString} chart.`->React.string} </p>
   | {error: None} =>
     <Button
-      text={"Archive"} onClick={_ => archiveChart({chartIds: chartIds})->ignore} disabled={false}
+      text={"Archive"}
+      onClick={_ => {
+        dispatch(Util.Remove(spec))
+        archiveChart({chartIds: chartIds})->ignore
+      }}
+      disabled={false}
     />
   }
 

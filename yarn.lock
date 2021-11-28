@@ -90,6 +90,11 @@
   resolved "https://registry.npmjs.org/@reasonml-community/graphql-ppx/-/graphql-ppx-1.2.0.tgz"
   integrity sha512-CKTzl/DZNT0QgpKjpi0Fij2R4r9c/oT+M8mEWYnNidaLDcFX7ZfcvmJA4ZhPYXRD6AGUO3cS1zQOJZSuJHKogQ==
 
+"@rescript-react-native/clipboard@^1.5.2":
+  version "1.5.2"
+  resolved "https://registry.yarnpkg.com/@rescript-react-native/clipboard/-/clipboard-1.5.2.tgz#a91b8790254a544da5beba733787c5feff9d98ca"
+  integrity sha512-NjyFm9xSrJdSYfpXpEFI26EaPfatMVHD1QNPfg9GQ5+/iMZK5YPG6g9EEjZI2MsojpZnM5y3yVYRIIctEzImdg==
+
 "@ryyppy/rescript-promise@^2.1.0":
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/@ryyppy/rescript-promise/-/rescript-promise-2.1.0.tgz#a33861274c41360cfbe872cf489f3dcb8dd526e6"

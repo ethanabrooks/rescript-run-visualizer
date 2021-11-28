@@ -26,7 +26,8 @@
     "reason-react",
     "bs-fetch",
     "bs-webapi",
-    "decco"
+    "decco",
+    "@rescript-react-native/clipboard"
   ],
   "ppx-flags": [
     "@reasonml-community/graphql-ppx/ppx",

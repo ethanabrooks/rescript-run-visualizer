@@ -1,5 +1,4 @@
 - validate json before passing to Vega
-- fix archive button for newly added charts
 - add select all button
 - switch from ReasonReact to RescriptReact
 - add authentication

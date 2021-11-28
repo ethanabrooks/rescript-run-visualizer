@@ -28,7 +28,6 @@ type jsonSet = Set.t<Js.Json.t, JsonComparator.identity>
 type jsonMap = Map.Int.t<Js.Json.t>
 type jsonArray = array<Js.Json.t>
 type parseResult = Result.t<Js.Json.t, option<string>>
-type chartAction = ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Set(jsonMap)
 type oldAndNewLogs = {old: jsonMap, new: jsonMap}
 
 let merge = (_, old, new) =>
@@ -60,3 +59,9 @@ let joinWith = (a, x) =>
     | _ => a->Array.concat([x, y])
     }
   )
+
+type queryResult<'a> = Loading | Error(string) | Stuck | Data('a)
+type chartState = {rendering: bool, ids: Set.Int.t, order: int, needsUpdate: bool}
+type chartAction =
+  ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Insert(Js.Json.t, Set.Int.t) | Remove(Js.Json.t)
+type mutationResult<'a> = Loading | Error(string) | NotCalled | Data('a)
