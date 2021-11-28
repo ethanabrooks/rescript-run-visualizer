@@ -14,8 +14,24 @@ module Subscription = %graphql(`
 
 module Metadata = {
   @react.component
-  let make = (~metadata) =>
-    <pre className="p-4"> {metadata->Util.yaml({sortKeys: true})->React.string} </pre>
+  let make = (~id: int, ~metadata) => {
+    open Routes
+    let href =
+      Valid({
+        granularity: Run,
+        ids: Set.Int.empty->Set.Int.add(id),
+        archived: false,
+        where: None,
+      })
+      ->routeToHash
+      ->hashToHref
+    <div className="p-4">
+      <a href className="font-medium text-indigo-700 hover:underline">
+        {id->Int.toString->React.string}
+      </a>
+      <pre className="text-gray-500"> {metadata->Util.yaml({sortKeys: true})->React.string} </pre>
+    </div>
+  }
 }
 
 // Convert Map.Int.t<Js.Json.t> to Map.t<Json.t, chartState>
@@ -83,8 +99,8 @@ let make = (~client, ~granularity, ~ids) => {
           ->List.toArray
           ->React.array}
           {metadata
-          ->Map.Int.valuesToArray
-          ->Array.mapWithIndex((i, metadata) => <Metadata key={i->Int.toString} metadata />)
+          ->Map.Int.toArray
+          ->Array.map(((id, metadata)) => <Metadata key={id->Int.toString} id metadata />)
           ->React.array}
         </>
       }

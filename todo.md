@@ -1,7 +1,6 @@
 - populate data field of vega chart on initial pull
 - fix search function
 - add ability to click on run ID to open individual run
-- sort YAML
 - validate json before passing to Vega
 - fix archive button for newly added charts
 - add select all button
