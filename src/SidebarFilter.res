@@ -1,5 +1,5 @@
 open Routes
-open MetadataFilter
+open SidebarFilterInput
 open Belt
 
 type whereResults = Predicate.t<Belt.Result.t<Hasura.metadata, option<string>>>
@@ -42,13 +42,7 @@ let addDummies = (texts: Predicate.t<string>) =>
 let buttonClass = "w-20 h-10 border border-gray-300 text-sm bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-default px-2 items-center justify-center"
 
 @react.component
-let make = (
-  ~ids: Set.Int.t,
-  ~granularity,
-  ~archived: bool,
-  ~where: option<Hasura.where>,
-  ~client: ApolloClient__Core_ApolloClient.t,
-) => {
+let make = (~ids: Set.Int.t, ~granularity, ~archived: bool, ~where: option<Hasura.where>) => {
   let initialWhere = where
   let (whereTexts, setWhereTexts) = React.useState(_ => initialWhere->whereOptionToTexts)
 
@@ -58,13 +52,6 @@ let make = (
   }, [initialWhere])
 
   let whereResults = whereTexts->Predicate.map(textToResult)
-  let where = whereResults->resultsToWhere
-  let queryResult = SidebarItemsSubscription.useSidebarItems(
-    ~granularity,
-    ~archived,
-    ~where,
-    ~client,
-  )
 
   let textsToHref = texts => {
     let where = texts->Predicate.map(textToResult)->resultsToWhere
@@ -149,7 +136,7 @@ let make = (
     switch texts {
     | Just(text) =>
       let setText = (text: string) => setWhereTexts(_ => text->Just->addText)
-      <MetadataFilter text setText />
+      <SidebarFilterInput text setText />
     | And(a) => a->elements(true)
     | Or(a) => a->elements(false)
     }
@@ -159,42 +146,37 @@ let make = (
   | Sweep => "sweep"
   }
 
-  <div className="w-1/2 m-5">
-    <div className="-space-y-px">
-      <label className={filterTextClass}>
-        <a href> {`SELECT * FROM ${table} WHERE`->React.string} </a>
-      </label>
-      <ul className="list-inside">
-        {switch Predicate.zip(whereTexts, whereResults) {
-        | Just(text, res) =>
-          let setText = text => setWhereTexts(_ => text->Just)
-          let textArray: array<Predicate.t<string>> = [whereTexts]
-          <div className="flex items-center pt-5 -space-x-px">
-            <MetadataFilter text setText />
-            <button
-              type_="button"
-              onClick={_ => textArray->And->setWhereTextsAndUrl}
-              disabled={res->Result.isError}
-              className={buttonClass}>
-              {"And"->React.string}
-            </button>
-            <button
-              type_="button"
-              onClick={_ => textArray->Or->setWhereTextsAndUrl}
-              disabled={res->Result.isError}
-              className={`${buttonClass} rounded-r-md`}>
-              {"Or"->React.string}
-            </button>
-          </div>
-        | _ => whereTexts->removeDummies->addDummies->textsToComponents(x => x)
-        }}
-      </ul>
-    </div>
-    {queryResult->Option.mapWithDefault(<p> {"Loading..."->React.string} </p>, queryResult =>
-      switch queryResult {
-      | Error(message) => <ErrorPage message />
-      | Ok(items) => <Sidebar items ids />
-      }
-    )}
+  <div className="-space-y-px">
+    <label className={filterTextClass}>
+      <a href> {`SELECT * FROM ${table} WHERE`->React.string} </a>
+    </label>
+    <ul className="list-inside">
+      {switch Predicate.zip(whereTexts, whereResults) {
+      | Just(text, res) =>
+        let setText = text => setWhereTexts(_ => text->Just)
+        let textArray: array<Predicate.t<string>> = [whereTexts]
+        <div className="flex items-center pt-5 -space-x-px">
+          <span className={`${filterTextClass} flex-none pr-6`}>
+            {"metadata @> "->React.string}
+          </span>
+          <SidebarFilterInput text setText />
+          <button
+            type_="button"
+            onClick={_ => textArray->And->setWhereTextsAndUrl}
+            disabled={res->Result.isError}
+            className={buttonClass}>
+            {"And"->React.string}
+          </button>
+          <button
+            type_="button"
+            onClick={_ => textArray->Or->setWhereTextsAndUrl}
+            disabled={res->Result.isError}
+            className={`${buttonClass} rounded-r-md`}>
+            {"Or"->React.string}
+          </button>
+        </div>
+      | _ => whereTexts->removeDummies->addDummies->textsToComponents(x => x)
+      }}
+    </ul>
   </div>
 }

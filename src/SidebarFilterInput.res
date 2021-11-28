@@ -7,7 +7,6 @@ let filterTextClass = "font-mono text-sm font-sm text-gray-700"
 
 @react.component
 let make = (~text, ~setText) => <>
-  <span className={`${filterTextClass} flex-none pr-6`}> {"metadata @> "->React.string} </span>
   <input
     type_={"text"}
     placeholder={"{}"}

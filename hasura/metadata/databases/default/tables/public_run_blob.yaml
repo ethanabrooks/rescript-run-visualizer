@@ -11,20 +11,3 @@ computed_fields:
       name: bytea_to_text
       schema: public
   name: text
-insert_permissions:
-- permission:
-    backend_only: false
-    check: {}
-    columns:
-    - blob
-    - id
-    - run_id
-  role: public
-select_permissions:
-- permission:
-    columns:
-    - blob
-    - id
-    - run_id
-    filter: {}
-  role: public

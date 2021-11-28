@@ -1,5 +1,6 @@
 open Routes
 open Belt
+type entry = {id: int, metadata: option<Js.Json.t>}
 
 module RunSubscription = %graphql(`
   subscription search_runs($archived: Boolean!, $limit: Int!, $condition: run_bool_exp = {}) {
@@ -31,7 +32,7 @@ module SweepSubscription = %graphql(`
 
 type state = {
   error: option<ApolloClient__Core_ApolloClient.ApolloError.t>,
-  data: option<array<Sidebar.entry>>,
+  data: option<array<entry>>,
 }
 
 let useSidebarItems = (
@@ -82,7 +83,7 @@ let useSidebarItems = (
               {
                 error: error,
                 data: non_sweep_run
-                ->Array.map(({id, metadata}): Sidebar.entry => {
+                ->Array.map(({id, metadata}): entry => {
                   id: id,
                   metadata: metadata,
                 })
@@ -128,7 +129,7 @@ let useSidebarItems = (
               {
                 error: error,
                 data: sweep
-                ->Array.map(({id, metadata}): Sidebar.entry => {
+                ->Array.map(({id, metadata}): entry => {
                   id: id,
                   metadata: metadata,
                 })

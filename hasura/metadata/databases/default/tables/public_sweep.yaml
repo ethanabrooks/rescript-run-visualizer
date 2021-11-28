@@ -31,20 +31,3 @@ computed_fields:
       name: sweep_metadata_path
       schema: public
   name: metadata_path
-insert_permissions:
-- permission:
-    backend_only: false
-    check: {}
-    columns:
-    - id
-    - grid_index
-    - metadata
-  role: public
-select_permissions:
-- permission:
-    columns:
-    - id
-    - grid_index
-    - metadata
-    filter: {}
-  role: public

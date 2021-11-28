@@ -5,20 +5,3 @@ object_relationships:
 - name: run
   using:
     foreign_key_constraint_on: run_id
-insert_permissions:
-- permission:
-    backend_only: false
-    check: {}
-    columns:
-    - id
-    - run_id
-    - spec
-  role: public
-select_permissions:
-- permission:
-    columns:
-    - id
-    - run_id
-    - spec
-    filter: {}
-  role: public

@@ -8,7 +8,6 @@ let wsLink = {
   make(
     ~uri="ws://" ++ graphqlEndpoint,
     ~options=ClientOptions.make(
-      // Auth headers
       ~connectionParams=ConnectionParams(Obj.magic({"headers": headers})),
       ~reconnect=true,
       (),
