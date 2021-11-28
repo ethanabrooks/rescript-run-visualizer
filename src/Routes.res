@@ -74,30 +74,33 @@ module Hasura = {
 }
 
 @decco
-type valid = {
+type urlParams = {
   granularity: granularity,
-  @decco.default(Set.Int.empty) ids: @decco.codec(Decco.Codecs.magic) Set.Int.t,
+  @decco.default(Set.Int.empty) checkedIds: @decco.codec(Decco.Codecs.magic) Set.Int.t,
   @decco.default(false) archived: bool,
   @decco.default(None) where: option<Hasura.where>,
 }
 
 type route =
-  | Valid({granularity: granularity, ids: Set.Int.t, archived: bool, where: option<Hasura.where>})
+  | Valid(urlParams)
   | Redirect
   | NotFound(string)
 
 let makeRoute = (
   ~granularity,
-  ~ids=Set.Int.empty,
+  ~checkedIds=Set.Int.empty,
   ~archived=false,
   ~where=None: option<Hasura.where>,
   (),
 ) => Valid({
   granularity: granularity,
-  ids: ids,
+  checkedIds: checkedIds,
   archived: archived,
   where: where,
 })
+
+let makeRouteFromUrlParams = ({granularity, checkedIds, archived, where}: urlParams): route =>
+  makeRoute(~granularity, ~checkedIds, ~archived, ~where, ())
 
 let hashToRoute = (hash: string) =>
   switch hash {
@@ -106,31 +109,14 @@ let hashToRoute = (hash: string) =>
     hash
     ->Js.Global.decodeURI
     ->parseJson
-    ->Result.flatMap(res => res->valid_decode->mapError(({message}) => message->Some))
-    ->Result.flatMap(valid =>
-      Valid({
-        granularity: valid.granularity,
-        ids: valid.ids,
-        archived: valid.archived,
-        where: valid.where,
-      })->Ok
-    )
+    ->Result.flatMap(res => res->urlParams_decode->mapError(({message}) => message->Some))
+    ->Result.flatMap(params => Valid(params)->Ok)
     ->Result.getWithDefault(NotFound(hash))
   }
 
 let routeToHash = (route: route): string =>
   switch route {
-  | Valid({granularity, ids, archived, where}) =>
-    {
-      granularity: granularity,
-      ids: ids,
-      archived: archived,
-      where: where,
-    }
-    ->valid_encode
-    ->Js.Json.stringify
-    ->Js.Global.encodeURI
-
+  | Valid(urlParams) => urlParams->urlParams_encode->Js.Json.stringify->Js.Global.encodeURI
   | Redirect => ""
   | NotFound(hash) => hash
   }

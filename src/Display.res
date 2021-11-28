@@ -20,7 +20,7 @@ let reverse = (specs: Util.jsonMap): Map.t<
   })
 
 @react.component
-let make = (~client, ~granularity, ~ids) => {
+let make = (~client, ~granularity, ~checkedIds) => {
   module Charts = {
     @react.component
     let make = (~logCount: int, ~specs: Util.jsonMap, ~runIds) => {
@@ -137,7 +137,7 @@ let make = (~client, ~granularity, ~ids) => {
     }
   }
 
-  switch InitialSubscription.useSubscription(~client, ~granularity, ~ids) {
+  switch InitialSubscription.useSubscription(~client, ~granularity, ~checkedIds) {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />

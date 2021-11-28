@@ -1,13 +1,13 @@
 open Belt
 open Routes
 @react.component
-let make = (~id: int, ~ids: Set.Int.t, ~metadata) => {
+let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
   let url = ReasonReactRouter.useUrl()
 
   open Util
   let newIds = Set.Int.empty->Set.Int.add(id)
   let href = switch url->urlToRoute {
-  | Valid(valid) => Valid({...valid, ids: newIds})
+  | Valid(valid) => Valid({...valid, checkedIds: newIds})
   | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to here.`)
   }->routeToHref
   <li key={id->Int.toString} className="relative bg-white py-5 px-4 hover:bg-gray-50">
@@ -17,11 +17,14 @@ let make = (~id: int, ~ids: Set.Int.t, ~metadata) => {
           id="candidates"
           name="candidates"
           type_="checkbox"
-          checked={ids->Set.Int.has(id)}
+          checked={checkedIds->Set.Int.has(id)}
           onChange={_ => {
-            let newIds = ids->Set.Int.has(id) ? ids->Set.Int.remove(id) : ids->Set.Int.add(id)
+            let newIds =
+              checkedIds->Set.Int.has(id)
+                ? checkedIds->Set.Int.remove(id)
+                : checkedIds->Set.Int.add(id)
             let href = switch url.hash->hashToRoute {
-            | Valid(valid) => Valid({...valid, ids: newIds})
+            | Valid(valid) => Valid({...valid, checkedIds: newIds})
             | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to here.`)
             }->routeToHref
 
@@ -47,7 +50,7 @@ let make = (~id: int, ~ids: Set.Int.t, ~metadata) => {
         </a>
       </h3>
     </div>
-    {if ids->Set.Int.has(id) {
+    {if checkedIds->Set.Int.has(id) {
       metadata->Option.mapWithDefault(<> </>, metadata => {
         <div className="mt-1">
           <pre className="line-clamp-2 text-sm text-gray-600 p-4 font-extralight">

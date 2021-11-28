@@ -4,9 +4,9 @@ open Belt
 let make = (~id: int, ~metadata) => {
   open Routes
   let href =
-    Valid({
+    Routes.Valid({
       granularity: Run,
-      ids: Set.Int.empty->Set.Int.add(id),
+      checkedIds: Set.Int.empty->Set.Int.add(id),
       archived: false,
       where: None,
     })

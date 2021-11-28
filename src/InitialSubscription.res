@@ -31,7 +31,7 @@ type queryResult = {
 
 type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
 
-let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granularity) => {
+let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, ~granularity) => {
   let (state, setState) = React.useState(() => Waiting)
 
   React.useEffect2(() => {
@@ -90,7 +90,7 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
 
     let condition = {
       open Routes
-      let ids = ids->Set.Int.toArray
+      let ids = checkedIds->Set.Int.toArray
       switch granularity {
       | Run =>
         let id = Subscription.makeInputObjectInt_comparison_exp(~_in=ids, ())
@@ -108,7 +108,7 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~ids, ~granul
         (),
       )->Some
     Some(_ => unsubscribe())
-  }, (ids, granularity))
+  }, (checkedIds, granularity))
 
   state
 }

@@ -42,8 +42,8 @@ let addDummies = (texts: Predicate.t<string>) =>
 let buttonClass = "w-20 h-10 border border-gray-300 text-sm bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-default px-2 items-center justify-center"
 
 @react.component
-let make = (~ids: Set.Int.t, ~granularity, ~archived: bool, ~where: option<Hasura.where>) => {
-  let initialWhere = where
+let make = (~urlParams) => {
+  let initialWhere = urlParams.where
   let (whereTexts, setWhereTexts) = React.useState(_ => initialWhere->whereOptionToTexts)
 
   React.useEffect1(() => {
@@ -55,7 +55,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived: bool, ~where: option<Hasur
 
   let textsToHref = texts => {
     let where = texts->Predicate.map(textToResult)->resultsToWhere
-    let route = makeRoute(~granularity, ~ids, ~archived, ~where, ())
+    let route = Valid({...urlParams, where: where})
     route->routeToHref
   }
   let href = whereTexts->textsToHref
@@ -141,7 +141,7 @@ let make = (~ids: Set.Int.t, ~granularity, ~archived: bool, ~where: option<Hasur
     | Or(a) => a->elements(false)
     }
   }
-  let table = switch granularity {
+  let table = switch urlParams.granularity {
   | Run => "run"
   | Sweep => "sweep"
   }

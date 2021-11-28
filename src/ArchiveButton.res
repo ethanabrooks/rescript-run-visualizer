@@ -46,8 +46,8 @@ module ArchivedSubscription = {
 }
 
 @react.component
-let make = (~granularity, ~ids) => {
-  let ids: array<int> = ids->Set.Int.toArray
+let make = (~granularity, ~checkedIds) => {
+  let ids: array<int> = checkedIds->Set.Int.toArray
   module Button = {
     @react.component
     let make = (~isArchived) => {
