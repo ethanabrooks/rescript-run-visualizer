@@ -75,7 +75,7 @@ let make = (~client, ~granularity, ~ids) => {
         }
       , specs->reverse)
 
-      switch (LogsSubscription.useLogs(~logCount, ~runIds), useSyncCharts(~specs, ~runIds)) {
+      switch (LogsQuery.useLogs(~logCount, ~runIds), useSyncCharts(~specs, ~runIds)) {
       | (Error(message), (_, _))
       | (_, ({error: Some({message})}, _))
       | (_, (_, {error: Some({message})})) =>
@@ -90,7 +90,9 @@ let make = (~client, ~granularity, ~ids) => {
           ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
             let key = i->Int.toString
             if rendering {
-              <ChartWithButtons key spec chartIds dispatch logs />
+              <div className="pb-10" key>
+                <Chart logs spec /> <ChartButtons spec chartIds dispatch />
+              </div>
             } else {
               let initialSpec = spec
               <SpecEditor key initialSpec dispatch />

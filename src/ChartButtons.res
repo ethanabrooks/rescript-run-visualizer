@@ -9,7 +9,7 @@ module SetArchived = %graphql(`
 `)
 
 @react.component
-let make = (~spec, ~chartIds, ~dispatch, ~logs) => {
+let make = (~spec, ~chartIds, ~dispatch) => {
   let (archiveChart, archiveChartResult) = SetArchived.use()
   let chartIds = chartIds->Option.map(Set.Int.toArray)
 
@@ -30,5 +30,5 @@ let make = (~spec, ~chartIds, ~dispatch, ~logs) => {
     archiveChartButton,
   ]
 
-  <> <Chart logs spec /> <Buttons buttons /> </>
+  <Buttons buttons />
 }
