@@ -2,7 +2,7 @@ import React from "react";
 import { Vega } from "react-vega";
 
 
-export function make(data, spec) {
+export function make(spec) {
     const [view, setView] = React.useState(null);
     // React.useEffect(
     //     () => {
@@ -18,6 +18,6 @@ export function make(data, spec) {
     //     },
     //     [view]
     // );
-    return <Vega spec={spec} data={{ data }} onNewView={setView} />;
+    return <Vega spec={spec} onNewView={setView} />;
 
 }
