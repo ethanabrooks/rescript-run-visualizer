@@ -1,6 +1,7 @@
 open Belt
 open Routes
-let textToResult = text => text->Util.parseJson->Result.map((m): Hasura.metadata => m->Contains)
+let textToResult = text =>
+  text->Util.parseJson->Result.map((m): Hasura.condition => m->MetadataContains)
 
 let textAreaClassName = "border h-10 p-4 flex-grow shadow-sm w-full sm:text-sm border-gray-300"
 let filterTextClass = "font-mono text-sm font-sm text-gray-700"

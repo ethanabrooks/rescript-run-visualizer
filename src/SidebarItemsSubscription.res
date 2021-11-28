@@ -60,10 +60,14 @@ let useSidebarItems = (
         | Or(_or) =>
           let _or = _or->Array.map(makeRunBoolExp)
           RunSubscription.makeInputObjectrun_bool_exp(~_or, ())
-        | Just(Contains(path)) =>
+        | Just(MetadataContains(path)) =>
           let _contains = path
           let metadata = RunSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
           RunSubscription.makeInputObjectrun_bool_exp(~metadata, ())
+        | Just(IdLessThan(i)) =>
+          let _lt = i
+          let id = RunSubscription.makeInputObjectInt_comparison_exp(~_lt, ())
+          RunSubscription.makeInputObjectrun_bool_exp(~id, ())
         }
       subscription :=
         client.subscribe(
@@ -106,10 +110,14 @@ let useSidebarItems = (
         | Or(_or) =>
           let _or = _or->Array.map(makeSweepBoolExp)
           SweepSubscription.makeInputObjectsweep_bool_exp(~_or, ())
-        | Just(Contains(path)) =>
+        | Just(MetadataContains(path)) =>
           let _contains = path
           let metadata = SweepSubscription.makeInputObjectjsonb_comparison_exp(~_contains, ())
           SweepSubscription.makeInputObjectsweep_bool_exp(~metadata, ())
+        | Just(IdLessThan(i)) =>
+          let _lt = i
+          let id = SweepSubscription.makeInputObjectInt_comparison_exp(~_lt, ())
+          SweepSubscription.makeInputObjectsweep_bool_exp(~id, ())
         }
       subscription :=
         client.subscribe(

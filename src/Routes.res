@@ -42,14 +42,14 @@ module Predicate = {
 
 module Hasura = {
   @decco
-  type metadata = Contains(Js.Json.t)
-  type where = Predicate.t<metadata>
+  type condition = MetadataContains(Js.Json.t) | IdLessThan(int)
+  type where = Predicate.t<condition>
 
   @decco
   type _where =
     | And_(array<Js.Json.t>)
     | Or_(array<Js.Json.t>)
-    | Just_(metadata)
+    | Just_(condition)
 
   let rec where_encode = (where: where): Js.Json.t =>
     switch where {

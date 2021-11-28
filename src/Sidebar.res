@@ -2,10 +2,15 @@ open Routes
 open SidebarFilterInput
 open Belt
 
-type whereResults = Predicate.t<Belt.Result.t<Hasura.metadata, option<string>>>
+type whereResults = Predicate.t<Belt.Result.t<Hasura.condition, option<string>>>
 
 let whereToTexts = (where: Hasura.where): Predicate.t<string> =>
-  where->Predicate.map((Contains(json)) => json->Js.Json.stringify)
+  where->Predicate.map(condition =>
+    switch condition {
+    | MetadataContains(json) => json->Js.Json.stringify
+    | IdLessThan(i) => i->Int.toString
+    }
+  )
 
 let whereOptionToTexts = (where: option<Hasura.where>): Predicate.t<string> =>
   where->Option.mapWithDefault(Predicate.Just(""), whereToTexts)
@@ -31,6 +36,10 @@ let make = (~urlParams: urlParams, ~client: ApolloClient__Core_ApolloClient.t) =
     ~client,
   )
 
+  // let nextHref = {
+  //   let where = where->Option.getWithDefault
+  // }
+
   <div className="w-1/2 m-5">
     <SidebarFilter urlParams />
     {queryResult->Option.mapWithDefault(<p> {"Loading..."->React.string} </p>, queryResult =>
@@ -51,5 +60,7 @@ let make = (~urlParams: urlParams, ~client: ApolloClient__Core_ApolloClient.t) =
         </div>
       }
     )}
+    // {<a href> {""->React.string} </a>}
+    // {<a href> {""->React.string} </a>}
   </div>
 }

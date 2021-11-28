@@ -2,10 +2,15 @@ open Routes
 open SidebarFilterInput
 open Belt
 
-type whereResults = Predicate.t<Belt.Result.t<Hasura.metadata, option<string>>>
+type whereResults = Predicate.t<Belt.Result.t<Hasura.condition, option<string>>>
 
 let whereToTexts = (where: Hasura.where): Predicate.t<string> =>
-  where->Predicate.map((Contains(json)) => json->Js.Json.stringify)
+  where->Predicate.map(condition =>
+    switch condition {
+    | MetadataContains(json) => json->Js.Json.stringify
+    | IdLessThan(i) => i->Int.toString
+    }
+  )
 
 let whereOptionToTexts = (where: option<Hasura.where>): Predicate.t<string> =>
   where->Option.mapWithDefault(Predicate.Just(""), whereToTexts)
