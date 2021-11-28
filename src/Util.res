@@ -2,7 +2,8 @@ open Belt
 
 @module external copy: string => bool = "copy-to-clipboard"
 
-@module("js-yaml") external yaml: Js.Json.t => string = "dump"
+type options = {sortKeys: bool}
+@module("js-yaml") external yaml: (Js.Json.t, options) => string = "dump"
 
 module JsonComparator = Belt.Id.MakeComparable({
   type t = Js.Json.t

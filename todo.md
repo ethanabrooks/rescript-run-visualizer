@@ -5,5 +5,4 @@
 - validate json before passing to Vega
 - fix archive button for newly added charts
 - add select all button
-- skip every nth run_log of count exceeds limit
 - switch from ReasonReact to RescriptReact

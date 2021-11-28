@@ -14,7 +14,8 @@ module Subscription = %graphql(`
 
 module Metadata = {
   @react.component
-  let make = (~metadata) => <pre className="p-4"> {metadata->Util.yaml->React.string} </pre>
+  let make = (~metadata) =>
+    <pre className="p-4"> {metadata->Util.yaml({sortKeys: true})->React.string} </pre>
 }
 
 // Convert Map.Int.t<Js.Json.t> to Map.t<Json.t, chartState>

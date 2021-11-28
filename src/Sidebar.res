@@ -62,7 +62,7 @@ let make = (~items, ~ids) => {
             metadata->Option.mapWithDefault(<> </>, metadata => {
               <div className="mt-1">
                 <pre className="line-clamp-2 text-sm text-gray-600 p-4 font-extralight">
-                  {metadata->yaml->React.string}
+                  {metadata->yaml({sortKeys: true})->React.string}
                 </pre>
               </div>
             })
