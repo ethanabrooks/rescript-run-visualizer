@@ -99,9 +99,6 @@ let makeRoute = (
   where: where,
 })
 
-let makeRouteFromUrlParams = ({granularity, checkedIds, archived, where}: urlParams): route =>
-  makeRoute(~granularity, ~checkedIds, ~archived, ~where, ())
-
 let hashToRoute = (hash: string) =>
   switch hash {
   | "" => Redirect

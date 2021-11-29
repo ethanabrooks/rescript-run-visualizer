@@ -4,6 +4,15 @@ open Belt
 
 type whereResults = Predicate.t<Belt.Result.t<Hasura.condition, option<string>>>
 
+let rec removeIdLessThan = (where: Hasura.where): option<Hasura.where> => {
+  switch where {
+  | Just(IdLessThan(_)) => None
+  | Just(_) => where->Some
+  | And(a) => a->Array.keepMap(removeIdLessThan)->And->Some
+  | Or(a) => a->Array.keepMap(removeIdLessThan)->Or->Some
+  }
+}
+
 let whereToTexts = (where: Hasura.where): Predicate.t<string> =>
   where->Predicate.map(condition =>
     switch condition {
@@ -48,13 +57,13 @@ let buttonClass = "w-20 h-10 border border-gray-300 text-sm bg-white text-gray-7
 
 @react.component
 let make = (~urlParams) => {
-  let initialWhere = urlParams.where
+  let initialWhere = urlParams.where->Option.flatMap(removeIdLessThan)
   let (whereTexts, setWhereTexts) = React.useState(_ => initialWhere->whereOptionToTexts)
 
-  React.useEffect1(() => {
-    setWhereTexts(_ => initialWhere->whereOptionToTexts)
-    None
-  }, [initialWhere])
+  // React.useEffect1(() => {
+  //   setWhereTexts(_ => initialWhere->whereOptionToTexts)
+  //   None
+  // }, [initialWhere])
 
   let whereResults = whereTexts->Predicate.map(textToResult)
 

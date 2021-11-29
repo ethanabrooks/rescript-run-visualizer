@@ -40,7 +40,7 @@ let useSidebarItems = (
   ~archived: bool,
   ~where: option<Hasura.where>,
   ~client: ApolloClient__Core_ApolloClient.t,
-) => {
+): option<state> => {
   let (state, setState) = React.useState(_ => None)
   let whereJson = where->Option.map(Hasura.where_encode)
   let whereText = whereJson->Option.mapWithDefault("", Js.Json.stringify)
@@ -50,6 +50,7 @@ let useSidebarItems = (
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
     let unsubscribe = _ => (subscription.contents->Option.getExn).unsubscribe()->ignore
     let limit = maxSweeps->Int.fromString->Option.getExn // TODO: better handling of None
+
     switch granularity {
     | Run =>
       let rec makeRunBoolExp = (where: Hasura.where): RunSubscription.t_variables_run_bool_exp =>
@@ -151,12 +152,5 @@ let useSidebarItems = (
     Some(_ => unsubscribe())
   }, (archived, granularity, whereText))
 
-  state->Option.map(state =>
-    switch state {
-    | {error: Some({message})} => message->Error
-    | {data: None, error: None} =>
-      "You might think this is impossible, but depending on the situation it might not be!"->Error
-    | {data: Some(items)} => items->Ok
-    }
-  )
+  state
 }
