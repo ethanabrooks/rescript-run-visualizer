@@ -13,7 +13,8 @@
     "prod:build": "concurrently 'yarn prod:bundle' 'yarn prod:css'",
     "prod:bundle": "bsb -make-world && esbuild --bundle src/Index.bs.js --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:NODE_MAX_SWEEPS=\\\"$NODE_MAX_SWEEPS\\\" --define:NODE_MAX_LOGS=\\\"$NODE_MAX_LOGS\\\" --define:process.env.NODE_ENV=\\\"production\\\" --external:react --external:react-dom --minify --outfile=dist/main.js",
     "prod:css": "NODE_ENV=production postcss src/main.css -o dist/main.css",
-    "prod:static": "rsync -av static/ dist/"
+    "prod:static": "rsync -av static/ dist/",
+    "prod:serve": "node server.js dist/"
   },
   "dependencies": {
     "@apollo/client": "^3.3.15",
