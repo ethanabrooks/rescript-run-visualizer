@@ -22,6 +22,8 @@ let make = (
   ~dispatch,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
+  let initialLogs = logs
+  let (logs, _) = React.useState(_ => initialLogs) // Freeze initial value for logs
   let (executeQuery, queryResult) = Query.useLazy()
   let (error, setError) = React.useState(() => None)
   let (_, setMinLogId) = React.useState(_ => logs->Map.Int.maxKey->Option.getWithDefault(0))
@@ -81,8 +83,12 @@ let make = (
     ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
       let key = i->Int.toString
       if rendering {
+        let newLogs = switch queryResult {
+        | Executed({data: Some({run_log})}) => run_log
+        | _ => []
+        }
         <div className="pb-10" key>
-          <Chart logs spec /> <ChartButtons spec chartIds dispatch />
+          <Chart logs newLogs spec /> <ChartButtons spec chartIds dispatch />
         </div>
       } else {
         let initialSpec = spec

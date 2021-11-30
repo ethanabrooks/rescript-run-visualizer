@@ -5,9 +5,18 @@ let mapToDict = map => map->Map.String.toArray->Js.Dict.fromArray
 let mapToObject = map => map->mapToDict->Js.Json.object_
 
 @module("./Chart.jsx")
-external make: (~spec: Js.Json.t) => React.element = "make"
+external make: (~spec: Js.Json.t, ~newData: array<Js.Json.t>) => React.element = "make"
 @react.component
-let make = (~logs, ~spec) => {
+let make = (~logs, ~spec, ~newLogs: array<LogsQuery.EveryQuery.EveryQuery_inner.t_run_log>) => {
+  let newData = newLogs->Array.keepMap(({id, log}) =>
+    if logs->Map.Int.has(id) {
+      None // don't add duplicate logs
+    } else {
+      Some(log)
+    }
+  )
+
+  // Add logs to spec
   spec
   ->Js.Json.decodeObject
   ->Option.flatMap(specObject => {
@@ -29,6 +38,6 @@ let make = (~logs, ~spec) => {
   })
   ->Option.mapWithDefault(
     <ErrorPage message={`Invalid spec: ${spec->Js.Json.stringifyWithSpace(2)}`} />,
-    spec => make(~spec),
+    spec => make(~spec, ~newData),
   )
 }
