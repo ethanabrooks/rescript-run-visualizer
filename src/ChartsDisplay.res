@@ -29,16 +29,21 @@ let make = (
   let (_, setMinLogId) = React.useState(_ => logs->Map.Int.maxKey->Option.getWithDefault(0))
 
   React.useEffect2(() => {
+    // Set up subscription to max run_log id
     let onError = error => setError(_ => error->Some)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
       | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(maxLogId)})})}}} =>
+        // When run_log id increases, query for new logs
+
+        // First condition: logs belong to checked runs
         let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
         let run = Query.makeInputObjectrun_bool_exp(~id, ())
         let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
 
         setMinLogId(minLogId => {
+          // Second condition: logs have a greater id than minLogId
           let id = Query.makeInputObjectInt_comparison_exp(~_gt=minLogId, ())
           let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
 
@@ -46,7 +51,7 @@ let make = (
           let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
 
           executeQuery({condition: condition})
-          maxLogId
+          maxLogId // return maxLogId value to setMinLogId callback, updating minLogId
         })
       | _ => ()
       }

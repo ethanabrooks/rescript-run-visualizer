@@ -11,6 +11,7 @@ export function make(spec, newData) {
             if (view != null) {
                 var cs = null
                 for (const d of newData) {
+                    console.log(d)
                     cs = view.changeset().insert(d)
                 }
                 if (cs != null) {
