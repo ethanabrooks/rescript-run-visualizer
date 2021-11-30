@@ -3,7 +3,7 @@ open Belt
 module InsertChart = InsertChartStatus.InsertChart
 module UpdateChart = UpdateChartStatus.UpdateChart
 
-let reverse = (specs: Util.jsonMap): Map.t<
+let reverse = (specs: Map.Int.t<Js.Json.t>): Map.t<
   Js.Json.t,
   Util.chartState,
   Util.JsonComparator.identity,
@@ -21,9 +21,9 @@ let reverse = (specs: Util.jsonMap): Map.t<
 
 @react.component
 let make = (~client, ~granularity, ~checkedIds) => {
-  module Charts = {
+  module StatusesAndCharts = {
     @react.component
-    let make = (~logCount: int, ~specs: Util.jsonMap, ~runIds) => {
+    let make = (~logCount: int, ~specs: Map.Int.t<Js.Json.t>, ~runIds) => {
       let (insertChart, insertChartResult) = InsertChart.use()
       let (updateChart, updateChartResult) = UpdateChart.use()
 
@@ -108,30 +108,11 @@ let make = (~client, ~granularity, ~checkedIds) => {
       <>
         <InsertChartStatus insertChartResult newSpec />
         <UpdateChartStatus updateChartResult />
-        {switch LogsQuery.useLogs(~logCount, ~runIds) {
+        {switch LogsQuery.useLogs(~logCount, ~checkedIds) {
         | Error(message) => <ErrorPage message />
         | Loading => <LoadingPage />
         | Stuck => <ErrorPage message={"Stuck."} />
-        | Data(logs) => <>
-            {specs
-            ->Map.toArray
-            ->List.fromArray
-            ->List.sort(((_, {order: order1}), (_, {order: order2})) => order1 - order2)
-            ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
-              let key = i->Int.toString
-              if rendering {
-                <div className="pb-10" key>
-                  <Chart logs spec /> <ChartButtons spec chartIds dispatch />
-                </div>
-              } else {
-                let initialSpec = spec
-                <SpecEditor key initialSpec dispatch />
-              }
-            })
-            ->List.toArray
-            ->React.array}
-            <SpecEditor initialSpec={Js.Json.null} dispatch />
-          </>
+        | Data(logs) => <ChartsDisplay specs logs dispatch checkedIds client />
         }}
       </>
     }
@@ -142,7 +123,7 @@ let make = (~client, ~granularity, ~checkedIds) => {
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
   | Data({logCount, specs, metadata, runIds}) => <>
-      <Charts logCount specs runIds />
+      <StatusesAndCharts logCount specs runIds />
       {metadata
       ->Map.Int.toArray
       ->Array.map(((id, metadata)) => <Metadata key={id->Int.toString} id metadata />)

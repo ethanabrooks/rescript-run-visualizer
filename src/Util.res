@@ -25,10 +25,8 @@ let jsonToMap = json =>
 let mapToJson = map => map->Map.String.toArray->Js.Dict.fromArray->Js.Json.object_
 
 type jsonSet = Set.t<Js.Json.t, JsonComparator.identity>
-type jsonMap = Map.Int.t<Js.Json.t>
 type jsonArray = array<Js.Json.t>
 type parseResult = Result.t<Js.Json.t, option<string>>
-type oldAndNewLogs = {old: jsonMap, new: jsonMap}
 
 let merge = (_, old, new) =>
   switch (old, new) {
@@ -65,3 +63,4 @@ type chartState = {rendering: bool, ids: Set.Int.t, order: int, needsUpdate: boo
 type chartAction =
   ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Insert(Js.Json.t, Set.Int.t) | Remove(Js.Json.t)
 type mutationResult<'a> = Loading | Error(string) | NotCalled | Data('a)
+type subscriptionState<'a> = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data('a)

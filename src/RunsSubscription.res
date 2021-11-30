@@ -24,7 +24,7 @@ module Subscription = %graphql(`
 type queryResult = {
   metadata: Map.Int.t<Js.Json.t>,
   specs: Map.Int.t<Js.Json.t>,
-  logs: jsonMap,
+  logs: Map.Int.t<Js.Json.t>,
   runIds: Set.Int.t,
 }
 

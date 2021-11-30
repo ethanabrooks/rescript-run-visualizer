@@ -1,5 +1,4 @@
 open Belt
-open Util
 
 @val external maxLogs: string = "NODE_MAX_LOGS"
 
@@ -29,10 +28,8 @@ type queryResult = {
   runIds: Set.Int.t,
 }
 
-type state = NoData | Waiting | Error(ApolloClient__Errors_ApolloError.t) | Data(queryResult)
-
 let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, ~granularity) => {
-  let (state, setState) = React.useState(() => Waiting)
+  let (state: Util.subscriptionState<queryResult>, setState) = React.useState(() => Util.Waiting)
 
   React.useEffect2(() => {
     let subscription: ref<option<ApolloClient__ZenObservable.Subscription.t>> = ref(None)
@@ -71,8 +68,8 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, 
               ->Option.mapWithDefault(
                 {metadata: metadataMap, specs: specs, logCount: logCount, runIds: runIds},
                 ({metadata: m, specs: s, logCount: l, runIds: r}) => {
-                  let metadata = m->Map.Int.merge(metadataMap, merge)
-                  let specs = s->Map.Int.merge(specs, merge)
+                  let metadata = m->Map.Int.merge(metadataMap, Util.merge)
+                  let specs = s->Map.Int.merge(specs, Util.merge)
                   let logCount = l + logCount
                   let runIds = r->Set.Int.union(runIds)
                   {metadata: metadata, specs: specs, logCount: logCount, runIds: runIds}
@@ -80,7 +77,7 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, 
               )
               ->Some
             })
-            ->Option.mapWithDefault(NoData, data => Data(data))
+            ->Option.mapWithDefault(Util.NoData, data => Data(data))
           setState(_ => newState)
         }
 

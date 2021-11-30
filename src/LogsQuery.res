@@ -41,10 +41,10 @@ let addParametersToLog = (log, metadata) => {
   ->Option.getWithDefault(log)
 }
 
-type queryResult = Util.queryResult<Util.jsonMap>
+type queryResult = Util.queryResult<Map.Int.t<Js.Json.t>>
 
-let useLogs = (~logCount: int, ~runIds): queryResult => {
-  let ids = runIds->Set.Int.toArray
+let useLogs = (~logCount: int, ~checkedIds): queryResult => {
+  let ids = checkedIds->Set.Int.toArray
   let toData = (x): queryResult => x->Map.Int.fromArray->Data
   maxLogs
   ->Int.fromString
