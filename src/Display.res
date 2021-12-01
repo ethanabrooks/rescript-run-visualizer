@@ -108,7 +108,7 @@ let make = (~client, ~granularity, ~checkedIds) => {
       <>
         <InsertChartStatus insertChartResult newSpec />
         <UpdateChartStatus updateChartResult />
-        {switch LogsQuery.useLogs(~logCount, ~checkedIds) {
+        {switch LogsQuery.useLogs(~logCount, ~checkedIds, ~granularity) {
         | Error(message) => <ErrorPage message />
         | Loading => <LoadingPage />
         | Stuck => <ErrorPage message={"Stuck."} />

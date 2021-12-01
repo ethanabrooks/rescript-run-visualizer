@@ -43,7 +43,11 @@ let addParametersToLog = (log, metadata) => {
 
 type queryResult = Util.queryResult<Map.Int.t<Js.Json.t>>
 
-let useLogs = (~logCount: int, ~checkedIds): queryResult => {
+let useLogs = (
+  ~logCount: int,
+  ~checkedIds: Set.Int.t,
+  ~granularity: Routes.granularity,
+): queryResult => {
   let ids = checkedIds->Set.Int.toArray
   let toData = (x): queryResult => x->Map.Int.fromArray->Data
   maxLogs
@@ -52,9 +56,17 @@ let useLogs = (~logCount: int, ~checkedIds): queryResult => {
     (Error(`Invalid value for NODE_MAX_LOGS: ${maxLogs}`): queryResult),
     maxLogs =>
       if logCount < maxLogs {
-        let id = EveryQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
-        let run = EveryQuery.makeInputObjectrun_bool_exp(~id, ())
-        let condition = EveryQuery.makeInputObjectrun_log_bool_exp(~run, ())
+        let condition = switch granularity {
+        | Run =>
+          let run_id = EveryQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let condition = EveryQuery.makeInputObjectrun_log_bool_exp(~run_id, ())
+          condition
+        | Sweep =>
+          let sweep_id = EveryQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let run = EveryQuery.makeInputObjectrun_bool_exp(~sweep_id, ())
+          let condition = EveryQuery.makeInputObjectrun_log_bool_exp(~run, ())
+          condition
+        }
         switch EveryQuery.use({condition: condition}) {
         | {loading: true} => Loading
         | {error: Some(error)} => Error(error.message)
@@ -63,9 +75,17 @@ let useLogs = (~logCount: int, ~checkedIds): queryResult => {
         }
       } else if logCount < 2 * maxLogs {
         let n: int = logCount / (logCount - maxLogs)
-        let id = ExceptEveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
-        let run = ExceptEveryNthQuery.makeInputObjectrun_bool_exp(~id, ())
-        let condition = ExceptEveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+        let condition = switch granularity {
+        | Run =>
+          let run_id = ExceptEveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let condition = ExceptEveryNthQuery.makeInputObjectrun_log_bool_exp(~run_id, ())
+          condition
+        | Sweep =>
+          let sweep_id = ExceptEveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let run = ExceptEveryNthQuery.makeInputObjectrun_bool_exp(~sweep_id, ())
+          let condition = ExceptEveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+          condition
+        }
         switch ExceptEveryNthQuery.use({condition: condition, n: n}) {
         | {loading: true} => Loading
         | {error: Some(error)} => Error(error.message)
@@ -75,9 +95,17 @@ let useLogs = (~logCount: int, ~checkedIds): queryResult => {
         }
       } else {
         let n: int = logCount / maxLogs
-        let id = EveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
-        let run = EveryNthQuery.makeInputObjectrun_bool_exp(~id, ())
-        let condition = EveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+        let condition = switch granularity {
+        | Run =>
+          let run_id = EveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let condition = EveryNthQuery.makeInputObjectrun_log_bool_exp(~run_id, ())
+          condition
+        | Sweep =>
+          let sweep_id = EveryNthQuery.makeInputObjectInt_comparison_exp(~_in=ids, ())
+          let run = EveryNthQuery.makeInputObjectrun_bool_exp(~sweep_id, ())
+          let condition = EveryNthQuery.makeInputObjectrun_log_bool_exp(~run, ())
+          condition
+        }
         switch EveryNthQuery.use({condition: condition, n: n}) {
         | {loading: true} => Loading
         | {error: Some(error)} => Error(error.message)
