@@ -112,7 +112,7 @@ let make = (~client, ~granularity, ~checkedIds) => {
         | Error(message) => <ErrorPage message />
         | Loading => <LoadingPage />
         | Stuck => <ErrorPage message={"Stuck."} />
-        | Data(logs) => <ChartsDisplay specs logs dispatch checkedIds client />
+        | Data(logs) => <ChartsDisplay specs logs dispatch checkedIds granularity client />
         }}
       </>
     }

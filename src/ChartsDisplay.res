@@ -19,6 +19,7 @@ let make = (
   ~specs: Map.t<Js.Json.t, Util.chartState, Util.JsonComparator.identity>,
   ~logs,
   ~checkedIds,
+  ~granularity: Routes.granularity,
   ~dispatch,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
@@ -38,8 +39,17 @@ let make = (
         // When run_log id increases, query for new logs
 
         // First condition: logs belong to checked runs
-        let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
-        let run = Query.makeInputObjectrun_bool_exp(~id, ())
+        let run = switch granularity {
+        | Sweep =>
+          let sweep_id = Query.makeInputObjectInt_comparison_exp(
+            ~_in=checkedIds->Set.Int.toArray,
+            (),
+          )
+          Query.makeInputObjectrun_bool_exp(~sweep_id, ())
+        | Run =>
+          let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
+          Query.makeInputObjectrun_bool_exp(~id, ())
+        }
         let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
 
         setMinLogId(minLogId => {
@@ -49,6 +59,15 @@ let make = (
 
           let _and = [condition1, condition2]
           let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
+
+          // Uncomment to print condition as JSON:
+
+          // Js.log(
+          //   {condition: condition}
+          //   ->Query.serializeVariables
+          //   ->Query.variablesToJson
+          //   ->Js.Json.stringifyWithSpace(2),
+          // )
 
           executeQuery({condition: condition})
           maxLogId // return maxLogId value to setMinLogId callback, updating minLogId
