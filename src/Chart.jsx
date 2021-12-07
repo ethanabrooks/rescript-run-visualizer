@@ -10,6 +10,7 @@ export function make(spec, newData) {
             // and https://colamda.de/blog/2020-12-03-React-Vega-Lifecycle/
             if (view != null) {
                 var cs = null
+
                 for (const d of newData) {
                     console.log(d)
                     cs = view.changeset().insert(d)
