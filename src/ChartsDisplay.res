@@ -23,11 +23,8 @@ let make = (
   ~dispatch,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
-  let (logIds, setLogIds) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray)
   let (executeQuery, queryResult) = Query.useLazy()
-  let (error, setError) = React.useState(() => None)
-  let (timedOut, setTimedOut) = React.useState(() => true)
-
+  let (logIds, setLogIds) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray)
   let newLogs = switch queryResult {
   | Executed({data: Some({run_log})}) =>
     run_log
@@ -41,56 +38,50 @@ let make = (
     ->Map.Int.fromArray
   | _ => Map.Int.empty
   }
+
   let maxLogId = switch newLogs->Map.Int.maxKey {
   | Some(max) => max
   | None => logIds->Set.Int.maximum->Option.getWithDefault(0)
   }
+  let executeQuery = Debounce.make(() => {
+    // First condition: logs are for selected sweeps/runs.
+    let run = switch granularity {
+    | Sweep =>
+      let sweep_id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
+      Query.makeInputObjectrun_bool_exp(~sweep_id, ())
+    | Run =>
+      let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
+      Query.makeInputObjectrun_bool_exp(~id, ())
+    }
+    let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
 
-  React.useEffect4(() => {
+    // Second condition: logs have a greater id than max id in logIds
+    let id = Query.makeInputObjectInt_comparison_exp(~_gt=maxLogId, ())
+    let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
+
+    let _and = [condition1, condition2]
+    let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
+
+    // Uncomment to print condition as JSON:
+
+    // Js.log(
+    //   {condition: condition}
+    //   ->Query.serializeVariables
+    //   ->Query.variablesToJson
+    //   ->Js.Json.stringifyWithSpace(2),
+    // )
+
+    executeQuery({condition: condition})
+  })
+  let (error, setError) = React.useState(() => None)
+
+  React.useEffect3(() => {
     // Set up subscription to max run_log id
     let onError = error => setError(_ => error->Some)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
-      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}}} =>
-        // When run_log id increases, query for new logs
-        if timedOut {
-          // First condition: logs belong to checked runs
-          let run = switch granularity {
-          | Sweep =>
-            let sweep_id = Query.makeInputObjectInt_comparison_exp(
-              ~_in=checkedIds->Set.Int.toArray,
-              (),
-            )
-            Query.makeInputObjectrun_bool_exp(~sweep_id, ())
-          | Run =>
-            let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
-            Query.makeInputObjectrun_bool_exp(~id, ())
-          }
-          let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
-
-          // Second condition: logs have a greater id than max id in logIds
-          let id = Query.makeInputObjectInt_comparison_exp(~_gt=maxLogId, ())
-          let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
-
-          let _and = [condition1, condition2]
-          let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
-
-          // Uncomment to print condition as JSON:
-
-          // Js.log(
-          //   {condition: condition}
-          //   ->Query.serializeVariables
-          //   ->Query.variablesToJson
-          //   ->Js.Json.stringifyWithSpace(2),
-          // )
-
-          executeQuery({condition: condition})
-
-          // reset debounce timer
-          setTimedOut(_ => false)
-          Js.Global.setTimeout(() => setTimedOut(_ => true), 5000)->ignore
-        }
+      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}}} => executeQuery()
       | _ => ()
       }
     }
@@ -105,7 +96,7 @@ let make = (
         (),
       )->Some
     Some(_ => (subscription->Option.getExn).unsubscribe())
-  }, (checkedIds, client, timedOut, maxLogId))
+  }, (checkedIds, client, executeQuery))
 
   React.useEffect1(() => {
     // add newLogs to logIds

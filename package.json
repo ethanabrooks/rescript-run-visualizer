@@ -39,6 +39,7 @@
     "prettier": "^2.2.1",
     "react-vega": "^7.4.2",
     "rescript-apollo-client": "^1.1.1",
+    "rescript-debounce": "^1.0.0",
     "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss": "^2.1.2",
     "vega": "^5.20.2",

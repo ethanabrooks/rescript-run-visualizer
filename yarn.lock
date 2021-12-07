@@ -3405,6 +3405,11 @@ rescript-apollo-client@^1.1.1:
   resolved "https://registry.npmjs.org/rescript-apollo-client/-/rescript-apollo-client-1.1.1.tgz"
   integrity sha512-rivEbm0E9yw8LuA/Qf18UBCNrkBFsYNgj7FZWCyAHw7sQkWHx1BkZfkgTNkb+m/lw6dW2dlrkncfzdGFEquKYw==
 
+rescript-debounce@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/rescript-debounce/-/rescript-debounce-1.0.0.tgz#943ba92f4f8560b6dba387f0f2614db87ae47eb1"
+  integrity sha512-vb1UlJvReXl9+p6TubaoEF06VBfAXdw+GPtDOPflce2IrqwCgwBVRn6mvImNFktPvyYvvDFDi36lihDamAM48w==
+
 resolve-from@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/resolve-from/-/resolve-from-3.0.0.tgz"
