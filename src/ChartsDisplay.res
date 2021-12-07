@@ -23,20 +23,36 @@ let make = (
   ~dispatch,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
-  let initialLogs = logs
-  let (logs, _) = React.useState(_ => initialLogs) // Freeze initial value for logs
+  let (logIds, setLogIds) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray)
   let (executeQuery, queryResult) = Query.useLazy()
   let (error, setError) = React.useState(() => None)
   let (timedOut, setTimedOut) = React.useState(() => true)
-  let (_, setMinLogId) = React.useState(_ => logs->Map.Int.maxKey->Option.getWithDefault(0))
 
-  React.useEffect3(() => {
+  let newLogs = switch queryResult {
+  | Executed({data: Some({run_log})}) =>
+    run_log
+    ->Array.keepMap(({id, log}) =>
+      if logIds->Set.Int.has(id) {
+        None // exclude logs that are already in logIds
+      } else {
+        Some((id, log))
+      }
+    )
+    ->Map.Int.fromArray
+  | _ => Map.Int.empty
+  }
+  let maxLogId = switch newLogs->Map.Int.maxKey {
+  | Some(max) => max
+  | None => logIds->Set.Int.maximum->Option.getWithDefault(0)
+  }
+
+  React.useEffect4(() => {
     // Set up subscription to max run_log id
     let onError = error => setError(_ => error->Some)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
-      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(maxLogId)})})}}} =>
+      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}}} =>
         // When run_log id increases, query for new logs
         if timedOut {
           // First condition: logs belong to checked runs
@@ -53,26 +69,23 @@ let make = (
           }
           let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
 
-          setMinLogId(minLogId => {
-            // Second condition: logs have a greater id than minLogId
-            let id = Query.makeInputObjectInt_comparison_exp(~_gt=minLogId, ())
-            let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
+          // Second condition: logs have a greater id than max id in logIds
+          let id = Query.makeInputObjectInt_comparison_exp(~_gt=maxLogId, ())
+          let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
 
-            let _and = [condition1, condition2]
-            let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
+          let _and = [condition1, condition2]
+          let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
 
-            // Uncomment to print condition as JSON:
+          // Uncomment to print condition as JSON:
 
-            Js.log(
-              {condition: condition}
-              ->Query.serializeVariables
-              ->Query.variablesToJson
-              ->Js.Json.stringifyWithSpace(2),
-            )
+          // Js.log(
+          //   {condition: condition}
+          //   ->Query.serializeVariables
+          //   ->Query.variablesToJson
+          //   ->Js.Json.stringifyWithSpace(2),
+          // )
 
-            executeQuery({condition: condition})
-            maxLogId // return maxLogId value to setMinLogId callback, updating minLogId
-          })
+          executeQuery({condition: condition})
 
           // reset debounce timer
           setTimedOut(_ => false)
@@ -92,7 +105,14 @@ let make = (
         (),
       )->Some
     Some(_ => (subscription->Option.getExn).unsubscribe())
-  }, (checkedIds, client, timedOut))
+  }, (checkedIds, client, timedOut, maxLogId))
+
+  React.useEffect1(() => {
+    // add newLogs to logIds
+    setLogIds(logIds => newLogs->Map.Int.keysToArray->Array.reduce(logIds, Set.Int.add))
+    None
+  }, [newLogs])
+
   <>
     {switch error {
     | None => <> </>
@@ -113,12 +133,9 @@ let make = (
     ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
       let key = i->Int.toString
       if rendering {
-        let newLogs = switch queryResult {
-        | Executed({data: Some({run_log})}) => run_log
-        | _ => []
-        }
         <div className="pb-10" key>
-          <Chart logs newLogs spec /> <ChartButtons spec chartIds dispatch />
+          <Chart logs newData={newLogs->Map.Int.valuesToArray} spec />
+          <ChartButtons spec chartIds dispatch />
         </div>
       } else {
         let initialSpec = spec

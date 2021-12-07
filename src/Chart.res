@@ -7,15 +7,7 @@ let mapToObject = map => map->mapToDict->Js.Json.object_
 @module("./Chart.jsx")
 external make: (~spec: Js.Json.t, ~newData: array<Js.Json.t>) => React.element = "make"
 @react.component
-let make = (~logs, ~spec, ~newLogs: array<LogsQuery.EveryQuery.EveryQuery_inner.t_run_log>) => {
-  let newData = newLogs->Array.keepMap(({id, log}) =>
-    if logs->Map.Int.has(id) {
-      None // don't add duplicate logs
-    } else {
-      Some(log)
-    }
-  )
-
+let make = (~logs, ~spec, ~newData: array<Js.Json.t>) => {
   // Add logs to spec
   spec
   ->Js.Json.decodeObject

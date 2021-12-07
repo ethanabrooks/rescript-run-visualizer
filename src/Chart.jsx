@@ -12,10 +12,10 @@ export function make(spec, newData) {
                 var cs = null
 
                 for (const d of newData) {
-                    console.log(d)
                     cs = view.changeset().insert(d)
                 }
                 if (cs != null) {
+                    console.log(newData)
                     view.change("data", cs).run();
                 }
             }
