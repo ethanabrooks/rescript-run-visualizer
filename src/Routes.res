@@ -103,12 +103,16 @@ let hashToRoute = (hash: string) =>
   switch hash {
   | "" => Redirect
   | _ =>
-    hash
-    ->Js.Global.decodeURI
-    ->parseJson
-    ->Result.flatMap(res => res->urlParams_decode->mapError(({message}) => message->Some))
-    ->Result.flatMap(params => Valid(params)->Ok)
-    ->Result.getWithDefault(NotFound(hash))
+    switch hash->Int.fromString {
+    | Some(runId) => makeRoute(~granularity=Run, ~checkedIds=[runId]->Set.Int.fromArray, ())
+    | _ =>
+      hash
+      ->Js.Global.decodeURI
+      ->parseJson
+      ->Result.flatMap(res => res->urlParams_decode->mapError(({message}) => message->Some))
+      ->Result.flatMap(params => Valid(params)->Ok)
+      ->Result.getWithDefault(NotFound(hash))
+    }
   }
 
 let routeToHash = (route: route): string =>
