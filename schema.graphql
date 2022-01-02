@@ -1,0 +1,4639 @@
+schema {
+  query: query_root
+  mutation: mutation_root
+  subscription: subscription_root
+}
+
+"""whether this query should be cached (Hasura Cloud only)"""
+directive @cached(
+  """measured in seconds"""
+  ttl: Int! = 60
+
+  """refresh the cache entry"""
+  refresh: Boolean! = false
+) on QUERY
+
+scalar _jsonb
+
+"""
+Boolean expression to compare columns of type "_jsonb". All fields are combined with logical 'AND'.
+"""
+input _jsonb_comparison_exp {
+  _eq: _jsonb
+  _gt: _jsonb
+  _gte: _jsonb
+  _in: [_jsonb!]
+  _is_null: Boolean
+  _lt: _jsonb
+  _lte: _jsonb
+  _neq: _jsonb
+  _nin: [_jsonb!]
+}
+
+scalar _text
+
+"""
+Boolean expression to compare columns of type "Boolean". All fields are combined with logical 'AND'.
+"""
+input Boolean_comparison_exp {
+  _eq: Boolean
+  _gt: Boolean
+  _gte: Boolean
+  _in: [Boolean!]
+  _is_null: Boolean
+  _lt: Boolean
+  _lte: Boolean
+  _neq: Boolean
+  _nin: [Boolean!]
+}
+
+scalar bytea
+
+"""
+Boolean expression to compare columns of type "bytea". All fields are combined with logical 'AND'.
+"""
+input bytea_comparison_exp {
+  _eq: bytea
+  _gt: bytea
+  _gte: bytea
+  _in: [bytea!]
+  _is_null: Boolean
+  _lt: bytea
+  _lte: bytea
+  _neq: bytea
+  _nin: [bytea!]
+}
+
+"""
+columns and relationships of "chart"
+"""
+type chart {
+  archived: Boolean!
+  id: Int!
+  order: Int
+
+  """An object relationship"""
+  run: run
+  run_id: Int
+  spec(
+    """JSON select path"""
+    path: String
+  ): jsonb!
+}
+
+"""
+aggregated selection of "chart"
+"""
+type chart_aggregate {
+  aggregate: chart_aggregate_fields
+  nodes: [chart!]!
+}
+
+"""
+aggregate fields of "chart"
+"""
+type chart_aggregate_fields {
+  avg: chart_avg_fields
+  count(columns: [chart_select_column!], distinct: Boolean): Int!
+  max: chart_max_fields
+  min: chart_min_fields
+  stddev: chart_stddev_fields
+  stddev_pop: chart_stddev_pop_fields
+  stddev_samp: chart_stddev_samp_fields
+  sum: chart_sum_fields
+  var_pop: chart_var_pop_fields
+  var_samp: chart_var_samp_fields
+  variance: chart_variance_fields
+}
+
+"""
+order by aggregate values of table "chart"
+"""
+input chart_aggregate_order_by {
+  avg: chart_avg_order_by
+  count: order_by
+  max: chart_max_order_by
+  min: chart_min_order_by
+  stddev: chart_stddev_order_by
+  stddev_pop: chart_stddev_pop_order_by
+  stddev_samp: chart_stddev_samp_order_by
+  sum: chart_sum_order_by
+  var_pop: chart_var_pop_order_by
+  var_samp: chart_var_samp_order_by
+  variance: chart_variance_order_by
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input chart_append_input {
+  spec: jsonb
+}
+
+"""
+input type for inserting array relation for remote table "chart"
+"""
+input chart_arr_rel_insert_input {
+  data: [chart_insert_input!]!
+
+  """on conflict condition"""
+  on_conflict: chart_on_conflict
+}
+
+"""aggregate avg on columns"""
+type chart_avg_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by avg() on columns of table "chart"
+"""
+input chart_avg_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "chart". All fields are combined with a logical 'AND'.
+"""
+input chart_bool_exp {
+  _and: [chart_bool_exp!]
+  _not: chart_bool_exp
+  _or: [chart_bool_exp!]
+  archived: Boolean_comparison_exp
+  id: Int_comparison_exp
+  order: Int_comparison_exp
+  run: run_bool_exp
+  run_id: Int_comparison_exp
+  spec: jsonb_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "chart"
+"""
+enum chart_constraint {
+  """unique or primary key constraint"""
+  chart_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input chart_delete_at_path_input {
+  spec: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input chart_delete_elem_input {
+  spec: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input chart_delete_key_input {
+  spec: String
+}
+
+"""
+input type for incrementing numeric columns in table "chart"
+"""
+input chart_inc_input {
+  id: Int
+  order: Int
+  run_id: Int
+}
+
+"""
+input type for inserting data into table "chart"
+"""
+input chart_insert_input {
+  archived: Boolean
+  id: Int
+  order: Int
+  run: run_obj_rel_insert_input
+  run_id: Int
+  spec: jsonb
+}
+
+"""aggregate max on columns"""
+type chart_max_fields {
+  id: Int
+  order: Int
+  run_id: Int
+}
+
+"""
+order by max() on columns of table "chart"
+"""
+input chart_max_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate min on columns"""
+type chart_min_fields {
+  id: Int
+  order: Int
+  run_id: Int
+}
+
+"""
+order by min() on columns of table "chart"
+"""
+input chart_min_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""
+response of any mutation on the table "chart"
+"""
+type chart_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [chart!]!
+}
+
+"""
+on conflict condition type for table "chart"
+"""
+input chart_on_conflict {
+  constraint: chart_constraint!
+  update_columns: [chart_update_column!]! = []
+  where: chart_bool_exp
+}
+
+"""Ordering options when selecting data from "chart"."""
+input chart_order_by {
+  archived: order_by
+  id: order_by
+  order: order_by
+  run: run_order_by
+  run_id: order_by
+  spec: order_by
+}
+
+"""primary key columns input for table: chart"""
+input chart_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input chart_prepend_input {
+  spec: jsonb
+}
+
+"""
+select columns of table "chart"
+"""
+enum chart_select_column {
+  """column name"""
+  archived
+
+  """column name"""
+  id
+
+  """column name"""
+  order
+
+  """column name"""
+  run_id
+
+  """column name"""
+  spec
+}
+
+"""
+input type for updating data in table "chart"
+"""
+input chart_set_input {
+  archived: Boolean
+  id: Int
+  order: Int
+  run_id: Int
+  spec: jsonb
+}
+
+"""aggregate stddev on columns"""
+type chart_stddev_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by stddev() on columns of table "chart"
+"""
+input chart_stddev_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type chart_stddev_pop_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "chart"
+"""
+input chart_stddev_pop_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type chart_stddev_samp_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "chart"
+"""
+input chart_stddev_samp_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate sum on columns"""
+type chart_sum_fields {
+  id: Int
+  order: Int
+  run_id: Int
+}
+
+"""
+order by sum() on columns of table "chart"
+"""
+input chart_sum_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""
+update columns of table "chart"
+"""
+enum chart_update_column {
+  """column name"""
+  archived
+
+  """column name"""
+  id
+
+  """column name"""
+  order
+
+  """column name"""
+  run_id
+
+  """column name"""
+  spec
+}
+
+"""aggregate var_pop on columns"""
+type chart_var_pop_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by var_pop() on columns of table "chart"
+"""
+input chart_var_pop_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type chart_var_samp_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by var_samp() on columns of table "chart"
+"""
+input chart_var_samp_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+"""aggregate variance on columns"""
+type chart_variance_fields {
+  id: Float
+  order: Float
+  run_id: Float
+}
+
+"""
+order by variance() on columns of table "chart"
+"""
+input chart_variance_order_by {
+  id: order_by
+  order: order_by
+  run_id: order_by
+}
+
+input every_nth_run_log_args {
+  n: Int
+}
+
+input except_every_nth_run_log_args {
+  n: Int
+}
+
+input filter_runs_args {
+  object: jsonb
+  path: _text
+  pattern: String
+}
+
+input filter_sweeps_args {
+  object: jsonb
+  path: _text
+  pattern: String
+}
+
+"""
+Boolean expression to compare columns of type "Int". All fields are combined with logical 'AND'.
+"""
+input Int_comparison_exp {
+  _eq: Int
+  _gt: Int
+  _gte: Int
+  _in: [Int!]
+  _is_null: Boolean
+  _lt: Int
+  _lte: Int
+  _neq: Int
+  _nin: [Int!]
+}
+
+scalar jsonb
+
+"""
+Boolean expression to compare columns of type "jsonb". All fields are combined with logical 'AND'.
+"""
+input jsonb_comparison_exp {
+  """is the column contained in the given json value"""
+  _contained_in: jsonb
+
+  """does the column contain the given json value at the top level"""
+  _contains: jsonb
+  _eq: jsonb
+  _gt: jsonb
+  _gte: jsonb
+
+  """does the string exist as a top-level key in the column"""
+  _has_key: String
+
+  """do all of these strings exist as top-level keys in the column"""
+  _has_keys_all: [String!]
+
+  """do any of these strings exist as top-level keys in the column"""
+  _has_keys_any: [String!]
+  _in: [jsonb!]
+  _is_null: Boolean
+  _lt: jsonb
+  _lte: jsonb
+  _neq: jsonb
+  _nin: [jsonb!]
+}
+
+input logs_less_than_step_args {
+  max_step: Int
+}
+
+input metadata_path_sweep_args {
+  path: _text
+}
+
+"""mutation root"""
+type mutation_root {
+  """
+  delete data from the table: "chart"
+  """
+  delete_chart(
+    """filter the rows which have to be deleted"""
+    where: chart_bool_exp!
+  ): chart_mutation_response
+
+  """
+  delete single row from the table: "chart"
+  """
+  delete_chart_by_pk(id: Int!): chart
+
+  """
+  delete data from the table: "new_run_logs"
+  """
+  delete_new_run_logs(
+    """filter the rows which have to be deleted"""
+    where: new_run_logs_bool_exp!
+  ): new_run_logs_mutation_response
+
+  """
+  delete single row from the table: "new_run_logs"
+  """
+  delete_new_run_logs_by_pk(id: Int!): new_run_logs
+
+  """
+  delete data from the table: "parameter_choices"
+  """
+  delete_parameter_choices(
+    """filter the rows which have to be deleted"""
+    where: parameter_choices_bool_exp!
+  ): parameter_choices_mutation_response
+
+  """
+  delete data from the table: "run"
+  """
+  delete_run(
+    """filter the rows which have to be deleted"""
+    where: run_bool_exp!
+  ): run_mutation_response
+
+  """
+  delete data from the table: "run_blob"
+  """
+  delete_run_blob(
+    """filter the rows which have to be deleted"""
+    where: run_blob_bool_exp!
+  ): run_blob_mutation_response
+
+  """
+  delete single row from the table: "run_blob"
+  """
+  delete_run_blob_by_pk(id: Int!): run_blob
+
+  """
+  delete single row from the table: "run"
+  """
+  delete_run_by_pk(id: Int!): run
+
+  """
+  delete data from the table: "run_log"
+  """
+  delete_run_log(
+    """filter the rows which have to be deleted"""
+    where: run_log_bool_exp!
+  ): run_log_mutation_response
+
+  """
+  delete single row from the table: "run_log"
+  """
+  delete_run_log_by_pk(id: Int!): run_log
+
+  """
+  delete data from the table: "sweep"
+  """
+  delete_sweep(
+    """filter the rows which have to be deleted"""
+    where: sweep_bool_exp!
+  ): sweep_mutation_response
+
+  """
+  delete single row from the table: "sweep"
+  """
+  delete_sweep_by_pk(id: Int!): sweep
+
+  """
+  insert data into the table: "chart"
+  """
+  insert_chart(
+    """the rows to be inserted"""
+    objects: [chart_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: chart_on_conflict
+  ): chart_mutation_response
+
+  """
+  insert a single row into the table: "chart"
+  """
+  insert_chart_one(
+    """the row to be inserted"""
+    object: chart_insert_input!
+
+    """on conflict condition"""
+    on_conflict: chart_on_conflict
+  ): chart
+
+  """
+  insert data into the table: "new_run_logs"
+  """
+  insert_new_run_logs(
+    """the rows to be inserted"""
+    objects: [new_run_logs_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: new_run_logs_on_conflict
+  ): new_run_logs_mutation_response
+
+  """
+  insert a single row into the table: "new_run_logs"
+  """
+  insert_new_run_logs_one(
+    """the row to be inserted"""
+    object: new_run_logs_insert_input!
+
+    """on conflict condition"""
+    on_conflict: new_run_logs_on_conflict
+  ): new_run_logs
+
+  """
+  insert data into the table: "parameter_choices"
+  """
+  insert_parameter_choices(
+    """the rows to be inserted"""
+    objects: [parameter_choices_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: parameter_choices_on_conflict
+  ): parameter_choices_mutation_response
+
+  """
+  insert a single row into the table: "parameter_choices"
+  """
+  insert_parameter_choices_one(
+    """the row to be inserted"""
+    object: parameter_choices_insert_input!
+
+    """on conflict condition"""
+    on_conflict: parameter_choices_on_conflict
+  ): parameter_choices
+
+  """
+  insert data into the table: "run"
+  """
+  insert_run(
+    """the rows to be inserted"""
+    objects: [run_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: run_on_conflict
+  ): run_mutation_response
+
+  """
+  insert data into the table: "run_blob"
+  """
+  insert_run_blob(
+    """the rows to be inserted"""
+    objects: [run_blob_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: run_blob_on_conflict
+  ): run_blob_mutation_response
+
+  """
+  insert a single row into the table: "run_blob"
+  """
+  insert_run_blob_one(
+    """the row to be inserted"""
+    object: run_blob_insert_input!
+
+    """on conflict condition"""
+    on_conflict: run_blob_on_conflict
+  ): run_blob
+
+  """
+  insert data into the table: "run_log"
+  """
+  insert_run_log(
+    """the rows to be inserted"""
+    objects: [run_log_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: run_log_on_conflict
+  ): run_log_mutation_response
+
+  """
+  insert a single row into the table: "run_log"
+  """
+  insert_run_log_one(
+    """the row to be inserted"""
+    object: run_log_insert_input!
+
+    """on conflict condition"""
+    on_conflict: run_log_on_conflict
+  ): run_log
+
+  """
+  insert a single row into the table: "run"
+  """
+  insert_run_one(
+    """the row to be inserted"""
+    object: run_insert_input!
+
+    """on conflict condition"""
+    on_conflict: run_on_conflict
+  ): run
+
+  """
+  insert data into the table: "sweep"
+  """
+  insert_sweep(
+    """the rows to be inserted"""
+    objects: [sweep_insert_input!]!
+
+    """on conflict condition"""
+    on_conflict: sweep_on_conflict
+  ): sweep_mutation_response
+
+  """
+  insert a single row into the table: "sweep"
+  """
+  insert_sweep_one(
+    """the row to be inserted"""
+    object: sweep_insert_input!
+
+    """on conflict condition"""
+    on_conflict: sweep_on_conflict
+  ): sweep
+
+  """
+  update data of the table: "chart"
+  """
+  update_chart(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: chart_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: chart_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: chart_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: chart_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: chart_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: chart_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: chart_set_input
+
+    """filter the rows which have to be updated"""
+    where: chart_bool_exp!
+  ): chart_mutation_response
+
+  """
+  update single row of the table: "chart"
+  """
+  update_chart_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: chart_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: chart_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: chart_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: chart_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: chart_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: chart_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: chart_set_input
+    pk_columns: chart_pk_columns_input!
+  ): chart
+
+  """
+  update data of the table: "new_run_logs"
+  """
+  update_new_run_logs(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: new_run_logs_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: new_run_logs_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: new_run_logs_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: new_run_logs_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: new_run_logs_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: new_run_logs_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: new_run_logs_set_input
+
+    """filter the rows which have to be updated"""
+    where: new_run_logs_bool_exp!
+  ): new_run_logs_mutation_response
+
+  """
+  update single row of the table: "new_run_logs"
+  """
+  update_new_run_logs_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: new_run_logs_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: new_run_logs_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: new_run_logs_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: new_run_logs_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: new_run_logs_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: new_run_logs_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: new_run_logs_set_input
+    pk_columns: new_run_logs_pk_columns_input!
+  ): new_run_logs
+
+  """
+  update data of the table: "parameter_choices"
+  """
+  update_parameter_choices(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: parameter_choices_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: parameter_choices_set_input
+
+    """filter the rows which have to be updated"""
+    where: parameter_choices_bool_exp!
+  ): parameter_choices_mutation_response
+
+  """
+  update data of the table: "run"
+  """
+  update_run(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_set_input
+
+    """filter the rows which have to be updated"""
+    where: run_bool_exp!
+  ): run_mutation_response
+
+  """
+  update data of the table: "run_blob"
+  """
+  update_run_blob(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_blob_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_blob_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_blob_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_blob_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_blob_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_blob_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_blob_set_input
+
+    """filter the rows which have to be updated"""
+    where: run_blob_bool_exp!
+  ): run_blob_mutation_response
+
+  """
+  update single row of the table: "run_blob"
+  """
+  update_run_blob_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_blob_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_blob_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_blob_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_blob_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_blob_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_blob_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_blob_set_input
+    pk_columns: run_blob_pk_columns_input!
+  ): run_blob
+
+  """
+  update single row of the table: "run"
+  """
+  update_run_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_set_input
+    pk_columns: run_pk_columns_input!
+  ): run
+
+  """
+  update data of the table: "run_log"
+  """
+  update_run_log(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_log_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_log_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_log_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_log_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_log_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_log_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_log_set_input
+
+    """filter the rows which have to be updated"""
+    where: run_log_bool_exp!
+  ): run_log_mutation_response
+
+  """
+  update single row of the table: "run_log"
+  """
+  update_run_log_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: run_log_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: run_log_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: run_log_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: run_log_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: run_log_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: run_log_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: run_log_set_input
+    pk_columns: run_log_pk_columns_input!
+  ): run_log
+
+  """
+  update data of the table: "sweep"
+  """
+  update_sweep(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: sweep_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: sweep_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: sweep_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: sweep_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: sweep_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: sweep_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: sweep_set_input
+
+    """filter the rows which have to be updated"""
+    where: sweep_bool_exp!
+  ): sweep_mutation_response
+
+  """
+  update single row of the table: "sweep"
+  """
+  update_sweep_by_pk(
+    """append existing jsonb value of filtered columns with new jsonb value"""
+    _append: sweep_append_input
+
+    """
+    delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+    """
+    _delete_at_path: sweep_delete_at_path_input
+
+    """
+    delete the array element with specified index (negative integers count from
+    the end). throws an error if top level container is not an array
+    """
+    _delete_elem: sweep_delete_elem_input
+
+    """
+    delete key/value pair or string element. key/value pairs are matched based on their key value
+    """
+    _delete_key: sweep_delete_key_input
+
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: sweep_inc_input
+
+    """prepend existing jsonb value of filtered columns with new jsonb value"""
+    _prepend: sweep_prepend_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: sweep_set_input
+    pk_columns: sweep_pk_columns_input!
+  ): sweep
+}
+
+"""
+columns and relationships of "new_run_logs"
+"""
+type new_run_logs {
+  id: Int!
+  log(
+    """JSON select path"""
+    path: String
+  ): jsonb!
+  run_id: Int!
+}
+
+"""
+aggregated selection of "new_run_logs"
+"""
+type new_run_logs_aggregate {
+  aggregate: new_run_logs_aggregate_fields
+  nodes: [new_run_logs!]!
+}
+
+"""
+aggregate fields of "new_run_logs"
+"""
+type new_run_logs_aggregate_fields {
+  avg: new_run_logs_avg_fields
+  count(columns: [new_run_logs_select_column!], distinct: Boolean): Int!
+  max: new_run_logs_max_fields
+  min: new_run_logs_min_fields
+  stddev: new_run_logs_stddev_fields
+  stddev_pop: new_run_logs_stddev_pop_fields
+  stddev_samp: new_run_logs_stddev_samp_fields
+  sum: new_run_logs_sum_fields
+  var_pop: new_run_logs_var_pop_fields
+  var_samp: new_run_logs_var_samp_fields
+  variance: new_run_logs_variance_fields
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input new_run_logs_append_input {
+  log: jsonb
+}
+
+"""aggregate avg on columns"""
+type new_run_logs_avg_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+Boolean expression to filter rows from the table "new_run_logs". All fields are combined with a logical 'AND'.
+"""
+input new_run_logs_bool_exp {
+  _and: [new_run_logs_bool_exp!]
+  _not: new_run_logs_bool_exp
+  _or: [new_run_logs_bool_exp!]
+  id: Int_comparison_exp
+  log: jsonb_comparison_exp
+  run_id: Int_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "new_run_logs"
+"""
+enum new_run_logs_constraint {
+  """unique or primary key constraint"""
+  new_run_logs_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input new_run_logs_delete_at_path_input {
+  log: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input new_run_logs_delete_elem_input {
+  log: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input new_run_logs_delete_key_input {
+  log: String
+}
+
+"""
+input type for incrementing numeric columns in table "new_run_logs"
+"""
+input new_run_logs_inc_input {
+  id: Int
+  run_id: Int
+}
+
+"""
+input type for inserting data into table "new_run_logs"
+"""
+input new_run_logs_insert_input {
+  id: Int
+  log: jsonb
+  run_id: Int
+}
+
+"""aggregate max on columns"""
+type new_run_logs_max_fields {
+  id: Int
+  run_id: Int
+}
+
+"""aggregate min on columns"""
+type new_run_logs_min_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+response of any mutation on the table "new_run_logs"
+"""
+type new_run_logs_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [new_run_logs!]!
+}
+
+"""
+on conflict condition type for table "new_run_logs"
+"""
+input new_run_logs_on_conflict {
+  constraint: new_run_logs_constraint!
+  update_columns: [new_run_logs_update_column!]! = []
+  where: new_run_logs_bool_exp
+}
+
+"""Ordering options when selecting data from "new_run_logs"."""
+input new_run_logs_order_by {
+  id: order_by
+  log: order_by
+  run_id: order_by
+}
+
+"""primary key columns input for table: new_run_logs"""
+input new_run_logs_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input new_run_logs_prepend_input {
+  log: jsonb
+}
+
+"""
+select columns of table "new_run_logs"
+"""
+enum new_run_logs_select_column {
+  """column name"""
+  id
+
+  """column name"""
+  log
+
+  """column name"""
+  run_id
+}
+
+"""
+input type for updating data in table "new_run_logs"
+"""
+input new_run_logs_set_input {
+  id: Int
+  log: jsonb
+  run_id: Int
+}
+
+"""aggregate stddev on columns"""
+type new_run_logs_stddev_fields {
+  id: Float
+  run_id: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type new_run_logs_stddev_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type new_run_logs_stddev_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""aggregate sum on columns"""
+type new_run_logs_sum_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+update columns of table "new_run_logs"
+"""
+enum new_run_logs_update_column {
+  """column name"""
+  id
+
+  """column name"""
+  log
+
+  """column name"""
+  run_id
+}
+
+"""aggregate var_pop on columns"""
+type new_run_logs_var_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""aggregate var_samp on columns"""
+type new_run_logs_var_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""aggregate variance on columns"""
+type new_run_logs_variance_fields {
+  id: Float
+  run_id: Float
+}
+
+"""column ordering options"""
+enum order_by {
+  """in ascending order, nulls last"""
+  asc
+
+  """in ascending order, nulls first"""
+  asc_nulls_first
+
+  """in ascending order, nulls last"""
+  asc_nulls_last
+
+  """in descending order, nulls first"""
+  desc
+
+  """in descending order, nulls first"""
+  desc_nulls_first
+
+  """in descending order, nulls last"""
+  desc_nulls_last
+}
+
+"""
+columns and relationships of "parameter_choices"
+"""
+type parameter_choices {
+  Key: String!
+  choice: _jsonb!
+
+  """An object relationship"""
+  sweep: sweep!
+  sweep_id: Int!
+}
+
+"""
+aggregated selection of "parameter_choices"
+"""
+type parameter_choices_aggregate {
+  aggregate: parameter_choices_aggregate_fields
+  nodes: [parameter_choices!]!
+}
+
+"""
+aggregate fields of "parameter_choices"
+"""
+type parameter_choices_aggregate_fields {
+  avg: parameter_choices_avg_fields
+  count(columns: [parameter_choices_select_column!], distinct: Boolean): Int!
+  max: parameter_choices_max_fields
+  min: parameter_choices_min_fields
+  stddev: parameter_choices_stddev_fields
+  stddev_pop: parameter_choices_stddev_pop_fields
+  stddev_samp: parameter_choices_stddev_samp_fields
+  sum: parameter_choices_sum_fields
+  var_pop: parameter_choices_var_pop_fields
+  var_samp: parameter_choices_var_samp_fields
+  variance: parameter_choices_variance_fields
+}
+
+"""
+order by aggregate values of table "parameter_choices"
+"""
+input parameter_choices_aggregate_order_by {
+  avg: parameter_choices_avg_order_by
+  count: order_by
+  max: parameter_choices_max_order_by
+  min: parameter_choices_min_order_by
+  stddev: parameter_choices_stddev_order_by
+  stddev_pop: parameter_choices_stddev_pop_order_by
+  stddev_samp: parameter_choices_stddev_samp_order_by
+  sum: parameter_choices_sum_order_by
+  var_pop: parameter_choices_var_pop_order_by
+  var_samp: parameter_choices_var_samp_order_by
+  variance: parameter_choices_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "parameter_choices"
+"""
+input parameter_choices_arr_rel_insert_input {
+  data: [parameter_choices_insert_input!]!
+
+  """on conflict condition"""
+  on_conflict: parameter_choices_on_conflict
+}
+
+"""aggregate avg on columns"""
+type parameter_choices_avg_fields {
+  sweep_id: Float
+}
+
+"""
+order by avg() on columns of table "parameter_choices"
+"""
+input parameter_choices_avg_order_by {
+  sweep_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "parameter_choices". All fields are combined with a logical 'AND'.
+"""
+input parameter_choices_bool_exp {
+  Key: String_comparison_exp
+  _and: [parameter_choices_bool_exp!]
+  _not: parameter_choices_bool_exp
+  _or: [parameter_choices_bool_exp!]
+  choice: _jsonb_comparison_exp
+  sweep: sweep_bool_exp
+  sweep_id: Int_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "parameter_choices"
+"""
+enum parameter_choices_constraint {
+  """unique or primary key constraint"""
+  parameter_choices_sweep_id_Key_key
+}
+
+"""
+input type for incrementing numeric columns in table "parameter_choices"
+"""
+input parameter_choices_inc_input {
+  sweep_id: Int
+}
+
+"""
+input type for inserting data into table "parameter_choices"
+"""
+input parameter_choices_insert_input {
+  Key: String
+  choice: _jsonb
+  sweep: sweep_obj_rel_insert_input
+  sweep_id: Int
+}
+
+"""aggregate max on columns"""
+type parameter_choices_max_fields {
+  Key: String
+  sweep_id: Int
+}
+
+"""
+order by max() on columns of table "parameter_choices"
+"""
+input parameter_choices_max_order_by {
+  Key: order_by
+  sweep_id: order_by
+}
+
+"""aggregate min on columns"""
+type parameter_choices_min_fields {
+  Key: String
+  sweep_id: Int
+}
+
+"""
+order by min() on columns of table "parameter_choices"
+"""
+input parameter_choices_min_order_by {
+  Key: order_by
+  sweep_id: order_by
+}
+
+"""
+response of any mutation on the table "parameter_choices"
+"""
+type parameter_choices_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [parameter_choices!]!
+}
+
+"""
+on conflict condition type for table "parameter_choices"
+"""
+input parameter_choices_on_conflict {
+  constraint: parameter_choices_constraint!
+  update_columns: [parameter_choices_update_column!]! = []
+  where: parameter_choices_bool_exp
+}
+
+"""Ordering options when selecting data from "parameter_choices"."""
+input parameter_choices_order_by {
+  Key: order_by
+  choice: order_by
+  sweep: sweep_order_by
+  sweep_id: order_by
+}
+
+"""
+select columns of table "parameter_choices"
+"""
+enum parameter_choices_select_column {
+  """column name"""
+  Key
+
+  """column name"""
+  choice
+
+  """column name"""
+  sweep_id
+}
+
+"""
+input type for updating data in table "parameter_choices"
+"""
+input parameter_choices_set_input {
+  Key: String
+  choice: _jsonb
+  sweep_id: Int
+}
+
+"""aggregate stddev on columns"""
+type parameter_choices_stddev_fields {
+  sweep_id: Float
+}
+
+"""
+order by stddev() on columns of table "parameter_choices"
+"""
+input parameter_choices_stddev_order_by {
+  sweep_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type parameter_choices_stddev_pop_fields {
+  sweep_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "parameter_choices"
+"""
+input parameter_choices_stddev_pop_order_by {
+  sweep_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type parameter_choices_stddev_samp_fields {
+  sweep_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "parameter_choices"
+"""
+input parameter_choices_stddev_samp_order_by {
+  sweep_id: order_by
+}
+
+"""aggregate sum on columns"""
+type parameter_choices_sum_fields {
+  sweep_id: Int
+}
+
+"""
+order by sum() on columns of table "parameter_choices"
+"""
+input parameter_choices_sum_order_by {
+  sweep_id: order_by
+}
+
+"""
+update columns of table "parameter_choices"
+"""
+enum parameter_choices_update_column {
+  """column name"""
+  Key
+
+  """column name"""
+  choice
+
+  """column name"""
+  sweep_id
+}
+
+"""aggregate var_pop on columns"""
+type parameter_choices_var_pop_fields {
+  sweep_id: Float
+}
+
+"""
+order by var_pop() on columns of table "parameter_choices"
+"""
+input parameter_choices_var_pop_order_by {
+  sweep_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type parameter_choices_var_samp_fields {
+  sweep_id: Float
+}
+
+"""
+order by var_samp() on columns of table "parameter_choices"
+"""
+input parameter_choices_var_samp_order_by {
+  sweep_id: order_by
+}
+
+"""aggregate variance on columns"""
+type parameter_choices_variance_fields {
+  sweep_id: Float
+}
+
+"""
+order by variance() on columns of table "parameter_choices"
+"""
+input parameter_choices_variance_order_by {
+  sweep_id: order_by
+}
+
+type query_root {
+  """
+  fetch data from the table: "chart"
+  """
+  chart(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): [chart!]!
+
+  """
+  fetch aggregated fields from the table: "chart"
+  """
+  chart_aggregate(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): chart_aggregate!
+
+  """fetch data from the table: "chart" using primary key columns"""
+  chart_by_pk(id: Int!): chart
+
+  """
+  execute function "empty_sweeps" which returns "sweep"
+  """
+  empty_sweeps(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  execute function "empty_sweeps" and query aggregates on result of table type "sweep"
+  """
+  empty_sweeps_aggregate(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """
+  execute function "every_nth_run_log" which returns "run_log"
+  """
+  every_nth_run_log(
+    """
+    input parameters for function "every_nth_run_log"
+    """
+    args: every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "every_nth_run_log" and query aggregates on result of table type "run_log"
+  """
+  every_nth_run_log_aggregate(
+    """
+    input parameters for function "every_nth_run_log"
+    """
+    args: every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  execute function "except_every_nth_run_log" which returns "run_log"
+  """
+  except_every_nth_run_log(
+    """
+    input parameters for function "except_every_nth_run_log"
+    """
+    args: except_every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "except_every_nth_run_log" and query aggregates on result of table type "run_log"
+  """
+  except_every_nth_run_log_aggregate(
+    """
+    input parameters for function "except_every_nth_run_log"
+    """
+    args: except_every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  execute function "filter_runs" which returns "run"
+  """
+  filter_runs(
+    """
+    input parameters for function "filter_runs"
+    """
+    args: filter_runs_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  execute function "filter_runs" and query aggregates on result of table type "run"
+  """
+  filter_runs_aggregate(
+    """
+    input parameters for function "filter_runs"
+    """
+    args: filter_runs_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  execute function "filter_sweeps" which returns "sweep"
+  """
+  filter_sweeps(
+    """
+    input parameters for function "filter_sweeps"
+    """
+    args: filter_sweeps_args!
+
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  execute function "filter_sweeps" and query aggregates on result of table type "sweep"
+  """
+  filter_sweeps_aggregate(
+    """
+    input parameters for function "filter_sweeps"
+    """
+    args: filter_sweeps_args!
+
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """
+  execute function "logs_less_than_step" which returns "run_log"
+  """
+  logs_less_than_step(
+    """
+    input parameters for function "logs_less_than_step"
+    """
+    args: logs_less_than_step_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "logs_less_than_step" and query aggregates on result of table type "run_log"
+  """
+  logs_less_than_step_aggregate(
+    """
+    input parameters for function "logs_less_than_step"
+    """
+    args: logs_less_than_step_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  fetch data from the table: "new_run_logs"
+  """
+  new_run_logs(
+    """distinct select on columns"""
+    distinct_on: [new_run_logs_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [new_run_logs_order_by!]
+
+    """filter the rows returned"""
+    where: new_run_logs_bool_exp
+  ): [new_run_logs!]!
+
+  """
+  fetch aggregated fields from the table: "new_run_logs"
+  """
+  new_run_logs_aggregate(
+    """distinct select on columns"""
+    distinct_on: [new_run_logs_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [new_run_logs_order_by!]
+
+    """filter the rows returned"""
+    where: new_run_logs_bool_exp
+  ): new_run_logs_aggregate!
+
+  """fetch data from the table: "new_run_logs" using primary key columns"""
+  new_run_logs_by_pk(id: Int!): new_run_logs
+
+  """
+  execute function "non_sweep_run" which returns "run"
+  """
+  non_sweep_run(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  execute function "non_sweep_run" and query aggregates on result of table type "run"
+  """
+  non_sweep_run_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  fetch data from the table: "parameter_choices"
+  """
+  parameter_choices(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): [parameter_choices!]!
+
+  """An aggregate relationship"""
+  parameter_choices_aggregate(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): parameter_choices_aggregate!
+
+  """
+  fetch data from the table: "run"
+  """
+  run(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  fetch aggregated fields from the table: "run"
+  """
+  run_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  fetch data from the table: "run_blob"
+  """
+  run_blob(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): [run_blob!]!
+
+  """
+  fetch aggregated fields from the table: "run_blob"
+  """
+  run_blob_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): run_blob_aggregate!
+
+  """fetch data from the table: "run_blob" using primary key columns"""
+  run_blob_by_pk(id: Int!): run_blob
+
+  """fetch data from the table: "run" using primary key columns"""
+  run_by_pk(id: Int!): run
+
+  """
+  fetch data from the table: "run_log"
+  """
+  run_log(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  fetch aggregated fields from the table: "run_log"
+  """
+  run_log_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """fetch data from the table: "run_log" using primary key columns"""
+  run_log_by_pk(id: Int!): run_log
+
+  """
+  fetch data from the table: "sweep"
+  """
+  sweep(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  fetch aggregated fields from the table: "sweep"
+  """
+  sweep_aggregate(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """fetch data from the table: "sweep" using primary key columns"""
+  sweep_by_pk(id: Int!): sweep
+}
+
+"""
+columns and relationships of "run"
+"""
+type run {
+  archived: Boolean!
+
+  """An array relationship"""
+  charts(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): [chart!]!
+
+  """An aggregate relationship"""
+  charts_aggregate(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): chart_aggregate!
+  id: Int!
+  metadata(
+    """JSON select path"""
+    path: String
+  ): jsonb
+
+  """An array relationship"""
+  run_blobs(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): [run_blob!]!
+
+  """An aggregate relationship"""
+  run_blobs_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): run_blob_aggregate!
+
+  """An array relationship"""
+  run_logs(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """An aggregate relationship"""
+  run_logs_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """An object relationship"""
+  sweep: sweep
+  sweep_id: Int
+}
+
+"""
+aggregated selection of "run"
+"""
+type run_aggregate {
+  aggregate: run_aggregate_fields
+  nodes: [run!]!
+}
+
+"""
+aggregate fields of "run"
+"""
+type run_aggregate_fields {
+  avg: run_avg_fields
+  count(columns: [run_select_column!], distinct: Boolean): Int!
+  max: run_max_fields
+  min: run_min_fields
+  stddev: run_stddev_fields
+  stddev_pop: run_stddev_pop_fields
+  stddev_samp: run_stddev_samp_fields
+  sum: run_sum_fields
+  var_pop: run_var_pop_fields
+  var_samp: run_var_samp_fields
+  variance: run_variance_fields
+}
+
+"""
+order by aggregate values of table "run"
+"""
+input run_aggregate_order_by {
+  avg: run_avg_order_by
+  count: order_by
+  max: run_max_order_by
+  min: run_min_order_by
+  stddev: run_stddev_order_by
+  stddev_pop: run_stddev_pop_order_by
+  stddev_samp: run_stddev_samp_order_by
+  sum: run_sum_order_by
+  var_pop: run_var_pop_order_by
+  var_samp: run_var_samp_order_by
+  variance: run_variance_order_by
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input run_append_input {
+  metadata: jsonb
+}
+
+"""
+input type for inserting array relation for remote table "run"
+"""
+input run_arr_rel_insert_input {
+  data: [run_insert_input!]!
+
+  """on conflict condition"""
+  on_conflict: run_on_conflict
+}
+
+"""aggregate avg on columns"""
+type run_avg_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by avg() on columns of table "run"
+"""
+input run_avg_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""
+columns and relationships of "run_blob"
+"""
+type run_blob {
+  blob: bytea!
+  id: Int!
+  metadata(
+    """JSON select path"""
+    path: String
+  ): jsonb
+
+  """An object relationship"""
+  run: run!
+  run_id: Int!
+
+  """
+  A computed field, executes function "bytea_to_text"
+  """
+  text: String
+}
+
+"""
+aggregated selection of "run_blob"
+"""
+type run_blob_aggregate {
+  aggregate: run_blob_aggregate_fields
+  nodes: [run_blob!]!
+}
+
+"""
+aggregate fields of "run_blob"
+"""
+type run_blob_aggregate_fields {
+  avg: run_blob_avg_fields
+  count(columns: [run_blob_select_column!], distinct: Boolean): Int!
+  max: run_blob_max_fields
+  min: run_blob_min_fields
+  stddev: run_blob_stddev_fields
+  stddev_pop: run_blob_stddev_pop_fields
+  stddev_samp: run_blob_stddev_samp_fields
+  sum: run_blob_sum_fields
+  var_pop: run_blob_var_pop_fields
+  var_samp: run_blob_var_samp_fields
+  variance: run_blob_variance_fields
+}
+
+"""
+order by aggregate values of table "run_blob"
+"""
+input run_blob_aggregate_order_by {
+  avg: run_blob_avg_order_by
+  count: order_by
+  max: run_blob_max_order_by
+  min: run_blob_min_order_by
+  stddev: run_blob_stddev_order_by
+  stddev_pop: run_blob_stddev_pop_order_by
+  stddev_samp: run_blob_stddev_samp_order_by
+  sum: run_blob_sum_order_by
+  var_pop: run_blob_var_pop_order_by
+  var_samp: run_blob_var_samp_order_by
+  variance: run_blob_variance_order_by
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input run_blob_append_input {
+  metadata: jsonb
+}
+
+"""
+input type for inserting array relation for remote table "run_blob"
+"""
+input run_blob_arr_rel_insert_input {
+  data: [run_blob_insert_input!]!
+
+  """on conflict condition"""
+  on_conflict: run_blob_on_conflict
+}
+
+"""aggregate avg on columns"""
+type run_blob_avg_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by avg() on columns of table "run_blob"
+"""
+input run_blob_avg_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "run_blob". All fields are combined with a logical 'AND'.
+"""
+input run_blob_bool_exp {
+  _and: [run_blob_bool_exp!]
+  _not: run_blob_bool_exp
+  _or: [run_blob_bool_exp!]
+  blob: bytea_comparison_exp
+  id: Int_comparison_exp
+  metadata: jsonb_comparison_exp
+  run: run_bool_exp
+  run_id: Int_comparison_exp
+  text: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "run_blob"
+"""
+enum run_blob_constraint {
+  """unique or primary key constraint"""
+  run_blob_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input run_blob_delete_at_path_input {
+  metadata: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input run_blob_delete_elem_input {
+  metadata: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input run_blob_delete_key_input {
+  metadata: String
+}
+
+"""
+input type for incrementing numeric columns in table "run_blob"
+"""
+input run_blob_inc_input {
+  id: Int
+  run_id: Int
+}
+
+"""
+input type for inserting data into table "run_blob"
+"""
+input run_blob_insert_input {
+  blob: bytea
+  id: Int
+  metadata: jsonb
+  run: run_obj_rel_insert_input
+  run_id: Int
+}
+
+"""aggregate max on columns"""
+type run_blob_max_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by max() on columns of table "run_blob"
+"""
+input run_blob_max_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate min on columns"""
+type run_blob_min_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by min() on columns of table "run_blob"
+"""
+input run_blob_min_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+response of any mutation on the table "run_blob"
+"""
+type run_blob_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [run_blob!]!
+}
+
+"""
+on conflict condition type for table "run_blob"
+"""
+input run_blob_on_conflict {
+  constraint: run_blob_constraint!
+  update_columns: [run_blob_update_column!]! = []
+  where: run_blob_bool_exp
+}
+
+"""Ordering options when selecting data from "run_blob"."""
+input run_blob_order_by {
+  blob: order_by
+  id: order_by
+  metadata: order_by
+  run: run_order_by
+  run_id: order_by
+  text: order_by
+}
+
+"""primary key columns input for table: run_blob"""
+input run_blob_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input run_blob_prepend_input {
+  metadata: jsonb
+}
+
+"""
+select columns of table "run_blob"
+"""
+enum run_blob_select_column {
+  """column name"""
+  blob
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  run_id
+}
+
+"""
+input type for updating data in table "run_blob"
+"""
+input run_blob_set_input {
+  blob: bytea
+  id: Int
+  metadata: jsonb
+  run_id: Int
+}
+
+"""aggregate stddev on columns"""
+type run_blob_stddev_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev() on columns of table "run_blob"
+"""
+input run_blob_stddev_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type run_blob_stddev_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "run_blob"
+"""
+input run_blob_stddev_pop_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type run_blob_stddev_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "run_blob"
+"""
+input run_blob_stddev_samp_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate sum on columns"""
+type run_blob_sum_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by sum() on columns of table "run_blob"
+"""
+input run_blob_sum_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+update columns of table "run_blob"
+"""
+enum run_blob_update_column {
+  """column name"""
+  blob
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  run_id
+}
+
+"""aggregate var_pop on columns"""
+type run_blob_var_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by var_pop() on columns of table "run_blob"
+"""
+input run_blob_var_pop_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type run_blob_var_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by var_samp() on columns of table "run_blob"
+"""
+input run_blob_var_samp_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate variance on columns"""
+type run_blob_variance_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by variance() on columns of table "run_blob"
+"""
+input run_blob_variance_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "run". All fields are combined with a logical 'AND'.
+"""
+input run_bool_exp {
+  _and: [run_bool_exp!]
+  _not: run_bool_exp
+  _or: [run_bool_exp!]
+  archived: Boolean_comparison_exp
+  charts: chart_bool_exp
+  id: Int_comparison_exp
+  metadata: jsonb_comparison_exp
+  run_blobs: run_blob_bool_exp
+  run_logs: run_log_bool_exp
+  sweep: sweep_bool_exp
+  sweep_id: Int_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "run"
+"""
+enum run_constraint {
+  """unique or primary key constraint"""
+  run_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input run_delete_at_path_input {
+  metadata: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input run_delete_elem_input {
+  metadata: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input run_delete_key_input {
+  metadata: String
+}
+
+"""
+input type for incrementing numeric columns in table "run"
+"""
+input run_inc_input {
+  id: Int
+  sweep_id: Int
+}
+
+"""
+input type for inserting data into table "run"
+"""
+input run_insert_input {
+  archived: Boolean
+  charts: chart_arr_rel_insert_input
+  id: Int
+  metadata: jsonb
+  run_blobs: run_blob_arr_rel_insert_input
+  run_logs: run_log_arr_rel_insert_input
+  sweep: sweep_obj_rel_insert_input
+  sweep_id: Int
+}
+
+"""
+columns and relationships of "run_log"
+"""
+type run_log {
+  id: Int!
+  log(
+    """JSON select path"""
+    path: String
+  ): jsonb!
+
+  """An object relationship"""
+  run: run!
+  run_id: Int!
+}
+
+"""
+aggregated selection of "run_log"
+"""
+type run_log_aggregate {
+  aggregate: run_log_aggregate_fields
+  nodes: [run_log!]!
+}
+
+"""
+aggregate fields of "run_log"
+"""
+type run_log_aggregate_fields {
+  avg: run_log_avg_fields
+  count(columns: [run_log_select_column!], distinct: Boolean): Int!
+  max: run_log_max_fields
+  min: run_log_min_fields
+  stddev: run_log_stddev_fields
+  stddev_pop: run_log_stddev_pop_fields
+  stddev_samp: run_log_stddev_samp_fields
+  sum: run_log_sum_fields
+  var_pop: run_log_var_pop_fields
+  var_samp: run_log_var_samp_fields
+  variance: run_log_variance_fields
+}
+
+"""
+order by aggregate values of table "run_log"
+"""
+input run_log_aggregate_order_by {
+  avg: run_log_avg_order_by
+  count: order_by
+  max: run_log_max_order_by
+  min: run_log_min_order_by
+  stddev: run_log_stddev_order_by
+  stddev_pop: run_log_stddev_pop_order_by
+  stddev_samp: run_log_stddev_samp_order_by
+  sum: run_log_sum_order_by
+  var_pop: run_log_var_pop_order_by
+  var_samp: run_log_var_samp_order_by
+  variance: run_log_variance_order_by
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input run_log_append_input {
+  log: jsonb
+}
+
+"""
+input type for inserting array relation for remote table "run_log"
+"""
+input run_log_arr_rel_insert_input {
+  data: [run_log_insert_input!]!
+
+  """on conflict condition"""
+  on_conflict: run_log_on_conflict
+}
+
+"""aggregate avg on columns"""
+type run_log_avg_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by avg() on columns of table "run_log"
+"""
+input run_log_avg_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "run_log". All fields are combined with a logical 'AND'.
+"""
+input run_log_bool_exp {
+  _and: [run_log_bool_exp!]
+  _not: run_log_bool_exp
+  _or: [run_log_bool_exp!]
+  id: Int_comparison_exp
+  log: jsonb_comparison_exp
+  run: run_bool_exp
+  run_id: Int_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "run_log"
+"""
+enum run_log_constraint {
+  """unique or primary key constraint"""
+  run_log_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input run_log_delete_at_path_input {
+  log: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input run_log_delete_elem_input {
+  log: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input run_log_delete_key_input {
+  log: String
+}
+
+"""
+input type for incrementing numeric columns in table "run_log"
+"""
+input run_log_inc_input {
+  id: Int
+  run_id: Int
+}
+
+"""
+input type for inserting data into table "run_log"
+"""
+input run_log_insert_input {
+  id: Int
+  log: jsonb
+  run: run_obj_rel_insert_input
+  run_id: Int
+}
+
+"""aggregate max on columns"""
+type run_log_max_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by max() on columns of table "run_log"
+"""
+input run_log_max_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate min on columns"""
+type run_log_min_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by min() on columns of table "run_log"
+"""
+input run_log_min_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+response of any mutation on the table "run_log"
+"""
+type run_log_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [run_log!]!
+}
+
+"""
+on conflict condition type for table "run_log"
+"""
+input run_log_on_conflict {
+  constraint: run_log_constraint!
+  update_columns: [run_log_update_column!]! = []
+  where: run_log_bool_exp
+}
+
+"""Ordering options when selecting data from "run_log"."""
+input run_log_order_by {
+  id: order_by
+  log: order_by
+  run: run_order_by
+  run_id: order_by
+}
+
+"""primary key columns input for table: run_log"""
+input run_log_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input run_log_prepend_input {
+  log: jsonb
+}
+
+"""
+select columns of table "run_log"
+"""
+enum run_log_select_column {
+  """column name"""
+  id
+
+  """column name"""
+  log
+
+  """column name"""
+  run_id
+}
+
+"""
+input type for updating data in table "run_log"
+"""
+input run_log_set_input {
+  id: Int
+  log: jsonb
+  run_id: Int
+}
+
+"""aggregate stddev on columns"""
+type run_log_stddev_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev() on columns of table "run_log"
+"""
+input run_log_stddev_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type run_log_stddev_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "run_log"
+"""
+input run_log_stddev_pop_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type run_log_stddev_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "run_log"
+"""
+input run_log_stddev_samp_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate sum on columns"""
+type run_log_sum_fields {
+  id: Int
+  run_id: Int
+}
+
+"""
+order by sum() on columns of table "run_log"
+"""
+input run_log_sum_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""
+update columns of table "run_log"
+"""
+enum run_log_update_column {
+  """column name"""
+  id
+
+  """column name"""
+  log
+
+  """column name"""
+  run_id
+}
+
+"""aggregate var_pop on columns"""
+type run_log_var_pop_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by var_pop() on columns of table "run_log"
+"""
+input run_log_var_pop_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type run_log_var_samp_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by var_samp() on columns of table "run_log"
+"""
+input run_log_var_samp_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate variance on columns"""
+type run_log_variance_fields {
+  id: Float
+  run_id: Float
+}
+
+"""
+order by variance() on columns of table "run_log"
+"""
+input run_log_variance_order_by {
+  id: order_by
+  run_id: order_by
+}
+
+"""aggregate max on columns"""
+type run_max_fields {
+  id: Int
+  sweep_id: Int
+}
+
+"""
+order by max() on columns of table "run"
+"""
+input run_max_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate min on columns"""
+type run_min_fields {
+  id: Int
+  sweep_id: Int
+}
+
+"""
+order by min() on columns of table "run"
+"""
+input run_min_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""
+response of any mutation on the table "run"
+"""
+type run_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [run!]!
+}
+
+"""
+input type for inserting object relation for remote table "run"
+"""
+input run_obj_rel_insert_input {
+  data: run_insert_input!
+
+  """on conflict condition"""
+  on_conflict: run_on_conflict
+}
+
+"""
+on conflict condition type for table "run"
+"""
+input run_on_conflict {
+  constraint: run_constraint!
+  update_columns: [run_update_column!]! = []
+  where: run_bool_exp
+}
+
+"""Ordering options when selecting data from "run"."""
+input run_order_by {
+  archived: order_by
+  charts_aggregate: chart_aggregate_order_by
+  id: order_by
+  metadata: order_by
+  run_blobs_aggregate: run_blob_aggregate_order_by
+  run_logs_aggregate: run_log_aggregate_order_by
+  sweep: sweep_order_by
+  sweep_id: order_by
+}
+
+"""primary key columns input for table: run"""
+input run_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input run_prepend_input {
+  metadata: jsonb
+}
+
+"""
+select columns of table "run"
+"""
+enum run_select_column {
+  """column name"""
+  archived
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  sweep_id
+}
+
+"""
+input type for updating data in table "run"
+"""
+input run_set_input {
+  archived: Boolean
+  id: Int
+  metadata: jsonb
+  sweep_id: Int
+}
+
+"""aggregate stddev on columns"""
+type run_stddev_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by stddev() on columns of table "run"
+"""
+input run_stddev_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type run_stddev_pop_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by stddev_pop() on columns of table "run"
+"""
+input run_stddev_pop_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type run_stddev_samp_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by stddev_samp() on columns of table "run"
+"""
+input run_stddev_samp_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate sum on columns"""
+type run_sum_fields {
+  id: Int
+  sweep_id: Int
+}
+
+"""
+order by sum() on columns of table "run"
+"""
+input run_sum_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""
+update columns of table "run"
+"""
+enum run_update_column {
+  """column name"""
+  archived
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  sweep_id
+}
+
+"""aggregate var_pop on columns"""
+type run_var_pop_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by var_pop() on columns of table "run"
+"""
+input run_var_pop_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate var_samp on columns"""
+type run_var_samp_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by var_samp() on columns of table "run"
+"""
+input run_var_samp_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""aggregate variance on columns"""
+type run_variance_fields {
+  id: Float
+  sweep_id: Float
+}
+
+"""
+order by variance() on columns of table "run"
+"""
+input run_variance_order_by {
+  id: order_by
+  sweep_id: order_by
+}
+
+"""
+Boolean expression to compare columns of type "String". All fields are combined with logical 'AND'.
+"""
+input String_comparison_exp {
+  _eq: String
+  _gt: String
+  _gte: String
+
+  """does the column match the given case-insensitive pattern"""
+  _ilike: String
+  _in: [String!]
+
+  """
+  does the column match the given POSIX regular expression, case insensitive
+  """
+  _iregex: String
+  _is_null: Boolean
+
+  """does the column match the given pattern"""
+  _like: String
+  _lt: String
+  _lte: String
+  _neq: String
+
+  """does the column NOT match the given case-insensitive pattern"""
+  _nilike: String
+  _nin: [String!]
+
+  """
+  does the column NOT match the given POSIX regular expression, case insensitive
+  """
+  _niregex: String
+
+  """does the column NOT match the given pattern"""
+  _nlike: String
+
+  """
+  does the column NOT match the given POSIX regular expression, case sensitive
+  """
+  _nregex: String
+
+  """does the column NOT match the given SQL regular expression"""
+  _nsimilar: String
+
+  """
+  does the column match the given POSIX regular expression, case sensitive
+  """
+  _regex: String
+
+  """does the column match the given SQL regular expression"""
+  _similar: String
+}
+
+type subscription_root {
+  """
+  fetch data from the table: "chart"
+  """
+  chart(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): [chart!]!
+
+  """
+  fetch aggregated fields from the table: "chart"
+  """
+  chart_aggregate(
+    """distinct select on columns"""
+    distinct_on: [chart_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [chart_order_by!]
+
+    """filter the rows returned"""
+    where: chart_bool_exp
+  ): chart_aggregate!
+
+  """fetch data from the table: "chart" using primary key columns"""
+  chart_by_pk(id: Int!): chart
+
+  """
+  execute function "empty_sweeps" which returns "sweep"
+  """
+  empty_sweeps(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  execute function "empty_sweeps" and query aggregates on result of table type "sweep"
+  """
+  empty_sweeps_aggregate(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """
+  execute function "every_nth_run_log" which returns "run_log"
+  """
+  every_nth_run_log(
+    """
+    input parameters for function "every_nth_run_log"
+    """
+    args: every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "every_nth_run_log" and query aggregates on result of table type "run_log"
+  """
+  every_nth_run_log_aggregate(
+    """
+    input parameters for function "every_nth_run_log"
+    """
+    args: every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  execute function "except_every_nth_run_log" which returns "run_log"
+  """
+  except_every_nth_run_log(
+    """
+    input parameters for function "except_every_nth_run_log"
+    """
+    args: except_every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "except_every_nth_run_log" and query aggregates on result of table type "run_log"
+  """
+  except_every_nth_run_log_aggregate(
+    """
+    input parameters for function "except_every_nth_run_log"
+    """
+    args: except_every_nth_run_log_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  execute function "filter_runs" which returns "run"
+  """
+  filter_runs(
+    """
+    input parameters for function "filter_runs"
+    """
+    args: filter_runs_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  execute function "filter_runs" and query aggregates on result of table type "run"
+  """
+  filter_runs_aggregate(
+    """
+    input parameters for function "filter_runs"
+    """
+    args: filter_runs_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  execute function "filter_sweeps" which returns "sweep"
+  """
+  filter_sweeps(
+    """
+    input parameters for function "filter_sweeps"
+    """
+    args: filter_sweeps_args!
+
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  execute function "filter_sweeps" and query aggregates on result of table type "sweep"
+  """
+  filter_sweeps_aggregate(
+    """
+    input parameters for function "filter_sweeps"
+    """
+    args: filter_sweeps_args!
+
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """
+  execute function "logs_less_than_step" which returns "run_log"
+  """
+  logs_less_than_step(
+    """
+    input parameters for function "logs_less_than_step"
+    """
+    args: logs_less_than_step_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  execute function "logs_less_than_step" and query aggregates on result of table type "run_log"
+  """
+  logs_less_than_step_aggregate(
+    """
+    input parameters for function "logs_less_than_step"
+    """
+    args: logs_less_than_step_args!
+
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """
+  fetch data from the table: "new_run_logs"
+  """
+  new_run_logs(
+    """distinct select on columns"""
+    distinct_on: [new_run_logs_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [new_run_logs_order_by!]
+
+    """filter the rows returned"""
+    where: new_run_logs_bool_exp
+  ): [new_run_logs!]!
+
+  """
+  fetch aggregated fields from the table: "new_run_logs"
+  """
+  new_run_logs_aggregate(
+    """distinct select on columns"""
+    distinct_on: [new_run_logs_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [new_run_logs_order_by!]
+
+    """filter the rows returned"""
+    where: new_run_logs_bool_exp
+  ): new_run_logs_aggregate!
+
+  """fetch data from the table: "new_run_logs" using primary key columns"""
+  new_run_logs_by_pk(id: Int!): new_run_logs
+
+  """
+  execute function "non_sweep_run" which returns "run"
+  """
+  non_sweep_run(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  execute function "non_sweep_run" and query aggregates on result of table type "run"
+  """
+  non_sweep_run_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  fetch data from the table: "parameter_choices"
+  """
+  parameter_choices(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): [parameter_choices!]!
+
+  """An aggregate relationship"""
+  parameter_choices_aggregate(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): parameter_choices_aggregate!
+
+  """
+  fetch data from the table: "run"
+  """
+  run(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """
+  fetch aggregated fields from the table: "run"
+  """
+  run_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+
+  """
+  fetch data from the table: "run_blob"
+  """
+  run_blob(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): [run_blob!]!
+
+  """
+  fetch aggregated fields from the table: "run_blob"
+  """
+  run_blob_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_blob_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_blob_order_by!]
+
+    """filter the rows returned"""
+    where: run_blob_bool_exp
+  ): run_blob_aggregate!
+
+  """fetch data from the table: "run_blob" using primary key columns"""
+  run_blob_by_pk(id: Int!): run_blob
+
+  """fetch data from the table: "run" using primary key columns"""
+  run_by_pk(id: Int!): run
+
+  """
+  fetch data from the table: "run_log"
+  """
+  run_log(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): [run_log!]!
+
+  """
+  fetch aggregated fields from the table: "run_log"
+  """
+  run_log_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_log_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_log_order_by!]
+
+    """filter the rows returned"""
+    where: run_log_bool_exp
+  ): run_log_aggregate!
+
+  """fetch data from the table: "run_log" using primary key columns"""
+  run_log_by_pk(id: Int!): run_log
+
+  """
+  fetch data from the table: "sweep"
+  """
+  sweep(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): [sweep!]!
+
+  """
+  fetch aggregated fields from the table: "sweep"
+  """
+  sweep_aggregate(
+    """distinct select on columns"""
+    distinct_on: [sweep_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [sweep_order_by!]
+
+    """filter the rows returned"""
+    where: sweep_bool_exp
+  ): sweep_aggregate!
+
+  """fetch data from the table: "sweep" using primary key columns"""
+  sweep_by_pk(id: Int!): sweep
+}
+
+"""
+columns and relationships of "sweep"
+"""
+type sweep {
+  archived: Boolean!
+  grid_index: Int
+
+  """
+  A computed field, executes function "has_logs"
+  """
+  has_logs: Boolean
+  id: Int!
+  metadata(
+    """JSON select path"""
+    path: String
+  ): jsonb
+
+  """
+  A computed field, executes function "sweep_metadata_path"
+  """
+  metadata_path(
+    """
+    input parameters for computed field "metadata_path" defined on table "sweep"
+    """
+    args: metadata_path_sweep_args!
+  ): String
+
+  """
+  fetch data from the table: "parameter_choices"
+  """
+  parameter_choices(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): [parameter_choices!]!
+
+  """An aggregate relationship"""
+  parameter_choices_aggregate(
+    """distinct select on columns"""
+    distinct_on: [parameter_choices_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [parameter_choices_order_by!]
+
+    """filter the rows returned"""
+    where: parameter_choices_bool_exp
+  ): parameter_choices_aggregate!
+  remaining_runs: Int
+
+  """An array relationship"""
+  runs(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): [run!]!
+
+  """An aggregate relationship"""
+  runs_aggregate(
+    """distinct select on columns"""
+    distinct_on: [run_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [run_order_by!]
+
+    """filter the rows returned"""
+    where: run_bool_exp
+  ): run_aggregate!
+}
+
+"""
+aggregated selection of "sweep"
+"""
+type sweep_aggregate {
+  aggregate: sweep_aggregate_fields
+  nodes: [sweep!]!
+}
+
+"""
+aggregate fields of "sweep"
+"""
+type sweep_aggregate_fields {
+  avg: sweep_avg_fields
+  count(columns: [sweep_select_column!], distinct: Boolean): Int!
+  max: sweep_max_fields
+  min: sweep_min_fields
+  stddev: sweep_stddev_fields
+  stddev_pop: sweep_stddev_pop_fields
+  stddev_samp: sweep_stddev_samp_fields
+  sum: sweep_sum_fields
+  var_pop: sweep_var_pop_fields
+  var_samp: sweep_var_samp_fields
+  variance: sweep_variance_fields
+}
+
+"""append existing jsonb value of filtered columns with new jsonb value"""
+input sweep_append_input {
+  metadata: jsonb
+}
+
+"""aggregate avg on columns"""
+type sweep_avg_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""
+Boolean expression to filter rows from the table "sweep". All fields are combined with a logical 'AND'.
+"""
+input sweep_bool_exp {
+  _and: [sweep_bool_exp!]
+  _not: sweep_bool_exp
+  _or: [sweep_bool_exp!]
+  archived: Boolean_comparison_exp
+  grid_index: Int_comparison_exp
+  has_logs: Boolean_comparison_exp
+  id: Int_comparison_exp
+  metadata: jsonb_comparison_exp
+  parameter_choices: parameter_choices_bool_exp
+  remaining_runs: Int_comparison_exp
+  runs: run_bool_exp
+}
+
+"""
+unique or primary key constraints on table "sweep"
+"""
+enum sweep_constraint {
+  """unique or primary key constraint"""
+  sweep_pkey
+}
+
+"""
+delete the field or element with specified path (for JSON arrays, negative integers count from the end)
+"""
+input sweep_delete_at_path_input {
+  metadata: [String!]
+}
+
+"""
+delete the array element with specified index (negative integers count from the
+end). throws an error if top level container is not an array
+"""
+input sweep_delete_elem_input {
+  metadata: Int
+}
+
+"""
+delete key/value pair or string element. key/value pairs are matched based on their key value
+"""
+input sweep_delete_key_input {
+  metadata: String
+}
+
+"""
+input type for incrementing numeric columns in table "sweep"
+"""
+input sweep_inc_input {
+  grid_index: Int
+  id: Int
+  remaining_runs: Int
+}
+
+"""
+input type for inserting data into table "sweep"
+"""
+input sweep_insert_input {
+  archived: Boolean
+  grid_index: Int
+  id: Int
+  metadata: jsonb
+  parameter_choices: parameter_choices_arr_rel_insert_input
+  remaining_runs: Int
+  runs: run_arr_rel_insert_input
+}
+
+"""aggregate max on columns"""
+type sweep_max_fields {
+  grid_index: Int
+  id: Int
+  remaining_runs: Int
+}
+
+"""aggregate min on columns"""
+type sweep_min_fields {
+  grid_index: Int
+  id: Int
+  remaining_runs: Int
+}
+
+"""
+response of any mutation on the table "sweep"
+"""
+type sweep_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [sweep!]!
+}
+
+"""
+input type for inserting object relation for remote table "sweep"
+"""
+input sweep_obj_rel_insert_input {
+  data: sweep_insert_input!
+
+  """on conflict condition"""
+  on_conflict: sweep_on_conflict
+}
+
+"""
+on conflict condition type for table "sweep"
+"""
+input sweep_on_conflict {
+  constraint: sweep_constraint!
+  update_columns: [sweep_update_column!]! = []
+  where: sweep_bool_exp
+}
+
+"""Ordering options when selecting data from "sweep"."""
+input sweep_order_by {
+  archived: order_by
+  grid_index: order_by
+  has_logs: order_by
+  id: order_by
+  metadata: order_by
+  parameter_choices_aggregate: parameter_choices_aggregate_order_by
+  remaining_runs: order_by
+  runs_aggregate: run_aggregate_order_by
+}
+
+"""primary key columns input for table: sweep"""
+input sweep_pk_columns_input {
+  id: Int!
+}
+
+"""prepend existing jsonb value of filtered columns with new jsonb value"""
+input sweep_prepend_input {
+  metadata: jsonb
+}
+
+"""
+select columns of table "sweep"
+"""
+enum sweep_select_column {
+  """column name"""
+  archived
+
+  """column name"""
+  grid_index
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  remaining_runs
+}
+
+"""
+input type for updating data in table "sweep"
+"""
+input sweep_set_input {
+  archived: Boolean
+  grid_index: Int
+  id: Int
+  metadata: jsonb
+  remaining_runs: Int
+}
+
+"""aggregate stddev on columns"""
+type sweep_stddev_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""aggregate stddev_pop on columns"""
+type sweep_stddev_pop_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""aggregate stddev_samp on columns"""
+type sweep_stddev_samp_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""aggregate sum on columns"""
+type sweep_sum_fields {
+  grid_index: Int
+  id: Int
+  remaining_runs: Int
+}
+
+"""
+update columns of table "sweep"
+"""
+enum sweep_update_column {
+  """column name"""
+  archived
+
+  """column name"""
+  grid_index
+
+  """column name"""
+  id
+
+  """column name"""
+  metadata
+
+  """column name"""
+  remaining_runs
+}
+
+"""aggregate var_pop on columns"""
+type sweep_var_pop_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""aggregate var_samp on columns"""
+type sweep_var_samp_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
+"""aggregate variance on columns"""
+type sweep_variance_fields {
+  grid_index: Float
+  id: Float
+  remaining_runs: Float
+}
+
