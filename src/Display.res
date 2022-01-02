@@ -3,19 +3,18 @@ open Belt
 module InsertChart = InsertChartStatus.InsertChart
 module UpdateChart = UpdateChartStatus.UpdateChart
 
-let reverse = (specs: Map.Int.t<Js.Json.t>): Map.t<
+let reverse = (specs: Map.Int.t<(int, Js.Json.t)>): Map.t<
   Js.Json.t,
   Util.chartState,
   Util.JsonComparator.identity,
 > =>
-  specs->Map.Int.reduce(Map.make(~id=module(Util.JsonComparator)), (map, id, spec) => {
+  specs->Map.Int.reduce(Map.make(~id=module(Util.JsonComparator)), (map, id, (order, spec)) => {
     let ids =
       map
       ->Map.get(spec)
       ->Option.map(({ids}: Util.chartState) => ids)
       ->Option.getWithDefault(Set.Int.empty)
     let ids = ids->Set.Int.add(id)
-    let order = map->Map.size - 1
     map->Map.set(spec, {ids: ids, rendering: true, order: order, needsUpdate: false})
   })
 
@@ -23,7 +22,7 @@ let reverse = (specs: Map.Int.t<Js.Json.t>): Map.t<
 let make = (~client, ~granularity, ~checkedIds) => {
   module StatusesAndCharts = {
     @react.component
-    let make = (~logCount: int, ~specs: Map.Int.t<Js.Json.t>, ~runIds) => {
+    let make = (~logCount: int, ~specs: Map.Int.t<(int, Js.Json.t)>, ~runIds) => {
       let (insertChart, insertChartResult) = InsertChart.use()
       let (updateChart, updateChartResult) = UpdateChart.use()
 

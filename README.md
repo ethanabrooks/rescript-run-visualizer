@@ -6,3 +6,8 @@ yarn
 yarn dev
 ```
 To set up Hasura, see `hasura/README.md`.
+
+To [update the GraphQL schema](https://github.com/reasonml-community/graphql-ppx#schema):
+```
+npx get-graphql-schema ENDPOINT_URL -j > graphql_schema.json
+```

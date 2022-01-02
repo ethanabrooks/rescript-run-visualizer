@@ -11,6 +11,7 @@ module Subscription = %graphql(`
       id
       spec
       archived
+      order
     }
     run_logs_aggregate {
       aggregate {
@@ -23,7 +24,7 @@ module Subscription = %graphql(`
 
 type queryResult = {
   metadata: Map.Int.t<Js.Json.t>,
-  specs: Map.Int.t<Js.Json.t>,
+  specs: Map.Int.t<(int, Js.Json.t)>,
   logCount: int,
   runIds: Set.Int.t,
 }
@@ -53,10 +54,10 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, 
                 metadata->Option.mapWithDefault(Map.Int.empty, Map.Int.empty->Map.Int.set(id))
 
               // combine multiple charts from run
-              let specs: Map.Int.t<Js.Json.t> =
+              let specs: Map.Int.t<(int, Js.Json.t)> =
                 charts
                 ->Array.keep(({archived}) => !archived)
-                ->Array.map(({id, spec}) => (id, spec))
+                ->Array.map(({id, order, spec}) => (id, (order->Option.getWithDefault(0), spec)))
                 ->Map.Int.fromArray
 
               let logCount = count->Option.mapWithDefault(0, ({count}) => count)
