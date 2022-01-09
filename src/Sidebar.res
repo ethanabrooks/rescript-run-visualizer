@@ -30,6 +30,27 @@ let rec containsIdLessThan = (where: Hasura.where): bool => {
   }
 }
 
+let rec removeIdLessThan = (where: Hasura.where): option<Hasura.where> =>
+  switch where {
+  | And(array) => array->removeIdLessThanInArray->And->Some
+  | Or(array) => array->removeIdLessThanInArray->Or->Some
+  | Just(IdLessThan(_)) => None
+  | Just(_) => where->Some
+  }
+and removeIdLessThanInArray = (array: array<Hasura.where>) =>
+  array->Array.reduce([], (array, where) =>
+    switch where {
+    | Just(IdLessThan(_)) => array
+    | _ =>
+      array->Array.concat(
+        switch where->removeIdLessThan {
+        | Some(where) => [where]
+        | None => []
+        },
+      )
+    }
+  )
+
 let buttonClass = "w-20 h-10 border border-gray-300 text-sm bg-white text-gray-700 hover:bg-gray-50 active:bg-gray-100 focus:outline-none disabled:opacity-50 disabled:cursor-default px-2 items-center justify-center"
 
 @react.component
@@ -90,12 +111,9 @@ let make = (~urlParams: urlParams, ~client: ApolloClient__Core_ApolloClient.t) =
               href={
                 let where = minId->Option.mapWithDefault(where, minId => {
                   let idLessThan: Hasura.where = Just(IdLessThan(minId))
-                  switch where {
-                  | None => idLessThan
-                  | Some(And([Just(IdLessThan(_)), where]))
-                  | Some(And([where, Just(IdLessThan(_))])) =>
-                    And([where, idLessThan])
+                  switch where->Option.flatMap(removeIdLessThan) {
                   | Some(where) => And([where, idLessThan])
+                  | None => idLessThan
                   }->Some
                 })
                 let urlParams = {...urlParams, where: where}
