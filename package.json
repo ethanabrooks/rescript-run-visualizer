@@ -37,6 +37,7 @@
     "js-yaml": "^4.1.0",
     "pac": "^1.0.0",
     "prettier": "^2.2.1",
+    "react-spring": "^9.4.1",
     "react-vega": "^7.4.2",
     "rescript-apollo-client": "^1.1.1",
     "rescript-debounce": "^1.0.0",
