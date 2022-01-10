@@ -1,11 +1,42 @@
 open Belt
 open Routes
+open Dom
+
+type springValue = string
+type outputHeight = {height: springValue}
+type inputHeight = {height: int}
+type to = {to: inputHeight}
+@module("@react-spring/web") external useSpring: to => outputHeight = "useSpring"
+
+@val @scope("window")
+external getComputedStyle: Dom.element => cssStyleDeclaration = "getComputedStyle"
+@get external getHeightProperty: cssStyleDeclaration => string = "height"
+
+type animated_props = {
+  style: ReactDOMStyle.t,
+  ref: ReactDOM.domRef,
+}
+@module("./Animated.jsx")
+external make: (~props: animated_props, ~children: React.element) => React.element = "make"
+
+let usePrevious = value => {
+  let ref = React.useRef(false)
+  React.useEffect1(() => {
+    ref.current = value
+    None
+  }, [value])
+  ref.current
+}
+
 @react.component
 let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
   let url = RescriptReactRouter.useUrl()
   let (opened, setOpened) = React.useState(_ => false)
+  let viewHeight = React.useRef(0)
+  // let previous = usePrevious(opened)
 
-  open Util
+  let spring = {to: {height: opened ? 1000 : 0}}->useSpring
+  let height = spring.height
   let newIds = Set.Int.empty->Set.Int.add(id)
   let href = switch url->urlToRoute {
   | Valid(valid) => Valid({...valid, checkedIds: newIds})
@@ -68,7 +99,7 @@ let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
         <a href>
           {`${id->Int.toString}. ${metadata->Option.mapWithDefault("No metadata", metadata => {
               metadata
-              ->jsonToMap
+              ->Util.jsonToMap
               ->Option.mapWithDefault("Ill-formatted metadata", map =>
                 map
                 ->Map.String.get("name")
@@ -80,16 +111,28 @@ let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
         </a>
       </h3>
     </div>
-    {if opened {
-      metadata->Option.mapWithDefault(<> </>, metadata => {
-        <div className="mt-1">
+    {metadata->Option.mapWithDefault(<> </>, metadata => {
+      make(
+        ~children={
           <pre className="line-clamp-2 text-sm text-gray-600 p-4 font-extralight">
-            {metadata->yaml({sortKeys: true})->React.string}
+            {metadata->Util.yaml({sortKeys: true})->React.string}
           </pre>
-        </div>
-      })
-    } else {
-      <> </>
-    }}
+        },
+        ~props={
+          {
+            style: ReactDOMStyle.make(~height, ()),
+            ref: ReactDOM.Ref.callbackDomRef(element => {
+              element
+              ->Js.Nullable.toOption
+              ->Option.map(getComputedStyle)
+              ->Option.map(getHeightProperty)
+              ->Option.map(Js.String2.replace("px", ""))
+              ->Option.flatMap(Int.fromString)
+              ->Option.forEach(height => viewHeight.current = height)
+            }),
+          }
+        },
+      )
+    })}
   </li>
 }
