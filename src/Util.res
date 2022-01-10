@@ -1,7 +1,5 @@
 open Belt
 
-@module external copy: string => bool = "copy-to-clipboard"
-
 type options = {sortKeys: bool}
 @module("js-yaml") external yaml: (Js.Json.t, options) => string = "dump"
 
