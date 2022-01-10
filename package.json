@@ -31,7 +31,6 @@
     "graphql": "^15.5.0",
     "js-yaml": "^4.1.0",
     "pac": "^1.0.0",
-    "react-spring": "^9.4.1",
     "react-use-measure": "^2.1.1",
     "react-vega": "^7.4.2",
     "rescript": "^9.1.4",

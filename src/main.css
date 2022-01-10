@@ -36,3 +36,7 @@
     @apply opacity-50;
     @apply cursor-default; 
 }
+
+.accordion {
+    transition: height 0.4s linear;
+}
