@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "license": "UNLICENSED",
   "scripts": {
-    "clean": "bsb -clean-world",
+    "clean": "rescript clean",
     "format": "prettier -w **/*.css **/*.html **/*.json **/*.scss src/**/*.js *.js",
     "dev": "concurrently 'node server.js dev' 'yarn dev:build' 'yarn dev:bundle' 'yarn dev:css'",
-    "dev:build": "bsb -make-world -w -ws _",
+    "dev:build": "rescript build -w -ws _",
     "dev:bundle": "esbuild --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:NODE_MAX_SWEEPS=\\\"$NODE_MAX_SWEEPS\\\" --define:NODE_MAX_LOGS=\\\"$NODE_MAX_LOGS\\\" --define:process.env.NODE_ENV=\\\"production\\\"  --serve=localhost:8001 --bundle src/Index.bs.js --external:react --external:react-dom",
     "dev:css": "postcss src/main.css -o dev/main.css",
     "prod": "concurrently 'yarn prod:bundle' 'yarn prod:css' 'yarn prod:static' 'yarn prod:serve'",
     "prod:build": "concurrently 'yarn prod:bundle' 'yarn prod:css'",
-    "prod:bundle": "bsb -make-world && esbuild --bundle src/Index.bs.js --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:NODE_MAX_SWEEPS=\\\"$NODE_MAX_SWEEPS\\\" --define:NODE_MAX_LOGS=\\\"$NODE_MAX_LOGS\\\" --define:process.env.NODE_ENV=\\\"production\\\" --external:react --external:react-dom --minify --outfile=dist/main.js",
+    "prod:bundle": "rescript build && esbuild --bundle src/Index.bs.js --define:NODE_GRAPHQL_ENDPOINT=\\\"$NODE_GRAPHQL_ENDPOINT\\\" --define:NODE_MAX_SWEEPS=\\\"$NODE_MAX_SWEEPS\\\" --define:NODE_MAX_LOGS=\\\"$NODE_MAX_LOGS\\\" --define:process.env.NODE_ENV=\\\"production\\\" --external:react --external:react-dom --minify --outfile=dist/main.js",
     "prod:css": "NODE_ENV=production postcss src/main.css -o dist/main.css",
     "prod:static": "rsync -av static/ dist/",
     "prod:serve": "node server.js dist/"
@@ -19,7 +19,8 @@
   "dependencies": {
     "@apollo/client": "^3.3.15",
     "@headlessui/react": "^1.0.0",
-    "@reasonml-community/graphql-ppx": "^1.2.0",
+    "@reasonml-community/graphql-ppx": "^1.2.2",
+    "@rescript/react": "^0.10.3",
     "@ryyppy/rescript-promise": "^2.1.0",
     "bs-fetch": "^0.6.2",
     "bs-platform": "^9.0.1",
@@ -32,7 +33,7 @@
     "pac": "^1.0.0",
     "react-spring": "^9.4.1",
     "react-vega": "^7.4.2",
-    "rescript-apollo-client": "^1.1.1",
+    "rescript-apollo-client": "^2.4.1",
     "rescript-debounce": "^1.0.0",
     "subscriptions-transport-ws": "^0.9.18",
     "tailwindcss": "^2.1.2",
@@ -49,7 +50,6 @@
     "postcss": "^8.2.12",
     "postcss-cli": "^8.3.1",
     "prettier": "^2.5.1",
-    "reanalyze": "^2.17.0",
-    "reason-react": "^0.9.1"
+    "reanalyze": "^2.17.0"
   }
 }

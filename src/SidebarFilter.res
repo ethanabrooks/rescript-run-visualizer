@@ -76,7 +76,7 @@ let make = (~urlParams) => {
 
   let setWhereTextsAndUrl = texts => {
     setWhereTexts(_ => texts)
-    texts->textsToHref->ReasonReactRouter.push
+    texts->textsToHref->RescriptReactRouter.push
   }
 
   let rec textsToComponents = (

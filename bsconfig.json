@@ -1,29 +1,22 @@
 {
   "name": "app",
-  "reason": {
-    "react-jsx": 3
-  },
+  "namespace": true,
   "sources": {
-    "dir": "src",
-    "subdirs": true
+    "dir": "src"
   },
+  "suffix": ".bs.js",
   "bsc-flags": [
     "-bs-super-errors",
     "-bs-no-version-header"
   ],
-  "package-specs": [
-    {
-      "module": "commonjs",
-      "in-source": true
-    }
-  ],
-  "suffix": ".bs.js",
-  "namespace": true,
+  "reason": {
+    "react-jsx": 3
+  },
   "bs-dependencies": [
+    "@rescript/react",
     "@reasonml-community/graphql-ppx",
     "@ryyppy/rescript-promise",
     "rescript-apollo-client",
-    "reason-react",
     "rescript-debounce",
     "bs-fetch",
     "bs-webapi",
@@ -43,5 +36,10 @@
     "templateTagImport": "gql",
     "templateTagLocation": "@apollo/client"
   },
-  "refmt": 3
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ]
 }

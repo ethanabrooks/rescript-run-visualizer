@@ -166,10 +166,15 @@
     "@react-spring/shared" "~9.4.0"
     "@react-spring/types" "~9.4.0"
 
-"@reasonml-community/graphql-ppx@^1.2.0":
-  version "1.2.0"
-  resolved "https://registry.npmjs.org/@reasonml-community/graphql-ppx/-/graphql-ppx-1.2.0.tgz"
-  integrity sha512-CKTzl/DZNT0QgpKjpi0Fij2R4r9c/oT+M8mEWYnNidaLDcFX7ZfcvmJA4ZhPYXRD6AGUO3cS1zQOJZSuJHKogQ==
+"@reasonml-community/graphql-ppx@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/@reasonml-community/graphql-ppx/-/graphql-ppx-1.2.2.tgz#c8e07f8d826782219da1ddb7b2c01202bb343690"
+  integrity sha512-mgkETKdZ2QM1Xqlsg7nb30KaM7ojDpxy1rWdiZE5XLaA+oJgClMxA6ghF2b3TZL5f/XdQJ1rnd0p4LmXKnmpqQ==
+
+"@rescript/react@^0.10.3":
+  version "0.10.3"
+  resolved "https://registry.yarnpkg.com/@rescript/react/-/react-0.10.3.tgz#a2a8bed6b017940ec26c2154764b350f50348889"
+  integrity sha512-Lf9rzrR3bQPKJjOK3PBRa/B3xrJ7CqQ1HYr9VHPVxJidarIJJFZBhj0Dg1uZURX+Wg/xiP0PHFxXmdj2bK8Vxw==
 
 "@ryyppy/rescript-promise@^2.1.0":
   version "2.1.0"
@@ -3385,11 +3390,6 @@ reanalyze@^2.17.0:
   resolved "https://registry.yarnpkg.com/reanalyze/-/reanalyze-2.17.0.tgz#a86e9eed5ece1812336281d446310d11b00fd2d5"
   integrity sha512-6OzrmtmaGvweIvGnpJKkFvWXSRoMvMdgTX9BtLewV1gR20uerEONGjqgHaLoO0AF7hmyJpKY+C+ft+o4lHS3JQ==
 
-reason-react@^0.9.1:
-  version "0.9.1"
-  resolved "https://registry.npmjs.org/reason-react/-/reason-react-0.9.1.tgz"
-  integrity sha512-nlH0O2TDy9KzOLOW+vlEQk4ExHOeciyzFdoLcsmmiit6hx6H5+CVDrwJ+8aiaLT/kqK5xFOjy4PS7PftWz4plA==
-
 redent@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/redent/-/redent-1.0.0.tgz"
@@ -3449,10 +3449,10 @@ require-main-filename@^2.0.0:
   resolved "https://registry.npmjs.org/require-main-filename/-/require-main-filename-2.0.0.tgz"
   integrity sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
 
-rescript-apollo-client@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.npmjs.org/rescript-apollo-client/-/rescript-apollo-client-1.1.1.tgz"
-  integrity sha512-rivEbm0E9yw8LuA/Qf18UBCNrkBFsYNgj7FZWCyAHw7sQkWHx1BkZfkgTNkb+m/lw6dW2dlrkncfzdGFEquKYw==
+rescript-apollo-client@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/rescript-apollo-client/-/rescript-apollo-client-2.4.1.tgz#77459c3deadb0b0f0cdff9e84967766f7696429d"
+  integrity sha512-m8qvi5Rt9dOKHVzFhFbWzqfYMK9g8lupe7OUn+Qzqazvdf9CvBdM/BHT6stUctxkklTdd8p6G30PMzGIrhVEGw==
 
 rescript-debounce@^1.0.0:
   version "1.0.0"

@@ -124,4 +124,4 @@ let routeToHash = (route: route): string =>
 
 let hashToHref = hash => `#${hash}`
 let routeToHref = route => route->routeToHash->hashToHref
-let urlToRoute = (url: ReasonReactRouter.url) => url.hash->hashToRoute
+let urlToRoute = (url: RescriptReactRouter.url) => url.hash->hashToRoute

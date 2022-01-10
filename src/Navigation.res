@@ -8,7 +8,7 @@ let make = (~route) => {
 
   React.useEffect1(_ => {
     switch route {
-    | Redirect => ReasonReactRouter.push(runs)
+    | Redirect => RescriptReactRouter.push(runs)
     | _ => ()
     }
     None

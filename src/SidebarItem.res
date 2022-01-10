@@ -2,7 +2,7 @@ open Belt
 open Routes
 @react.component
 let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
-  let url = ReasonReactRouter.useUrl()
+  let url = RescriptReactRouter.useUrl()
   let (opened, setOpened) = React.useState(_ => false)
 
   open Util
@@ -29,7 +29,7 @@ let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
             | _ => Js.Exn.raiseError(`The hash ${url.hash} should not route to here.`)
             }->routeToHref
 
-            ReasonReactRouter.replace(href)
+            RescriptReactRouter.replace(href)
           }}
           className="focus:ring-indigo-500 h-4 w-4 filterKeywords-indigo-600 border-gray-300 rounded"
         />
