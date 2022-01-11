@@ -57,7 +57,13 @@ let joinWith = (a, x) =>
   )
 
 type queryResult<'a> = Loading | Error(string) | Stuck | Data('a)
-type chartState = {rendering: bool, ids: Set.Int.t, order: int, needsUpdate: bool}
+type chartState = {
+  rendering: bool,
+  ids: Set.Int.t,
+  order: int,
+  name: option<string>,
+  needsUpdate: bool,
+}
 type chartAction =
   ToggleRender(Js.Json.t) | Submit(Js.Json.t) | Insert(Js.Json.t, Set.Int.t) | Remove(Js.Json.t)
 type mutationResult<'a> = Loading | Error(string) | NotCalled | Data('a)

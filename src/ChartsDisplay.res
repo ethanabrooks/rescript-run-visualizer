@@ -121,17 +121,23 @@ let make = (
     ->Map.toArray
     ->List.fromArray
     ->List.sort(((_, {order: order1}), (_, {order: order2})) => order1 - order2)
-    ->List.mapWithIndex((i, (spec, {rendering, ids: chartIds})) => {
+    ->List.mapWithIndex((i, (spec, {rendering, name, ids: chartIds})) => {
       let key = i->Int.toString
-      if rendering {
-        <div className="pb-10" key>
-          <Chart logs newData={newLogs->Map.Int.valuesToArray} spec />
-          <ChartButtons spec chartIds dispatch />
-        </div>
-      } else {
-        let initialSpec = spec
-        <SpecEditor key initialSpec dispatch />
-      }
+      <>
+        {switch name {
+        | None => <> </>
+        | Some(name) => <h3> {name->React.string} </h3>
+        }}
+        {if rendering {
+          <div className="pb-10" key>
+            <Chart logs newData={newLogs->Map.Int.valuesToArray} spec />
+            <ChartButtons spec chartIds dispatch />
+          </div>
+        } else {
+          let initialSpec = spec
+          <SpecEditor key initialSpec dispatch />
+        }}
+      </>
     })
     ->List.toArray
     ->React.array}

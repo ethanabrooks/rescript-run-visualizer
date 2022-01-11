@@ -3,26 +3,32 @@ open Belt
 module InsertChart = InsertChartStatus.InsertChart
 module UpdateChart = UpdateChartStatus.UpdateChart
 
-let reverse = (specs: Map.Int.t<(int, Js.Json.t)>): Map.t<
+type chart = InitialSubscription.chart
+
+let reverse = (specs: Map.Int.t<chart>): Map.t<
   Js.Json.t,
   Util.chartState,
   Util.JsonComparator.identity,
 > =>
-  specs->Map.Int.reduce(Map.make(~id=module(Util.JsonComparator)), (map, id, (order, spec)) => {
+  specs->Map.Int.reduce(Map.make(~id=module(Util.JsonComparator)), (
+    map,
+    id,
+    {order, spec, name},
+  ) => {
     let ids =
       map
       ->Map.get(spec)
       ->Option.map(({ids}: Util.chartState) => ids)
       ->Option.getWithDefault(Set.Int.empty)
     let ids = ids->Set.Int.add(id)
-    map->Map.set(spec, {ids: ids, rendering: true, order: order, needsUpdate: false})
+    map->Map.set(spec, {ids: ids, rendering: true, order: order, name: name, needsUpdate: false})
   })
 
 @react.component
 let make = (~client, ~granularity, ~checkedIds) => {
   module StatusesAndCharts = {
     @react.component
-    let make = (~logCount: int, ~specs: Map.Int.t<(int, Js.Json.t)>, ~runIds) => {
+    let make = (~logCount: int, ~charts: Map.Int.t<chart>, ~runIds) => {
       let (insertChart, insertChartResult) = InsertChart.use()
       let (updateChart, updateChartResult) = UpdateChart.use()
 
@@ -30,11 +36,11 @@ let make = (~client, ~granularity, ~checkedIds) => {
         ((specs, newSpec), action: Util.chartAction) =>
           switch action {
           | ToggleRender(spec) =>
-            let {rendering, ids, order}: Util.chartState = specs->Map.getExn(spec)
+            let {rendering, ids, order, name}: Util.chartState = specs->Map.getExn(spec)
             let specs =
               specs->Map.set(
                 spec,
-                {rendering: !rendering, ids: ids, order: order, needsUpdate: false},
+                {rendering: !rendering, ids: ids, order: order, name: name, needsUpdate: false},
               )
             (specs, newSpec)
           | Submit(spec) =>
@@ -51,6 +57,7 @@ let make = (~client, ~granularity, ~checkedIds) => {
                   {
                     rendering: true,
                     ids: ids,
+                    name: None,
                     order: specs->Map.size,
                     needsUpdate: false,
                   }: Util.chartState
@@ -60,7 +67,7 @@ let make = (~client, ~granularity, ~checkedIds) => {
             )
           | Remove(spec) => (specs->Map.remove(spec), None)
           },
-        (specs->reverse, None),
+        (charts->reverse, None),
       )
 
       // run insertChart mutation, inserting newSpec for each id in runIds
@@ -121,8 +128,8 @@ let make = (~client, ~granularity, ~checkedIds) => {
   | Waiting => <p> {"Waiting for data..."->React.string} </p>
   | NoData => <p> {"No data."->React.string} </p>
   | Error({message}) => <ErrorPage message />
-  | Data({logCount, specs, metadata, runIds}) => <>
-      <StatusesAndCharts logCount specs runIds />
+  | Data({logCount, charts, metadata, runIds}) => <>
+      <StatusesAndCharts logCount charts runIds />
       {metadata
       ->Map.Int.toArray
       ->Array.map(((id, metadata)) => <Metadata key={id->Int.toString} id metadata />)

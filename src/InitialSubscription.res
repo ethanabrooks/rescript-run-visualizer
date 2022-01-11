@@ -12,6 +12,7 @@ module Subscription = %graphql(`
       spec
       archived
       order
+      name
     }
     run_logs_aggregate {
       aggregate {
@@ -22,9 +23,10 @@ module Subscription = %graphql(`
 }
 `)
 
+type chart = {spec: Js.Json.t, name: option<string>, order: int}
 type queryResult = {
   metadata: Map.Int.t<Js.Json.t>,
-  specs: Map.Int.t<(int, Js.Json.t)>,
+  charts: Map.Int.t<chart>,
   logCount: int,
   runIds: Set.Int.t,
 }
@@ -54,10 +56,13 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, 
                 metadata->Option.mapWithDefault(Map.Int.empty, Map.Int.empty->Map.Int.set(id))
 
               // combine multiple charts from run
-              let specs: Map.Int.t<(int, Js.Json.t)> =
+              let charts: Map.Int.t<chart> =
                 charts
                 ->Array.keep(({archived}) => !archived)
-                ->Array.map(({id, order, spec}) => (id, (order->Option.getWithDefault(0), spec)))
+                ->Array.map(({id, order, spec, name}) => (
+                  id,
+                  {spec: spec, order: order->Option.getWithDefault(0), name: name},
+                ))
                 ->Map.Int.fromArray
 
               let logCount = count->Option.mapWithDefault(0, ({count}) => count)
@@ -67,13 +72,13 @@ let useSubscription = (~client: ApolloClient__Core_ApolloClient.t, ~checkedIds, 
               // combine values from this run with values from previous runs
               acc
               ->Option.mapWithDefault(
-                {metadata: metadataMap, specs: specs, logCount: logCount, runIds: runIds},
-                ({metadata: m, specs: s, logCount: l, runIds: r}) => {
+                {metadata: metadataMap, charts: charts, logCount: logCount, runIds: runIds},
+                ({metadata: m, charts: c, logCount: l, runIds: r}) => {
                   let metadata = m->Map.Int.merge(metadataMap, Util.merge)
-                  let specs = s->Map.Int.merge(specs, Util.merge)
+                  let charts = c->Map.Int.merge(charts, Util.merge)
                   let logCount = l + logCount
                   let runIds = r->Set.Int.union(runIds)
-                  {metadata: metadata, specs: specs, logCount: logCount, runIds: runIds}
+                  {metadata: metadata, charts: charts, logCount: logCount, runIds: runIds}
                 },
               )
               ->Some
