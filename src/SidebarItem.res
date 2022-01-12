@@ -80,7 +80,13 @@ let make = (~id: int, ~checkedIds: Set.Int.t, ~metadata) => {
           ~maxHeight={opened ? "2000px" : "0px"},
           (),
         )}>
-        <pre className="line-clamp-2 text-sm text-gray-600 p-4 font-extralight">
+        <pre
+          style={ReactDOMStyle.make(
+            ~transition={"max-height 0.4s linear"},
+            ~maxHeight={opened ? "2000px" : "0px"},
+            (),
+          )}
+          className="line-clamp-2 text-sm text-gray-600 font-extralight pt-4 overflow-hidden">
           {metadata->Util.yaml({sortKeys: true})->React.string}
         </pre>
       </div>
