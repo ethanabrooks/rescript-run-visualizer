@@ -9,10 +9,8 @@ let make = (~client) => {
         let {granularity, checkedIds} = urlParams
         <div className={"flex flex-row"}>
           <Sidebar urlParams client /> // The sidebar lists each sweep or run
-          <div
-            className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
-            <div
-              className={"flex flex-grow flex-col max-h-screen overflow-y-scroll overscroll-contain"}>
+          <div className={"flex flex-grow flex-col overflow-y-scroll overscroll-contain"}>
+            <div className={"flex flex-grow flex-col overflow-y-scroll overscroll-contain"}>
               <Display client granularity checkedIds /> <ArchiveButton granularity checkedIds /> // The charts display shows graphs and lists metadata per run
             </div>
           </div>

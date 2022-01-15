@@ -108,16 +108,74 @@ let make = (
   module ChartGroup = {
     @react.component
     let make = (~name: option<string>, ~rendering: bool, ~spec, ~chartIds: Set.Int.t) => {
+      let name = switch name {
+      | None =>
+        spec
+        ->Js.Json.decodeObject
+        ->Option.flatMap(object =>
+          object
+          ->Js.Dict.get("hconcat")
+          ->Option.flatMap(hconcat =>
+            hconcat
+            ->Js.Json.decodeArray
+            ->Option.flatMap(array =>
+              array
+              ->Array.get(0)
+              ->Option.flatMap(elt =>
+                elt
+                ->Js.Json.decodeObject
+                ->Option.flatMap(object =>
+                  object
+                  ->Js.Dict.get("encoding")
+                  ->Option.flatMap(encoding =>
+                    encoding
+                    ->Js.Json.decodeObject
+                    ->Option.flatMap(object =>
+                      object
+                      ->Js.Dict.get("y")
+                      ->Option.flatMap(y =>
+                        y
+                        ->Js.Json.decodeObject
+                        ->Option.flatMap(object =>
+                          object
+                          ->Js.Dict.get("field")
+                          ->Option.flatMap(field => field->Js.Json.decodeString)
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      | _ => None
+      }
+      let (opened, setOpened) = React.useState(_ => true)
       <>
-        {switch name {
-        | None => <> </>
-        | Some(name) => <h3> {name->React.string} </h3>
-        }}
-        {if rendering {
-          <div className="pb-10">
-            <Chart logs newLogs spec /> <ChartButtons spec chartIds dispatch />
+        {name->Option.mapWithDefault(<> </>, name =>
+          <div className="flex space-x-3">
+            <div
+              className="flex items-center justify-center overflow-hidden"
+              onClick={_ => setOpened(state => !state)}>
+              {opened ? <Chevron.Down /> : <Chevron.Right />}
+            </div>
+            <h2> {name->React.string} </h2>
           </div>
-        } else {
+        )}
+        {switch rendering {
+        | true =>
+          <div
+            style={ReactDOMStyle.make(
+              ~transition={"max-height 0.4s linear"},
+              ~maxHeight={opened ? "1000px" : "0px"},
+              ~overflow="auto",
+              (),
+            )}>
+            <Chart logs newLogs spec />
+            <div className="pb-5"> <ChartButtons spec chartIds dispatch /> </div>
+          </div>
+        | false =>
           let initialSpec = spec
           <SpecEditor initialSpec dispatch />
         }}
