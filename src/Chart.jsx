@@ -2,7 +2,7 @@ import React from "react";
 import { Vega } from "react-vega";
 
 
-export function make(spec, newData) {
+export function make(spec, newData, setPlotted) {
     const [view, setView] = React.useState(null);
     React.useEffect(
         () => {
@@ -11,8 +11,9 @@ export function make(spec, newData) {
             if (view != null) {
                 var cs = null
 
-                for (const d of newData) {
+                for (const [i, d] of newData) {
                     cs = view.changeset().insert(d)
+                    setPlotted(i)
                 }
                 if (cs != null) {
                     console.log(newData)

@@ -13,6 +13,10 @@ subscription MaxRunLogId($condition: run_log_bool_exp!) {
   }
 }
 `)
+type apolloResult = Result.t<
+  ApolloClient__Core_ApolloClient.ApolloQueryResult.t__ok<Query.t>,
+  ApolloClient__Core_ApolloClient.ApolloError.t,
+>
 
 @react.component
 let make = (
@@ -23,61 +27,66 @@ let make = (
   ~dispatch,
   ~client: ApolloClient__Core_ApolloClient.t,
 ) => {
-  let (executeQuery, queryResult) = Query.useLazy()
-  let (logIds, setLogIds) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray)
-  let newLogs = switch queryResult {
-  | Executed({data: Some({run_log})}) =>
-    run_log
-    ->Array.keepMap(({id, log}) =>
-      if logIds->Set.Int.has(id) {
-        None // exclude logs that are already in logIds
-      } else {
-        Some((id, log))
+  let (logIds, setLogIds) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray) // ids of all logs (original and new)
+  let (newLogs, setNewLogs) = React.useState(_ => Map.Int.empty) // (id => log) map of logs since original logs
+  let (error, setError) = React.useState(() => None)
+
+  React.useEffect1(() => {
+    // add newLogs to logIds
+    setLogIds(logIds => newLogs->Map.Int.keysToArray->Array.reduce(logIds, Set.Int.add))
+    None
+  }, [newLogs])
+
+  let run = switch granularity {
+  | Sweep =>
+    let sweep_id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
+    Query.makeInputObjectrun_bool_exp(~sweep_id, ())
+  | Run =>
+    let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
+    Query.makeInputObjectrun_bool_exp(~id, ())
+  }
+  let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
+
+  let maxLogId = switch (newLogs->Map.Int.maxKey, logIds->Set.Int.maximum) {
+  | (Some(maxLogId), _)
+  | (_, Some(maxLogId)) => maxLogId
+  | _ => 0
+  }
+
+  // Second condition: logs have a greater id than max id in logIds
+  let id = Query.makeInputObjectInt_comparison_exp(~_gt=maxLogId, ())
+  let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
+
+  let _and = [condition1, condition2]
+  let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
+
+  // Uncomment to print condition as JSON:
+
+  // Js.log(
+  //   {condition: condition}
+  //   ->Query.serializeVariables
+  //   ->Query.variablesToJson
+  //   ->Js.Json.stringifyWithSpace(2),
+  // )
+
+  let onError = error => setError(_ => error->Some)
+
+  let executeQuery = Debounce.make(() => {
+    client.query(~query=module(Query), {condition: condition})
+    ->Promise.thenResolve(result =>
+      switch result {
+      | Error(error) => error->onError
+      | Ok({data: {run_log}}) =>
+        setNewLogs(newLogs =>
+          run_log->Array.reduce(newLogs, (newLogs, {id, log}) => newLogs->Map.Int.set(id, log))
+        )
       }
     )
-    ->Map.Int.fromArray
-  | _ => Map.Int.empty
-  }
-
-  let maxLogId = switch newLogs->Map.Int.maxKey {
-  | Some(max) => max
-  | None => logIds->Set.Int.maximum->Option.getWithDefault(0)
-  }
-  let executeQuery = Debounce.make(() => {
-    // First condition: logs are for selected sweeps/runs.
-    let run = switch granularity {
-    | Sweep =>
-      let sweep_id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
-      Query.makeInputObjectrun_bool_exp(~sweep_id, ())
-    | Run =>
-      let id = Query.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
-      Query.makeInputObjectrun_bool_exp(~id, ())
-    }
-    let condition1 = Query.makeInputObjectrun_log_bool_exp(~run, ())
-
-    // Second condition: logs have a greater id than max id in logIds
-    let id = Query.makeInputObjectInt_comparison_exp(~_gt=maxLogId, ())
-    let condition2 = Query.makeInputObjectrun_log_bool_exp(~id, ())
-
-    let _and = [condition1, condition2]
-    let condition = Query.makeInputObjectrun_log_bool_exp(~_and, ())
-
-    // Uncomment to print condition as JSON:
-
-    // Js.log(
-    //   {condition: condition}
-    //   ->Query.serializeVariables
-    //   ->Query.variablesToJson
-    //   ->Js.Json.stringifyWithSpace(2),
-    // )
-
-    executeQuery({condition: condition})
+    ->ignore
   })
-  let (error, setError) = React.useState(() => None)
 
   React.useEffect3(() => {
     // Set up subscription to max run_log id
-    let onError = error => setError(_ => error->Some)
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
@@ -89,20 +98,12 @@ let make = (
     let id = Subscription.makeInputObjectInt_comparison_exp(~_in=checkedIds->Set.Int.toArray, ())
     let run = Subscription.makeInputObjectrun_bool_exp(~id, ())
     let condition = Subscription.makeInputObjectrun_log_bool_exp(~run, ())
-    let subscription =
-      client.subscribe(~subscription=module(Subscription), {condition: condition}).subscribe(
-        ~onNext,
-        ~onError,
-        (),
-      )->Some
-    Some(_ => (subscription->Option.getExn).unsubscribe())
+    let subscription = client.subscribe(
+      ~subscription=module(Subscription),
+      {condition: condition},
+    ).subscribe(~onNext, ~onError, ())
+    Some(_ => subscription.unsubscribe())
   }, (checkedIds, client, executeQuery))
-
-  React.useEffect1(() => {
-    // add newLogs to logIds
-    setLogIds(logIds => newLogs->Map.Int.keysToArray->Array.reduce(logIds, Set.Int.add))
-    None
-  }, [newLogs])
 
   module ChartGroup = {
     @react.component
@@ -114,8 +115,7 @@ let make = (
         }}
         {if rendering {
           <div className="pb-10">
-            <Chart logs newData={newLogs->Map.Int.valuesToArray} spec />
-            <ChartButtons spec chartIds dispatch />
+            <Chart logs newLogs spec /> <ChartButtons spec chartIds dispatch />
           </div>
         } else {
           let initialSpec = spec
@@ -131,12 +131,6 @@ let make = (
     | Some({message}) =>
       let message = `MaxRunLogId subscription error: ${message}`
       <ErrorPage message />
-    }}
-    {switch queryResult {
-    | Executed({error: Some({message})}) =>
-      let message = `LogsQuery.EveryQuery error: ${message}`
-      <ErrorPage message />
-    | _ => <> </>
     }}
     {specs
     ->Map.toArray

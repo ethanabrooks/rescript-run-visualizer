@@ -1,13 +1,22 @@
 open Belt
 
+type data = array<(int, Js.Json.t)>
 let dictToMap = dict => dict->Js.Dict.entries->Map.String.fromArray
 let mapToDict = map => map->Map.String.toArray->Js.Dict.fromArray
 let mapToObject = map => map->mapToDict->Js.Json.object_
 
 @module("./Chart.jsx")
-external make: (~spec: Js.Json.t, ~newData: array<Js.Json.t>) => React.element = "make"
+external make: (
+  ~spec: Js.Json.t,
+  ~newData: array<(int, Js.Json.t)>,
+  ~setPlotted: int => unit,
+) => React.element = "make"
 @react.component
-let make = (~logs, ~spec, ~newData: array<Js.Json.t>) => {
+let make = (~logs, ~spec, ~newLogs: Map.Int.t<Js.Json.t>) => {
+  let (plotted, setPlotted) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray) // ids of logs added to Vega chart
+  let setPlotted = (id: int) => setPlotted(plotted => plotted->Set.Int.add(id)) // called when corresponding log is plotted
+  let newData = newLogs->Map.Int.keep((id, _) => !(plotted->Set.Int.has(id)))->Map.Int.toArray // logs in newLogs not already plotted
+
   // Add logs to spec
   spec
   ->Js.Json.decodeObject
@@ -30,6 +39,6 @@ let make = (~logs, ~spec, ~newData: array<Js.Json.t>) => {
   })
   ->Option.mapWithDefault(
     <ErrorPage message={`Invalid spec: ${spec->Js.Json.stringifyWithSpace(2)}`} />,
-    spec => make(~spec, ~newData),
+    spec => make(~spec, ~newData, ~setPlotted),
   )
 }
