@@ -14,8 +14,8 @@ external make: (
 @react.component
 let make = (~logs, ~spec, ~newLogs: Map.Int.t<Js.Json.t>) => {
   let (plotted, setPlotted) = React.useState(_ => logs->Map.Int.keysToArray->Set.Int.fromArray) // ids of logs added to Vega chart
-  let setPlotted = (id: int) => setPlotted(plotted => plotted->Set.Int.add(id)) // called when corresponding log is plotted
   let newData = newLogs->Map.Int.keep((id, _) => !(plotted->Set.Int.has(id)))->Map.Int.toArray // logs in newLogs not already plotted
+  let setPlotted = (id: int) => setPlotted(plotted => plotted->Set.Int.add(id)) // called when corresponding log is plotted
 
   // Add logs to spec
   spec

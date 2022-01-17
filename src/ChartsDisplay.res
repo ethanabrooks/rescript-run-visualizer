@@ -85,14 +85,13 @@ let make = (
     ->ignore
   })
 
-  React.useEffect3(() => {
+  React.useEffect4(() => {
     // Set up subscription to max run_log id
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
-      | {
-          data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}},
-        } => executeQuery.schedule()
+      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}}} =>
+        executeQuery.schedule()
       | _ => ()
       }
     }
@@ -110,7 +109,7 @@ let make = (
         executeQuery.cancel()
       },
     )
-  }, (checkedIds, client, executeQuery))
+  }, (checkedIds, client, onError, executeQuery))
 
   module ChartGroup = {
     @react.component
