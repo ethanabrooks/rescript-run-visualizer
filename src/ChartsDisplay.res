@@ -71,7 +71,7 @@ let make = (
 
   let onError = error => setError(_ => error->Some)
 
-  let executeQuery = Debounce.make(() => {
+  let executeQuery = Debounce.makeControlled(() => {
     client.query(~query=module(Query), {condition: condition})
     ->Promise.thenResolve(result =>
       switch result {
@@ -90,7 +90,9 @@ let make = (
     let onNext = (value: ApolloClient__Core_ApolloClient.FetchResult.t__ok<Subscription.t>) => {
       switch value {
       | {error: Some(error)} => error->onError
-      | {data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}}} => executeQuery()
+      | {
+          data: {run_log_aggregate: {aggregate: Some({max: Some({id: Some(_)})})}},
+        } => executeQuery.schedule()
       | _ => ()
       }
     }
@@ -102,7 +104,12 @@ let make = (
       ~subscription=module(Subscription),
       {condition: condition},
     ).subscribe(~onNext, ~onError, ())
-    Some(_ => subscription.unsubscribe())
+    Some(
+      _ => {
+        subscription.unsubscribe()
+        executeQuery.cancel()
+      },
+    )
   }, (checkedIds, client, executeQuery))
 
   module ChartGroup = {
