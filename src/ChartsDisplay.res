@@ -83,7 +83,7 @@ let make = (
       }
     )
     ->ignore
-  })
+  }, ~wait=10000)
 
   React.useEffect4(() => {
     // Set up subscription to max run_log id
