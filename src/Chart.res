@@ -17,6 +17,13 @@ let make = (~logs, ~spec, ~newLogs: Map.Int.t<Js.Json.t>) => {
   let newData = newLogs->Map.Int.keep((id, _) => !(plotted->Set.Int.has(id)))->Map.Int.toArray // logs in newLogs not already plotted
   let setPlotted = (id: int) => setPlotted(plotted => plotted->Set.Int.add(id)) // called when corresponding log is plotted
 
+  let addLogsToDataObject = dataObject =>
+    dataObject
+    ->dictToMap
+    ->Map.String.set("values", logs->Map.Int.valuesToArray->Js.Json.array)
+    ->mapToObject
+    ->Some
+
   // Add logs to spec
   spec
   ->Js.Json.decodeObject
@@ -26,14 +33,22 @@ let make = (~logs, ~spec, ~newLogs: Map.Int.t<Js.Json.t>) => {
     ->Map.String.get("data")
     ->Option.flatMap(data =>
       data
-      ->Js.Json.decodeObject
-      ->Option.flatMap(dataObject => {
-        dataObject
-        ->dictToMap
-        ->Map.String.set("values", logs->Map.Int.valuesToArray->Js.Json.array)
-        ->mapToObject
-        ->Some
-      })
+      ->Js.Json.decodeArray
+      ->Option.mapWithDefault(
+        data->Js.Json.decodeObject->Option.flatMap(addLogsToDataObject),
+        dataArray =>
+          dataArray
+          ->Array.map(dataElement =>
+            dataElement->Js.Json.decodeObject->Option.flatMap(addLogsToDataObject)
+          )
+          ->Array.reduce([]->Some, (array, element) =>
+            switch (array, element) {
+            | (Some(array), Some(element)) => array->Array.concat([element])->Some
+            | _ => None
+            }
+          )
+          ->Option.map(Js.Json.array),
+      )
     )
     ->Option.map(data => specMap->Map.String.set("data", data)->mapToObject)
   })
