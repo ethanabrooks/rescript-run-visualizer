@@ -2,6 +2,8 @@ open Belt
 
 @val external maxLogs: string = "NODE_MAX_LOGS"
 
+Js.log2("NODE_MAX_LOGS:", maxLogs)
+
 module Subscription = %graphql(`
   subscription InitialSubscription($condition: run_bool_exp!) {
   run(where: $condition) {
