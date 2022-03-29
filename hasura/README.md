@@ -6,14 +6,23 @@ on the server of interest (not on localhost).
  ## Import Hasura setup
 This will use a Hasura migration. First
 you need to determine the ip-address of the server where the database is running.
-Next run:
+
+Next apply our metadata to the enpoint:
 ```
-./migrate [database-ip-address]:8080
+hasura metadata apply
+```
+Now we apply any saved migrations to the connected databases:
+```
+hasura migrate apply --all-databases
+```
+Finally we reload the metadata:
+```
+hasura metadata reload
 ```
 The port is `8080` by default, but you can double check this by looking in the
 `docker-compose.yml` file that you ran on the database server. This will add the appropriate tables and relations to your GraphQL endpoint. You can check this by running
 ```
-hasura console --endpoint [database-ip-address]:8080
+hasura console
 ```
 On the DATA tab, you should see the appropriate Database(s) and table(s) in the
 left column. 
@@ -34,9 +43,13 @@ One way to perform regular backups is to run this command periodically using a `
 
 ## Restore data
 First follow the steps described in 
-[Set up a database on a server](#set-up-a-database-on-a-server) and 
-[Import Hasura setup](#import-hasura-setup).
+[Set up a database on a server](#set-up-a-database-on-a-server).
 Next run
 ```
 docker exec -i hasura_postgres_1 psql -U postgres -d postgres < [backup-file]
+```
+This will load the actual data into the postgres database backing hasura.
+Finally run
+```
+hasura metadata apply
 ```
