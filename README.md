@@ -1,11 +1,54 @@
-## Launch site locally
-Define the environment variable `NODE_GRAPHQL_ENDPOINT` as the `[host]:[post]`
-of your GraphQL server, e.g. `rldl100.eecs.umich.edu:8080`. Then run:
+# Welcome to run-visualizer!
+This is a website for visualizing runs logged in a [run-tracker/hasura](https://github.com/run-tracker/hasura) database.
+
+# Usage
+
+Begin by [setting up your Hasura database](https://github.com/run-tracker/hasura).
+
+Next we pull the docker-image for `run-visualizer` from dockerhub and run it:
+
 ```
-yarn
-yarn dev
+docker pull ethanabrooks/run-visualizer
+docker run --rm -it --detach \
+  -p 8081:80 \
+  --env NODE_GRAPHQL_ENDPOINT=server.university.edu:1200/v1/graphql \
+  --env NODE_MAX_LOGS=20000 \
+  --env NODE_MAX_SWEEPS=50 \
+  ethanabrooks/run-visualizer
 ```
-To set up Hasura, see `hasura/README.md`.
+This will make the site available at `https://current.host.edu:8081`, 
+where `current.host.edu` is the address of the machine that you are using and `8081` is the port identified on the third line.
+
+Now check that the docker container is running:
+```
+CONTAINER ID   IMAGE                          COMMAND                  CREATED         STATUS         PORTS                                       NAMES
+5b00d20b6523   ethanabrooks/run-visualizer    "/docker-entrypoint.…"   3 seconds ago   Up 3 seconds   0.0.0.0:8081->80/tcp, :::8081->80/tcp       quirky_brahmagupta
+```
+## Environment variables
+
+### `NODE_GRAPHQL_ENDPOINT`
+This is the endpoint for your Hasura GraphQL API. You can check this
+by running `hasura console` per [these instructions](https://github.com/run-tracker/hasura#access-the-hasura-console) and checking the API tab. It should look something like `http://server.university.edu:1200/v1/graphql`.
+
+
+### `NODE_MAX_LOGS`
+This determines the number of logs that are displayed per chart.
+If the number of logs in the database exceeds this number, 
+`run-visualizer` will skip logs at regular intervals in order
+to bring the log count below `NODE_MAX_LOGS` (e.g. it will skip every
+other or every third log). 
+
+This will distort the appearance of logs but a lower `NODE_MAX_LOGS`
+value may be necessary for performance reasons and to prevent chrome from displaying Error code: 5.
+
+### `NODE_MAX_SWEEPS`
+This determines the number of sweeps to be displayed simultaneously 
+in the side bar on the left. Users can view older sweeps by clicking 
+the › character at the bottom of the sidebar. As with `NODE_MAX_LOGS`
+this value should be adjusted to match the performance of the
+local machine where you will be viewing the website.
+
+# Developers
 
 To [update the GraphQL schema](https://github.com/reasonml-community/graphql-ppx#schema):
 ```
