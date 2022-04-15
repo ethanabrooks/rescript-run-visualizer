@@ -1,7 +1,0 @@
-table:
-  name: parameter_choices
-  schema: public
-object_relationships:
-- name: sweep
-  using:
-    foreign_key_constraint_on: sweep_id

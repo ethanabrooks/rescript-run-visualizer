@@ -1,7 +1,0 @@
-table:
-  name: run_log
-  schema: public
-object_relationships:
-- name: run
-  using:
-    foreign_key_constraint_on: run_id
