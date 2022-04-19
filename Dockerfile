@@ -1,4 +1,4 @@
-FROM node:latest as build-deps
+FROM node:current-buster as build-deps
 WORKDIR /app
 COPY package.json yarn.lock ./
 RUN yarn
@@ -11,6 +11,6 @@ ENV NODE_MAX_SWEEPS=${NODE_MAX_SWEEPS}
 ENV NODE_MAX_LOGS=${NODE_MAX_LOGS}
 RUN yarn prod:build && mv ./static/* dist/
 
-FROM nginx:latest
+FROM nginx:alpine
 COPY --from=build-deps /app/dist /usr/share/nginx/html
 CMD ["nginx", "-g", "daemon off;"]
