@@ -5,18 +5,26 @@ This is a website for visualizing runs logged in a [run-tracker/hasura](https://
 
 Begin by [setting up your Hasura database](https://github.com/run-tracker/hasura).
 
-Next we pull the docker-image for `run-visualizer` from dockerhub and run it:
+Next ensure that you have installed [docker-compose](https://docs.docker.com/compose/).
+
+Next we clone this repository and run
 
 ```
-docker pull ethanabrooks/run-visualizer
-docker run --rm -it --detach \
-  -p 8081:80 \
-  --env NODE_GRAPHQL_ENDPOINT=server.university.edu:1200/v1/graphql \
-  --env NODE_MAX_LOGS=20000 \
-  --env NODE_MAX_SWEEPS=50 \
-  ethanabrooks/run-visualizer
+docker-compose build \
+  --build-arg NODE_GRAPHQL_ENDPOINT=server.university.edu:1200/v1/graphql \
+  --build-arg NODE_MAX_LOGS=20000 \
+  --build-arg NODE_MAX_SWEEPS=50 
 ```
-This will make the site available at `https://current.host.edu:8081`, 
+Replacing the `NODE_GRAPHQL_ENDPOINT`  value with your Hasura GraphQL endpoint.
+Finally run:
+```
+docker-compose up -d
+```
+Check that the image is running by running
+```
+docker ps
+```
+The site should be available at `https://current.host.edu:8081`, 
 where `current.host.edu` is the address of the machine that you are using and `8081` is the port identified on the third line.
 
 Now check that the docker container is running:
