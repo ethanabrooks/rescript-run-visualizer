@@ -15,7 +15,7 @@ then
   exit
 fi
 docker-compose build \
-  --build-arg ENDPOINT="$NODE_GRAPHQL_ENDPOINT" \
-  --build-arg MAX_SWEEPS="$NODE_MAX_SWEEPS" \
-  --build-arg MAX_LOGS="$NODE_MAX_LOGS"
+  --build-arg NODE_GRAPHQL_ENDPOINT="$NODE_GRAPHQL_ENDPOINT" \
+  --build-arg NODE_MAX_SWEEPS="$NODE_MAX_SWEEPS" \
+  --build-arg NODE_MAX_LOGS="$NODE_MAX_LOGS"
 docker-compose up -d
