@@ -29,6 +29,7 @@ module SweepSubscription = %graphql(`
 `)
 
 @val external maxSweeps: string = "NODE_MAX_SWEEPS"
+Js.log2("NODE_MAX_SWEEPS:", maxSweeps)
 
 type state = {
   error: option<ApolloClient__Core_ApolloClient.ApolloError.t>,

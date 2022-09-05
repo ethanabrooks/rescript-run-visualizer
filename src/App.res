@@ -1,4 +1,6 @@
 @val external graphqlEndpoint: string = "NODE_GRAPHQL_ENDPOINT"
+let uri = "ws://" ++ graphqlEndpoint
+Js.log2("uri:", uri)
 
 let headers = {"Authorization": "There are a bunch of ways to get a token in here"}
 
@@ -6,7 +8,7 @@ let headers = {"Authorization": "There are a bunch of ways to get a token in her
 let wsLink = {
   open ApolloClient.Link.WebSocketLink
   make(
-    ~uri="ws://" ++ graphqlEndpoint,
+    ~uri=uri,
     ~options=ClientOptions.make(
       ~connectionParams=ConnectionParams(Obj.magic({"headers": headers})),
       ~reconnect=true,
